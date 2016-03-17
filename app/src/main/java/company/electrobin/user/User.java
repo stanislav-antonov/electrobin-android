@@ -83,7 +83,7 @@ public class User {
                     }
 
                     if (!response.has("token")) {
-                        listener.onAuthError(UserAuthListener.ERROR_BAD_AUTH_PARAMS);
+                        listener.onAuthError(UserAuthListener.ERROR_BAD_AUTH_CREDENTIALS);
                         return;
                     }
 
@@ -103,6 +103,13 @@ public class User {
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    // For a proper reason API give us 400 *error* code when auth credentials are wrong.
+                    // So we need to handle it here.
+                    if (error.networkResponse.statusCode == 400) {
+                        listener.onAuthError(UserAuthListener.ERROR_BAD_AUTH_CREDENTIALS);
+                        return;
+                    }
+
                     Log.e(LOG_TAG, "Login error: " + error.getMessage());
                     listener.onAuthError(UserAuthListener.ERROR_SYSTEM);
                 }

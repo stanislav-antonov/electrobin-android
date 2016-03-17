@@ -3,60 +3,79 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="10dp"
     android:background="#ffc9cdaf"
+    android:gravity="center"
     >
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
+        android:padding="10dp"
         >
-<!-- Logo
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="Logo"
-        />
--->
-    <EditText
-        android:id="@+id/username_input"
-        android:gravity="center_horizontal"
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            >
+            <!-- Logo
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="Logo"
+                />
+            -->
+            <EditText
+                android:id="@+id/username_input"
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="#FF444444"
+                android:textColorHint="#FF999999"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:background="#FFFFFFFF"
+                />
+            <EditText
+                android:id="@+id/password_input"
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="#FF444444"
+                android:textColorHint="#FF999999"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:background="#FFFFFFFF"
+                android:layout_marginTop="20dp"
+                android:inputType="textPassword"
+                />
+            <Button
+                android:id="@+id/signin_button"
+                android:layout_marginTop="40dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="#FFFFFFFF"
+                android:textAllCaps="false"
+                android:background="@drawable/custom_round_button_1"
+                style="?android:attr/borderlessButtonStyle"
+                />
+        </LinearLayout>
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/loading_layout"
+        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textColor="#FF444444"
-        android:textColorHint="#FF999999"
-        android:padding="10dp"
-        android:singleLine="true"
-        android:background="#FFFFFFFF"
-        />
-    <EditText
-        android:id="@+id/password_input"
-        android:gravity="center_horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textColor="#FF444444"
-        android:textColorHint="#FF999999"
-        android:padding="10dp"
-        android:singleLine="true"
-        android:background="#FFFFFFFF"
-        android:layout_marginTop="20dp"
-        android:inputType="textPassword"
-        />
-    <Button
-        android:id="@+id/signin_button"
-        android:layout_marginTop="40dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textColor="#FFFFFFFF"
-        android:textAllCaps="false"
-        android:background="@drawable/custom_round_button_1"
-        style="?android:attr/borderlessButtonStyle"
-        />
-    </LinearLayout>
+        android:layout_height="match_parent"
+        android:gravity="center"
+        >
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            />
+    </RelativeLayout>
 </LinearLayout>

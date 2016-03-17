@@ -1,12 +1,15 @@
 package company.electrobin;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import company.electrobin.i10n.I10n;
@@ -22,6 +25,11 @@ public class AuthActivity extends AppCompatActivity {
     private EditText mEtUsername;
     private EditText mEtPassword;
     private Button mSignInBtn;
+
+    private RelativeLayout mRlLoading;
+    private RelativeLayout mRlMain;
+
+    private final static String LOG_TAG = AuthActivity.class.getSimpleName();
 
     private class SignInActionHandler implements View.OnClickListener, UserAuthListener {
         @Override
@@ -42,15 +50,19 @@ public class AuthActivity extends AppCompatActivity {
             mSignInBtn.setEnabled(false);
             mEtUsername.setEnabled(false);
             mEtPassword.setEnabled(false);
+
+            mRlLoading.setVisibility(View.VISIBLE);
+            mRlMain.setVisibility(View.GONE);
+
             mUser.auth(username, password, SignInActionHandler.this);
         }
 
         @Override
         public void onAuthSuccess() {
-            mSignInBtn.setEnabled(true);
-            mEtUsername.setEnabled(true);
-            mEtPassword.setEnabled(true);
-            Toast.makeText(getBaseContext(), mUser.getAuthToken(), Toast.LENGTH_LONG).show();
+            mRlLoading.setVisibility(View.GONE);
+
+            Log.d(LOG_TAG, "Successfully authenticated, auth token is " + mUser.getAuthToken());
+            startActivity(new Intent(AuthActivity.this, RouteActivity.class));
         }
 
         @Override
@@ -59,9 +71,14 @@ public class AuthActivity extends AppCompatActivity {
             mEtUsername.setEnabled(true);
             mEtPassword.setEnabled(true);
 
+            mRlLoading.setVisibility(View.GONE);
+            mRlMain.setVisibility(View.VISIBLE);
+
             String strMessage = mI10n.l("error_common");
-            if (error == UserAuthListener.ERROR_BAD_AUTH_PARAMS)
+            if (error == UserAuthListener.ERROR_BAD_AUTH_CREDENTIALS) {
                 strMessage = mI10n.l("username_or_password_wrong");
+                mEtPassword.getText().clear();
+            }
 
             Toast.makeText(getBaseContext(), strMessage, Toast.LENGTH_LONG).show();
         }
@@ -79,6 +96,12 @@ public class AuthActivity extends AppCompatActivity {
         mEtUsername = (EditText)findViewById(R.id.username_input);
         mEtPassword = (EditText)findViewById(R.id.password_input);
         mSignInBtn = (Button)findViewById(R.id.signin_button);
+
+        mRlLoading = (RelativeLayout)findViewById(R.id.loading_layout);
+        mRlLoading.setVisibility(View.GONE);
+
+        mRlMain = (RelativeLayout)findViewById(R.id.main_layout);
+        mRlMain.setVisibility(View.VISIBLE);
 
         mEtUsername.setHint(mI10n.l("username"));
         mEtPassword.setHint(mI10n.l("password"));
