@@ -30,32 +30,38 @@ public class AuthActivity extends AppCompatActivity {
             String password = mEtPassword.getText().toString().trim();
 
             if (username.isEmpty()) {
-                Toast.makeText(getBaseContext(), "Не указано имя пользователя", Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), mI10n.l("username_empty"), Toast.LENGTH_LONG).show();
                 return;
             }
 
             if (password.isEmpty()) {
-                Toast.makeText(getBaseContext(), "Не указан пароль", Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), mI10n.l("password_empty"), Toast.LENGTH_LONG).show();
                 return;
             }
 
             mSignInBtn.setEnabled(false);
+            mEtUsername.setEnabled(false);
+            mEtPassword.setEnabled(false);
             mUser.auth(username, password, SignInActionHandler.this);
         }
 
         @Override
         public void onAuthSuccess() {
             mSignInBtn.setEnabled(true);
+            mEtUsername.setEnabled(true);
+            mEtPassword.setEnabled(true);
             Toast.makeText(getBaseContext(), mUser.getAuthToken(), Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void onAuthError(int error) {
             mSignInBtn.setEnabled(true);
+            mEtUsername.setEnabled(true);
+            mEtPassword.setEnabled(true);
 
-            String strMessage = "Системная ошибка";
+            String strMessage = mI10n.l("error_common");
             if (error == UserAuthListener.ERROR_BAD_AUTH_PARAMS)
-                strMessage = "Неверное имя пользователя или пароль";
+                strMessage = mI10n.l("username_or_password_wrong");
 
             Toast.makeText(getBaseContext(), strMessage, Toast.LENGTH_LONG).show();
         }
@@ -77,7 +83,7 @@ public class AuthActivity extends AppCompatActivity {
         mEtUsername.setHint(mI10n.l("username"));
         mEtPassword.setHint(mI10n.l("password"));
 
-        mSignInBtn.setText(mI10n.l("login_start_btn"));
+        mSignInBtn.setText(mI10n.l("signin"));
         mSignInBtn.setOnClickListener(new SignInActionHandler());
     }
 

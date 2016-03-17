@@ -10,12 +10,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Locale;
 
 import company.electrobin.ElectrobinApplication;
-import company.electrobin.user.UserAuthListener;
 
 public class I10n {
 
@@ -24,7 +24,8 @@ public class I10n {
     private SharedPreferences mSharedPref;
     private Locale mCurrentLocale;
 
-    public final static String SHARED_PREFERENCES_FILE_KEY = I10n.class.getName();
+    public final static String SHARED_PREFERENCES_FILE_KEY = I10n.class.getName() + ".%1$s";
+    private final static String LAST_LANG_KEY = "__last_lang";
     private final static String URL_I10n = "https://138.201.20.149/v1.02/language/?lang=%1$s";
     private final static String LOG_TAG = I10n.class.getSimpleName();
 
@@ -35,8 +36,19 @@ public class I10n {
     public I10n(Context context) {
         mContext = context;
         mApp = (ElectrobinApplication)mContext;
-        mSharedPref = mContext.getSharedPreferences(SHARED_PREFERENCES_FILE_KEY, Context.MODE_PRIVATE);
+
+        resetLocale();
+    }
+
+    /**
+     *
+     */
+    public void resetLocale() {
         mCurrentLocale = mContext.getResources().getConfiguration().locale;
+
+        // Make the file name according to the current lang of device
+        mSharedPref = mContext.getSharedPreferences(String.format(SHARED_PREFERENCES_FILE_KEY,
+                mCurrentLocale.getLanguage()), Context.MODE_PRIVATE);
     }
 
     /**
@@ -44,31 +56,44 @@ public class I10n {
      * @param listener
      */
     public void initialize(final I10nInitializeListener listener) {
+
+        if (mSharedPref.getString(LAST_LANG_KEY, null) != null) {
+            listener.onInitializeSuccess();
+            return;
+        }
+
         JsonArrayRequest request = new JsonArrayRequest(
-            Request.Method.GET,
-            String.format(URL_I10n, mCurrentLocale.getLanguage()),
+            Request.Method.GET, String.format(URL_I10n, mCurrentLocale.getLanguage()),
             new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray response) {
                     if (response == null || response.length() == 0) {
-                        listener.onInitializeError(UserAuthListener.ERROR_SYSTEM);
+                        Log.e(LOG_TAG, "I10n initialize error: empty data");
+                        listener.onInitializeError(I10nInitializeListener.ERROR_EMPTY_DATA);
                         return;
                     }
 
                     try {
                         SharedPreferences.Editor editor = mSharedPref.edit();
-                        editor.clear();
+                        editor.putString(LAST_LANG_KEY, mCurrentLocale.getLanguage());
 
                         for (int i = 0; i < response.length(); i++) {
-                            JSONObject jo = (JSONObject)response.get(i);
+                            String key, value;
+                            try {
+                                JSONObject jo = (JSONObject) response.get(i);
 
-                            if (!jo.has("string_name") || !jo.has("string_text")) continue;
+                                if (!jo.has("string_name") || !jo.has("string_text")) continue;
 
-                            final String key = jo.getString("string_name");
-                            if (key == null || key.isEmpty()) continue;
+                                key = jo.getString("string_name");
+                                if (key == null || key.isEmpty()) continue;
 
-                            final String value = jo.getString("string_text");
-                            if (value == null || value.isEmpty()) continue;
+                                value = jo.getString("string_text");
+                                if (value == null || value.isEmpty()) continue;
+                            }
+                            catch (JSONException e) {
+                                Log.e(LOG_TAG, "I10n initialize error: " + e.getMessage());
+                                continue;
+                            }
 
                             editor.putString(key, value);
                         }
@@ -77,7 +102,7 @@ public class I10n {
                     }
                     catch (Exception e) {
                         Log.e(LOG_TAG, "I10n initialize error: " + e.getMessage());
-                        listener.onInitializeError(UserAuthListener.ERROR_SYSTEM);
+                        listener.onInitializeError(I10nInitializeListener.ERROR_SYSTEM);
                         return;
                     }
 
@@ -87,8 +112,8 @@ public class I10n {
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.e(LOG_TAG, "Login error: " + error.getMessage());
-                    listener.onInitializeError(UserAuthListener.ERROR_SYSTEM);
+                    Log.e(LOG_TAG, "I10n initialize error: " + error.getMessage());
+                    listener.onInitializeError(I10nInitializeListener.ERROR_NETWORK);
                 }
             }
         );

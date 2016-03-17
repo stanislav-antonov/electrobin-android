@@ -6,9 +6,15 @@
 
     <string name="username">Login</string>
     <string name="password">Password</string>
-    <string name="login_start_btn">Sign in</string>
+    <string name="signin">Sign in</string>
 
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="title_activity_route">RouteActivity</string>
+    <string name="username_empty">Username is empty</string>
+    <string name="password_empty">Password is empty</string>
 
+    <string name="username_or_password_wrong">Username or password is wrong</string>
+
+    <string name="title_activity_auth">Authentication</string>
+    <string name="title_activity_route">Route</string>
+
+    <string name="error_common">System error</string>
 </resources>
