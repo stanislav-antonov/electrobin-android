@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Route</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+        <script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+        <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
+        <script type="text/javascript">
+            var myMap;
+            var placemark;
+
+
+
+            ymaps.ready(function () {
+
+                var initCoords = [55.53638053374438,37.529385721565184];
+
+                myMap = new ymaps.Map('map', {
+                    center: initCoords,
+                    zoom: 16
+                });
+
+                placemark = new ymaps.Placemark(initCoords, {}, {
+                                iconColor: 'red'
+                            });
+
+                myMap.geoObjects.add(placemark);
+            });
+
+            function updatePosition(lat, long) {
+
+                var coords = [lat, long];
+
+                myMap.panTo([
+                    coords
+                ]).then(
+                    function () {
+                        // Success
+                        if (!placemark) {
+                            placemark = new ymaps.Placemark(coords, {
+                                balloonContent: 'Some placemark'
+                            }, {
+                                iconColor: 'red'
+                            });
+
+                            myMap.geoObjects.add(placemark);
+                        }
+                        else {
+                            placemark.geometry.setCoordinates(coords);
+                        }
+                    },
+
+                    function (err) {
+                        // Error
+                    },
+
+                    this
+                );
+            }
+        </script>
+        <style>
+            html, body, #map {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #map {
+                background-color: black;
+            }
+
+            #button {
+                position: absolute;
+                height: 20px;
+                top: 10px; left: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+    </body>
+</html>
