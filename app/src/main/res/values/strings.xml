@@ -19,4 +19,5 @@
     <string name="title_activity_route">Route</string>
 
     <string name="error_common">System error</string>
+    <string name="error_map_load">Network problem during loading the map</string>
 </resources>

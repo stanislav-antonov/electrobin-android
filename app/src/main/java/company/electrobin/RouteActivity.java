@@ -20,6 +20,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -210,6 +211,9 @@ public class RouteActivity extends AppCompatActivity {
             Button btnLoadRetry = (Button)mRlLoadRetry.findViewById(R.id.load_retry_button);
             btnLoadRetry.setText(mI10n.l("retry"));
             btnLoadRetry.setOnClickListener(new MapLoadRetryHandler());
+
+            TextView tvErrorMapLoad =(TextView)mRlLoadRetry.findViewById(R.id.error_map_load_text);
+            tvErrorMapLoad.setText(mI10n.l("error_map_load"));
         }
     }
 
