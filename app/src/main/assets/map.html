@@ -10,26 +10,17 @@
             var myMap;
             var placemark;
 
-
-
             ymaps.ready(function () {
-
                 var initCoords = [55.53638053374438,37.529385721565184];
-
                 myMap = new ymaps.Map('map', {
                     center: initCoords,
                     zoom: 16
                 });
 
-                placemark = new ymaps.Placemark(initCoords, {}, {
-                                iconColor: 'red'
-                            });
-
-                myMap.geoObjects.add(placemark);
+                Android.onMapReady();
             });
 
             function updatePosition(lat, long) {
-
                 var coords = [lat, long];
 
                 myMap.panTo([
@@ -38,9 +29,7 @@
                     function () {
                         // Success
                         if (!placemark) {
-                            placemark = new ymaps.Placemark(coords, {
-                                balloonContent: 'Some placemark'
-                            }, {
+                            placemark = new ymaps.Placemark(coords, {}, {
                                 iconColor: 'red'
                             });
 

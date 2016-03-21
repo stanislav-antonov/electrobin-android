@@ -2,18 +2,59 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-    <Button
-        android:layout_alignParentBottom="true"
-        android:id="@+id/jump_button"
-        android:layout_height="30pt"
-        android:layout_width="match_parent"
-        android:text="Jump!"
-        style="?android:attr/borderlessButtonStyle"
-        />
-    <WebView
-        android:layout_above="@id/jump_button"
-        android:id="@+id/map"
+    <RelativeLayout
+        android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
+        >
+        <Button
+            android:layout_alignParentBottom="true"
+            android:id="@+id/jump_button"
+            android:layout_height="30pt"
+            android:layout_width="match_parent"
+            android:text="Jump!"
+            style="?android:attr/borderlessButtonStyle"
+            />
+        <WebView
+            android:layout_above="@id/jump_button"
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/load_retry_layout"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ffd0d0d0"
+        android:gravity="center"
+        >
+        <Button
+            android:id="@+id/load_retry_button"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="20sp"
+            android:textColor="#FFFFFFFF"
+            android:textAllCaps="false"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:background="@drawable/custom_round_button_1"
+            style="?android:attr/borderlessButtonStyle"
+            />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/loading_layout"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:background="#ffd0d0d0"
+        >
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            />
+    </RelativeLayout>
 </RelativeLayout>
