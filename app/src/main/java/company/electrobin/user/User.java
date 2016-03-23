@@ -12,6 +12,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONObject;
 
 import company.electrobin.ElectrobinApplication;
+import company.electrobin.common.Constants;
 import company.electrobin.common.Installation;
 
 public class User {
@@ -20,7 +21,7 @@ public class User {
     private ElectrobinApplication mApp;
     private SharedPreferences mSharedPref;
 
-    private final static String URL_LOGIN = "https://138.201.20.149/v1.02/auth-token/";
+    private final static String URL_LOGIN = Constants.REST_API_BASE_URL + "/auth-token/";
     private final static String LOG_TAG = User.class.getSimpleName();
     private final static String AUTH_TOKEN_KEY = "auth_token";
     public final static String SHARED_PREFERENCES_FILE_KEY = User.class.getName();

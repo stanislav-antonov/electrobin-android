@@ -1,6 +1,5 @@
 package company.electrobin;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -26,6 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import company.electrobin.i10n.I10n;
+import company.electrobin.network.TCPClient;
+import company.electrobin.network.TCPClientAuthHandler;
+import company.electrobin.network.TCPClientResponseHandler;
 import company.electrobin.user.User;
 
 public class RouteActivity extends AppCompatActivity {
@@ -254,6 +256,22 @@ public class RouteActivity extends AppCompatActivity {
         mWvMap.setWebViewClient(new MyWebViewClient());
 
         loadMap();
+
+        final TCPClient tcpClient = mApp.getTCPClient();
+        tcpClient.start(new TCPClientAuthHandler() {
+            @Override
+            public void run() {
+
+                // Log.d(LOG_TAG, getMessage());
+
+                tcpClient.sendToken(mUser.getAuthToken(), new TCPClientAuthHandler() {
+                    @Override
+                    public void run() {
+                        Log.d(LOG_TAG, "AUTH Result: " + getMessage());
+                    }
+                });
+            }
+        });
     }
 
     private void loadMap() {

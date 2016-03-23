@@ -13,9 +13,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
 import java.util.Locale;
 
 import company.electrobin.ElectrobinApplication;
+import company.electrobin.common.Constants;
 
 public class I10n {
 
@@ -26,7 +28,7 @@ public class I10n {
 
     public final static String SHARED_PREFERENCES_FILE_KEY = I10n.class.getName() + ".%1$s";
     private final static String LAST_LANG_KEY = "__last_lang";
-    private final static String URL_I10n = "https://138.201.20.149/v1.02/language/?lang=%1$s";
+    private final static String URL_I10n = Constants.REST_API_BASE_URL + "/language/?lang=%1$s";
     private final static String LOG_TAG = I10n.class.getSimpleName();
 
     /**
