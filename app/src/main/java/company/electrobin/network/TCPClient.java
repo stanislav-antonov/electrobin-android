@@ -1,8 +1,12 @@
 package company.electrobin.network;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.util.Pair;
 
@@ -14,9 +18,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 
 import company.electrobin.common.Constants;
@@ -24,108 +31,175 @@ import company.electrobin.common.Constants;
 
 public class TCPClient {
 
-    private TCPClientAuthHandler mListener;
+    private TCPClientListener mTCPClientListener;
     private Context mContext;
-    private Thread mThread;
 
-    private BlockingQueue<Pair<String, Runnable>> mQueue;
+    private AsyncWriter mAsyncWriter;
+    private Thread mAsyncWriterThread;
+
+    private AsyncReader mAsyncReader;
+    private Thread mAsyncReaderThread;
+
+    private BufferedReader mIn;
+    private PrintWriter mOut;
 
     private final static String LOG_TAG = TCPClient.class.getSimpleName();
     private final static String TCP_HOST = Constants.SOCKET_API_HOST;
     private final static int TCP_PORT = Constants.SOCKET_API_PORT;
 
-    private class TCPClientRunnable implements Runnable {
+    private interface AsyncConnectorListener {
 
-        private boolean mIsRunning;
+        public static final int CONNECT_RESULT_OK = 1;
+        public static final int CONNECT_RESULT_ERROR = 2;
+        public static final int AUTH_RESULT_ERROR = 3;
 
-        private BufferedReader mIn;
-        private PrintWriter mOut;
+        void onConnectResult(int result);
+    }
 
-        private final BlockingQueue<Pair<String, Runnable>> mQueue;
-        private final Handler mHandler;
+    private class AsyncConnector implements Runnable {
 
-        public TCPClientRunnable(BlockingQueue<Pair<String, Runnable>> queue, Handler handler) {
-            mQueue = queue;
-            mHandler = handler;
+        private final AsyncConnectorListener mAsyncConnectorListener;
+
+        private static final String HANDSHAKE_PROMPT = "HELLO!";
+        private static final String HANDSHAKE_RESULT_OK = "200 AUTH_OK";
+
+        public AsyncConnector(AsyncConnectorListener listener) {
+            if (listener == null) throw new IllegalArgumentException();
+            mAsyncConnectorListener = listener;
         }
 
-        /**
-         *
-         * @param data
-         * @throws IOException
-         */
-        private void send(String data) throws IOException {
-            if (mOut == null || mOut.checkError())
-                throw new IOException("Error sending message");
+        @Override
+        public void run() {
+            try {
+                TLSSocketFactory tlsFact = new TLSSocketFactory();
+                SSLSocket socket = (SSLSocket) tlsFact.createSocket(TCP_HOST, TCP_PORT);
 
-            mOut.println(data);
-            mOut.flush(); // TODO: Maybe this explicit is not necessary during the PrintWriter usage with autoflush
+                mIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                mOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket
+                        .getOutputStream())), true);
+            }
+            catch(Exception e) {
+                try {
+                    mAsyncConnectorListener.onConnectResult(AsyncConnectorListener.CONNECT_RESULT_ERROR);
+                }
+                catch (Exception ex) {
+                    Log.e(LOG_TAG, ex.getMessage());
+                }
+
+                return;
+            }
+
+            try {
+                String data = mIn.readLine();
+                if (data == null || !data.equals(HANDSHAKE_PROMPT)) {
+                    throw new IllegalStateException("Bad handshake prompt: " + data);
+                }
+
+                String token = String.format("Token:%1$s", mTCPClientListener.onAuthToken());
+                mOut.println(token);
+                mOut.flush();
+
+                data = mIn.readLine();
+                if (data == null || !data.equals(HANDSHAKE_RESULT_OK)) {
+                    throw new IllegalStateException("Bad handshake result: " + data);
+                }
+            }
+            catch (Exception e) {
+                try {
+                    mAsyncConnectorListener.onConnectResult(AsyncConnectorListener.AUTH_RESULT_ERROR);
+                }
+                catch (Exception ex) {
+                    Log.e(LOG_TAG, ex.getMessage());
+                }
+
+                return;
+            }
+
+            try {
+                mAsyncConnectorListener.onConnectResult(AsyncConnectorListener.CONNECT_RESULT_OK);
+            }
+            catch (Exception ex) {
+                Log.e(LOG_TAG, ex.getMessage());
+            }
         }
+    }
+
+
+    private class AsyncWriter implements Runnable {
+
+        private Handler mHandler;
+        private volatile boolean mIsRunning;
+
+        private static final String MESSAGE_KEY = "key";
+
+        @Override
+        public void run() {
+            if (mIsRunning ) {
+                Log.i(LOG_TAG, "AsyncWriter already running");
+                return;
+            }
+
+            Looper.prepare();
+
+            // Construct fore the current thread
+            mHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    mOut.println(msg.getData().getString(MESSAGE_KEY));
+                    mOut.flush();
+                }
+            };
+
+            // Run the message queue
+            Looper.loop();
+            mIsRunning = true;
+        }
+
+        public void sendData(String data) {
+            Message msg = new Message();
+
+            Bundle bundle = new Bundle();
+            bundle.putString(MESSAGE_KEY, data);
+
+            msg.setData(bundle);
+
+            mHandler.sendMessage(msg);
+        }
+
+        public void shutdown() {
+            mIsRunning = false;
+            Looper.myLooper().quit();
+            Thread.currentThread().interrupt();
+            // if (Thread.currentThread().isInterrupted()) {}
+        }
+    }
+
+
+    private class AsyncReader implements Runnable {
+
+        private volatile boolean mIsRunning;
 
         /**
          *
          */
         @Override
         public void run() {
+            mIsRunning = true;
+
             try {
-                TLSSocketFactory tlsFact = new TLSSocketFactory();
-                SSLSocket socket = (SSLSocket)tlsFact.createSocket(TCP_HOST, TCP_PORT);
-
-                mIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                mOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket
-                        .getOutputStream())), true);
-
-                String helloStr = mIn.readLine();
-                if (!mQueue.isEmpty()) {
-                    Pair<String, Runnable> pair = mQueue.poll();
-                    TCPClientAuthHandler authHandler = (TCPClientAuthHandler)pair.second;
-                    if (authHandler != null) {
-                        mHandler.post(authHandler);
-
-                        while (true) {
-                            if (mQueue.isEmpty()) continue;
-                            pair = mQueue.poll();
-                            break;
-                        }
-
-                        send(pair.first);
-                        String authResStr = mIn.readLine();
-
-                        authHandler = (TCPClientAuthHandler)pair.second;
-                        authHandler.setMessage(authResStr);
-
-                        mHandler.post(authHandler);
-                    }
-                }
-
-                // Try to run...
-                mIsRunning = true;
-
                 while (mIsRunning) {
                     // Handle the thread interruption
                     if (Thread.interrupted()) throw new InterruptedException();
-
-                    TCPClientResponseHandler responseHandler = null;
-
-                    if (!mQueue.isEmpty()) {
-                        Pair<String, Runnable> pair = mQueue.poll();
-                        responseHandler = (TCPClientResponseHandler)pair.second;
-                        send(pair.first);
-                    }
 
                     // Assume the server always respond us the data trailing with the \n
                     String data = mIn.readLine();
 
                     // And we need to answer to each message from server
+                    mOut.println("OK");
+                    mOut.flush();
+
                     if (data != null) {
-                        send("OK");
-
                         Log.d(LOG_TAG, "Got data from server: " + data);
-
-                        if (responseHandler != null) {
-                            responseHandler.setMessage(data);
-                            mHandler.post(responseHandler);
-                        }
                     }
                 }
             }
@@ -140,14 +214,6 @@ public class TCPClient {
             finally {
                 // No more running
                 mIsRunning = false;
-                try {
-                    mIn.close();
-                    mOut.flush();
-                    mOut.close();
-                }
-                catch (Exception e) {
-                    // Log.e(LOG_TAG, e.getMessage());
-                }
             }
         }
     }
@@ -163,41 +229,58 @@ public class TCPClient {
     /**
      *
      * @param data
-     * @param handler
      */
-    public void sendData(String data, Runnable handler) {
+    public void sendData(final String data) {
         if (data == null || data.isEmpty())
             throw new IllegalArgumentException();
 
         try {
-            mQueue.put(Pair.create(data, handler));
+            mAsyncWriter.sendData(data);
         }
-        catch (InterruptedException e) {
-            // TODO: Need to handle InterruptedException correctly
+        catch(Exception e) {
             Log.e(LOG_TAG, e.getMessage());
         }
     }
 
-    public void sendToken(String token, TCPClientAuthHandler handler) {
-        sendData(String.format("Token:%1$s", token), handler);
+    /**
+     *
+     */
+    public void start(final TCPClientListener listener) {
+
+        if (listener == null) throw new IllegalArgumentException();
+        mTCPClientListener = listener;
+
+        AsyncConnector asyncConnector = new AsyncConnector(new AsyncConnectorListener() {
+            @Override
+            public void onConnectResult(int result) {
+                if (result == AsyncConnectorListener.CONNECT_RESULT_OK) {
+
+                    mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_OK);
+
+                    mAsyncWriter = new AsyncWriter();
+                    mAsyncWriterThread = new Thread(mAsyncWriter);
+                    mAsyncWriterThread.setName("TCP Client async writer");
+                    mAsyncWriterThread.start();
+
+                    mAsyncReader = new AsyncReader();
+                    mAsyncReaderThread = new Thread(mAsyncReader);
+                    mAsyncReaderThread.setName("TCP Client async reader");
+                    mAsyncReaderThread.start();
+                }
+                else {
+                    mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_ERROR);
+                }
+            }
+        });
+
+        new Thread(asyncConnector).start();
     }
 
     /**
      *
-     * @param handler
      */
-    public void start(TCPClientAuthHandler handler) {
-        mQueue = new LinkedBlockingQueue<Pair<String, Runnable>>();
-        mThread = new Thread(new TCPClientRunnable(mQueue, new Handler(mContext.getMainLooper())));
-        sendData("HELLO!", handler);
-        mThread.start();
-    }
-
-    /**
-     *
-     */
-    public void stop() {
-        if (mThread != null && !mThread.isInterrupted())
-            mThread.interrupt();
+    public void shutdown() {
+        if (mAsyncWriterThread != null && !mAsyncWriterThread.isInterrupted())
+            mAsyncWriterThread.interrupt();
     }
 }

@@ -27,6 +27,7 @@ import java.io.InputStream;
 import company.electrobin.i10n.I10n;
 import company.electrobin.network.TCPClient;
 import company.electrobin.network.TCPClientAuthHandler;
+import company.electrobin.network.TCPClientListener;
 import company.electrobin.network.TCPClientResponseHandler;
 import company.electrobin.user.User;
 
@@ -258,18 +259,20 @@ public class RouteActivity extends AppCompatActivity {
         loadMap();
 
         final TCPClient tcpClient = mApp.getTCPClient();
-        tcpClient.start(new TCPClientAuthHandler() {
+        tcpClient.start(new TCPClientListener() {
             @Override
-            public void run() {
+            public void onConnectResult(int result) {
+                Log.d(LOG_TAG, "Connect result: " + result);
+            }
 
-                // Log.d(LOG_TAG, getMessage());
+            @Override
+            public String onAuthToken() {
+                return mUser.getAuthToken();
+            }
 
-                tcpClient.sendToken(mUser.getAuthToken(), new TCPClientAuthHandler() {
-                    @Override
-                    public void run() {
-                        Log.d(LOG_TAG, "AUTH Result: " + getMessage());
-                    }
-                });
+            @Override
+            public void onDataReceived(String data) {
+                Log.d(LOG_TAG, "Data received: " + data);
             }
         });
     }
