@@ -63,6 +63,8 @@ public class TCPClient {
         private static final String HANDSHAKE_PROMPT = "HELLO!";
         private static final String HANDSHAKE_RESULT_OK = "200 AUTH_OK";
 
+        private final String LOG_TAG = AsyncConnector.class.getName();
+
         public AsyncConnector(AsyncConnectorListener listener) {
             if (listener == null) throw new IllegalArgumentException();
             mAsyncConnectorListener = listener;
@@ -130,14 +132,12 @@ public class TCPClient {
         private Handler mHandler;
         private volatile boolean mIsRunning;
 
+        private final String LOG_TAG = AsyncWriter.class.getName();
         private static final String MESSAGE_KEY = "key";
 
         @Override
         public void run() {
-            if (mIsRunning ) {
-                Log.i(LOG_TAG, "AsyncWriter already running");
-                return;
-            }
+            if (mIsRunning) throw new IllegalStateException("Already running");
 
             Looper.prepare();
 
@@ -150,27 +150,34 @@ public class TCPClient {
                 }
             };
 
-            // Run the message queue
-            Looper.loop();
             mIsRunning = true;
+
+            // Run the message queue. The loop() call blocks!
+            Looper.loop();
+
+            // We can come here after the looper quit
+            mIsRunning = false;
         }
 
+        /**
+         *
+         * @param data
+         */
         public void sendData(String data) {
             Message msg = new Message();
-
             Bundle bundle = new Bundle();
             bundle.putString(MESSAGE_KEY, data);
-
             msg.setData(bundle);
 
             mHandler.sendMessage(msg);
         }
 
+        /**
+         *
+         */
         public void shutdown() {
-            mIsRunning = false;
             Looper.myLooper().quit();
             Thread.currentThread().interrupt();
-            // if (Thread.currentThread().isInterrupted()) {}
         }
     }
 
@@ -178,19 +185,22 @@ public class TCPClient {
     private class AsyncReader implements Runnable {
 
         private volatile boolean mIsRunning;
+        private final String LOG_TAG = AsyncReader.class.getName();
 
         /**
          *
          */
         @Override
         public void run() {
-            mIsRunning = true;
+            if (mIsRunning) {
+                Log.e(LOG_TAG, "Already running");
+                return;
+            }
 
             try {
-                while (mIsRunning) {
-                    // Handle the thread interruption
-                    if (Thread.interrupted()) throw new InterruptedException();
+                mIsRunning = true;
 
+                while (mIsRunning) {
                     // Assume the server always respond us the data trailing with the \n
                     String data = mIn.readLine();
 
@@ -203,18 +213,21 @@ public class TCPClient {
                     }
                 }
             }
-            catch (InterruptedException e) {
-                Log.e(LOG_TAG, "Interrupted: " + e.getMessage());
-                e.printStackTrace();
-            }
             catch (Exception e) {
                 Log.e(LOG_TAG, "Error: " + e.getMessage());
-                e.printStackTrace();
             }
             finally {
                 // No more running
                 mIsRunning = false;
             }
+        }
+
+        /**
+         *
+         */
+        public void shutdown() {
+            mIsRunning = false;
+            Thread.currentThread().interrupt();
         }
     }
 
