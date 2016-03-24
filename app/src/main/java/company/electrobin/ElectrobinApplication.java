@@ -35,7 +35,7 @@ public class ElectrobinApplication extends Application  {
      */
     public synchronized TCPClient getTCPClient() {
         if (mTCPClient == null)
-            mTCPClient = new TCPClient(getApplicationContext());
+            mTCPClient = new TCPClient();
 
         return mTCPClient;
     }

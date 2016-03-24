@@ -1,29 +1,19 @@
 package company.electrobin.network;
 
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import android.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.CharArrayWriter;
-import java.io.DataInputStream;
-import java.io.IOException;
+
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 
 import company.electrobin.common.Constants;
@@ -32,7 +22,6 @@ import company.electrobin.common.Constants;
 public class TCPClient {
 
     private TCPClientListener mTCPClientListener;
-    private Context mContext;
 
     private AsyncWriter mAsyncWriter;
     private Thread mAsyncWriterThread;
@@ -58,6 +47,9 @@ public class TCPClient {
 
     private class AsyncConnector implements Runnable {
 
+        private volatile boolean mIsConnected;
+        private SSLSocket mSocket;
+
         private final AsyncConnectorListener mAsyncConnectorListener;
 
         private static final String HANDSHAKE_PROMPT = "HELLO!";
@@ -72,13 +64,21 @@ public class TCPClient {
 
         @Override
         public void run() {
+            if (mIsConnected) {
+                Log.e(LOG_TAG, "Already connected");
+                return;
+            }
+
             try {
                 TLSSocketFactory tlsFact = new TLSSocketFactory();
-                SSLSocket socket = (SSLSocket) tlsFact.createSocket(TCP_HOST, TCP_PORT);
 
-                mIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                mOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket
+                mSocket = (SSLSocket)tlsFact.createSocket(TCP_HOST, TCP_PORT);
+                mSocket.setKeepAlive(true);
+
+                mIn = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+                mOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(mSocket
                         .getOutputStream())), true);
+
             }
             catch(Exception e) {
                 try {
@@ -117,11 +117,32 @@ public class TCPClient {
                 return;
             }
 
+            mIsConnected = true;
+
             try {
                 mAsyncConnectorListener.onConnectResult(AsyncConnectorListener.CONNECT_RESULT_OK);
             }
             catch (Exception ex) {
                 Log.e(LOG_TAG, ex.getMessage());
+            }
+        }
+
+        /**
+         *
+         */
+        public synchronized void disconnect() {
+            // First of all
+            mIsConnected = false;
+
+            if (mSocket != null) {
+                try {
+                    mSocket.close();
+                }
+                catch(Exception e) {
+                    // Ignore exception
+                }
+
+                mSocket = null;
             }
         }
     }
@@ -229,14 +250,6 @@ public class TCPClient {
             mIsRunning = false;
             Thread.currentThread().interrupt();
         }
-    }
-
-    /**
-     *
-     * @param context
-     */
-    public TCPClient(Context context) {
-        mContext = context;
     }
 
     /**

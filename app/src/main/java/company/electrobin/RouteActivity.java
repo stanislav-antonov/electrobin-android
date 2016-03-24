@@ -263,6 +263,15 @@ public class RouteActivity extends AppCompatActivity {
             @Override
             public void onConnectResult(int result) {
                 Log.d(LOG_TAG, "Connect result: " + result);
+
+                mBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        String cmd = "{\"action\":\"start_route\", \"route_id\":\"234\", \"created\":\"2014-12-28T19:50:40.964531Z\"}";
+                        tcpClient.sendData(cmd);
+                    }
+                });
             }
 
             @Override
