@@ -33,9 +33,17 @@ public class ElectrobinApplication extends Application  {
      *
      * @return
      */
+    public synchronized ElectrobinApplication getInstance() {
+        return ElectrobinApplication.this;
+    }
+
+    /**
+     *
+     * @return
+     */
     public synchronized TCPClient getTCPClient() {
         if (mTCPClient == null)
-            mTCPClient = new TCPClient();
+            mTCPClient = new TCPClient(getApplicationContext());
 
         return mTCPClient;
     }

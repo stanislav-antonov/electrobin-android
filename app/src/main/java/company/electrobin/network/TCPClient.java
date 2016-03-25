@@ -1,5 +1,8 @@
 package company.electrobin.network;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -43,6 +46,8 @@ interface AsyncReaderErrorListener {
 public class TCPClient implements AsyncConnectorListener {
 
     private TCPClientListener mTCPClientListener;
+
+    private Context mContext;
 
     private volatile SSLSocket mSocket;
     private volatile boolean mIsConnected;
@@ -207,8 +212,19 @@ public class TCPClient implements AsyncConnectorListener {
          *
          * @return
          */
+        private boolean isNetworkAvailable() {
+            ConnectivityManager connectivityManager
+                    = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
+
+        /**
+         *
+         * @return
+         */
         private boolean canReconnect() {
-            return !mIsReconnecting && !mIsConnected; // && NetworkConnectivityReceiver.isNetworkAvailable();
+            return !mIsReconnecting && !mIsConnected && isNetworkAvailable();
         }
 
         /**
@@ -255,7 +271,6 @@ public class TCPClient implements AsyncConnectorListener {
             mIsReconnecting = false;
         }
     }
-
 
     private class AsyncWriter implements Runnable {
 
@@ -354,7 +369,6 @@ public class TCPClient implements AsyncConnectorListener {
         }
     }
 
-
     private class AsyncReader implements Runnable {
 
         private volatile boolean mIsRunning;
@@ -445,6 +459,14 @@ public class TCPClient implements AsyncConnectorListener {
         public boolean isRunning() {
             return mIsRunning;
         }
+    }
+
+    /**
+     *
+     * @param context
+     */
+    public TCPClient(Context context) {
+        mContext = context;
     }
 
     /**
