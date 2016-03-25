@@ -18,8 +18,19 @@ import javax.net.ssl.SSLSocket;
 
 import company.electrobin.common.Constants;
 
+interface AsyncConnectorListener {
 
-public class TCPClient {
+    public static final int CONNECT_RESULT_OK = 1;
+    public static final int CONNECT_RESULT_CREATE_SOCKET_ERROR = 2;
+    public static final int CONNECT_RESULT_AUTH_ERROR = 3;
+
+    public static final int CONNECTION_CLOSED_NORMALLY = 4;
+
+    abstract void onConnectResult(int status);
+    abstract void onConnectionClosed(int status);
+}
+
+public class TCPClient implements AsyncConnectorListener {
 
     private TCPClientListener mTCPClientListener;
 
@@ -29,25 +40,21 @@ public class TCPClient {
     private AsyncReader mAsyncReader;
     private Thread mAsyncReaderThread;
 
-    private BufferedReader mIn;
-    private PrintWriter mOut;
+    private AsyncConnector mAsyncConnector;
+
+    private volatile BufferedReader mIn;
+    private volatile PrintWriter mOut;
+
+    private volatile boolean mIsConnected;
 
     private final static String LOG_TAG = TCPClient.class.getSimpleName();
     private final static String TCP_HOST = Constants.SOCKET_API_HOST;
     private final static int TCP_PORT = Constants.SOCKET_API_PORT;
 
-    private interface AsyncConnectorListener {
 
-        public static final int CONNECT_RESULT_OK = 1;
-        public static final int CONNECT_RESULT_ERROR = 2;
-        public static final int AUTH_RESULT_ERROR = 3;
-
-        void onConnectResult(int result);
-    }
 
     private class AsyncConnector implements Runnable {
 
-        private volatile boolean mIsConnected;
         private SSLSocket mSocket;
 
         private final AsyncConnectorListener mAsyncConnectorListener;
@@ -57,11 +64,18 @@ public class TCPClient {
 
         private final String LOG_TAG = AsyncConnector.class.getName();
 
+        /**
+         *
+         * @param listener
+         */
         public AsyncConnector(AsyncConnectorListener listener) {
             if (listener == null) throw new IllegalArgumentException();
             mAsyncConnectorListener = listener;
         }
 
+        /**
+         *
+         */
         @Override
         public void run() {
             if (mIsConnected) {
@@ -82,7 +96,7 @@ public class TCPClient {
             }
             catch(Exception e) {
                 try {
-                    mAsyncConnectorListener.onConnectResult(AsyncConnectorListener.CONNECT_RESULT_ERROR);
+                    mAsyncConnectorListener.onConnectResult(AsyncConnectorListener.CONNECT_RESULT_CREATE_SOCKET_ERROR);
                 }
                 catch (Exception ex) {
                     Log.e(LOG_TAG, ex.getMessage());
@@ -108,7 +122,7 @@ public class TCPClient {
             }
             catch (Exception e) {
                 try {
-                    mAsyncConnectorListener.onConnectResult(AsyncConnectorListener.AUTH_RESULT_ERROR);
+                    mAsyncConnectorListener.onConnectResult(AsyncConnectorListener.CONNECT_RESULT_AUTH_ERROR);
                 }
                 catch (Exception ex) {
                     Log.e(LOG_TAG, ex.getMessage());
@@ -117,6 +131,8 @@ public class TCPClient {
                 return;
             }
 
+            // This means that we have established logical connection:
+            // connected and authenticated by token
             mIsConnected = true;
 
             try {
@@ -144,6 +160,13 @@ public class TCPClient {
 
                 mSocket = null;
             }
+
+            try {
+                mAsyncConnectorListener.onConnectionClosed(AsyncConnectorListener.CONNECTION_CLOSED_NORMALLY);
+            }
+            catch (Exception ex) {
+                Log.e(LOG_TAG, ex.getMessage());
+            }
         }
     }
 
@@ -158,25 +181,30 @@ public class TCPClient {
 
         @Override
         public void run() {
-            if (mIsRunning) throw new IllegalStateException("Already running");
+            if (mIsRunning) throw new IllegalStateException("AsyncWriter already running");
 
-            Looper.prepare();
+            try {
+                Looper.prepare();
 
-            // Construct fore the current thread
-            mHandler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    mOut.println(msg.getData().getString(MESSAGE_KEY));
-                    mOut.flush();
-                }
-            };
+                // Construct fore the current thread
+                mHandler = new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        mOut.println(msg.getData().getString(MESSAGE_KEY));
+                        mOut.flush();
+                    }
+                };
 
-            mIsRunning = true;
+                mIsRunning = true;
 
-            // Run the message queue. The loop() call blocks!
-            Looper.loop();
+                // Run the message queue. The loop() call blocks!
+                Looper.loop();
+            }
+            catch (Exception e) {
+                Log.e(LOG_TAG, "AsyncWriter error: " + e.getMessage());
+            }
 
-            // We can come here after the looper quit
+            // We can come here after normal the looper quit or during some error
             mIsRunning = false;
         }
 
@@ -198,7 +226,17 @@ public class TCPClient {
          */
         public void shutdown() {
             Looper.myLooper().quit();
-            Thread.currentThread().interrupt();
+
+            mHandler = null;
+            mIsRunning = false; // Paranoid feelings
+        }
+
+        /**
+         *
+         * @return
+         */
+        public boolean isRunning() {
+            return mIsRunning;
         }
     }
 
@@ -213,10 +251,8 @@ public class TCPClient {
          */
         @Override
         public void run() {
-            if (mIsRunning) {
-                Log.e(LOG_TAG, "Already running");
-                return;
-            }
+            if (mIsRunning)
+                throw new IllegalStateException("AsyncReader already running");
 
             try {
                 mIsRunning = true;
@@ -248,7 +284,15 @@ public class TCPClient {
          */
         public void shutdown() {
             mIsRunning = false;
-            Thread.currentThread().interrupt();
+            // Thread.currentThread().interrupt();
+        }
+
+        /**
+         *
+         * @return
+         */
+        public boolean isRunning() {
+            return mIsRunning;
         }
     }
 
@@ -271,42 +315,89 @@ public class TCPClient {
     /**
      *
      */
-    public void start(final TCPClientListener listener) {
+    private void connect() {
+        if (mAsyncConnector != null && mIsConnected) {
+            Log.e(LOG_TAG, "Already connected");
+            return;
+        }
 
+        mAsyncConnector = new AsyncConnector(this);
+
+        Thread connectorThread = new Thread(mAsyncConnector);
+        connectorThread.setName("TCPClient async connector");
+        connectorThread.start();
+    }
+
+    /**
+     *
+     */
+    public void start(final TCPClientListener listener) {
         if (listener == null) throw new IllegalArgumentException();
         mTCPClientListener = listener;
 
-        AsyncConnector asyncConnector = new AsyncConnector(new AsyncConnectorListener() {
-            @Override
-            public void onConnectResult(int result) {
-                if (result == AsyncConnectorListener.CONNECT_RESULT_OK) {
-
-                    mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_OK);
-
-                    mAsyncWriter = new AsyncWriter();
-                    mAsyncWriterThread = new Thread(mAsyncWriter);
-                    mAsyncWriterThread.setName("TCP Client async writer");
-                    mAsyncWriterThread.start();
-
-                    mAsyncReader = new AsyncReader();
-                    mAsyncReaderThread = new Thread(mAsyncReader);
-                    mAsyncReaderThread.setName("TCP Client async reader");
-                    mAsyncReaderThread.start();
-                }
-                else {
-                    mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_ERROR);
-                }
-            }
-        });
-
-        new Thread(asyncConnector).start();
+        connect();
     }
 
     /**
      *
      */
     public void shutdown() {
-        if (mAsyncWriterThread != null && !mAsyncWriterThread.isInterrupted())
-            mAsyncWriterThread.interrupt();
+        if (mAsyncWriter != null) mAsyncWriter.shutdown();
+        if (mAsyncReader != null) mAsyncReader.shutdown();
+        if (mAsyncConnector != null) mAsyncConnector.disconnect();
     }
+
+    /**
+     *
+     */
+    private void startAsyncWriter() {
+        if (mAsyncWriter != null && mAsyncWriter.isRunning()) {
+            Log.i(LOG_TAG, "AsyncWriter already running");
+            return;
+        }
+
+        if (mAsyncWriterThread == null) {
+            mAsyncWriter = new AsyncWriter();
+            mAsyncWriterThread = new Thread(mAsyncWriter);
+            mAsyncWriterThread.setName("TCPClient async writer");
+        }
+
+        mAsyncWriterThread.start();
+    }
+
+    /**
+     *
+     */
+    private void startAsyncReader() {
+        if (mAsyncReader != null && mAsyncReader.isRunning()) {
+            Log.i(LOG_TAG, "AsyncReader already running");
+            return;
+        }
+
+        if (mAsyncReaderThread == null) {
+            mAsyncReader = new AsyncReader();
+            mAsyncReaderThread = new Thread(mAsyncReader);
+            mAsyncReaderThread.setName("TCPClient async reader");
+        }
+
+        mAsyncReaderThread.start();
+    }
+
+    @Override
+    public void onConnectResult(int status) {
+        if (status == AsyncConnectorListener.CONNECT_RESULT_OK) {
+            mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_OK);
+            startAsyncWriter();
+            startAsyncReader();
+        }
+        else {
+            mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_ERROR);
+        }
+    }
+
+    @Override
+    public void onConnectionClosed(int status) {
+
+    }
+
 }
