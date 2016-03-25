@@ -28,6 +28,15 @@ interface AsyncConnectorListener {
 
     abstract void onConnectResult(int status);
     abstract void onConnectionClosed(int status);
+
+}
+
+interface AsyncWriterErrorListener {
+    abstract void onWriteError(Exception e);
+}
+
+interface AsyncReaderErrorListener {
+    abstract void onReadError(Exception e);
 }
 
 public class TCPClient implements AsyncConnectorListener {
@@ -44,6 +53,7 @@ public class TCPClient implements AsyncConnectorListener {
     private Thread mAsyncReaderThread;
 
     private AsyncConnector mAsyncConnector;
+    private AsyncConnectionWatcher mAsyncConnectionWatcher;
 
     private final static String LOG_TAG = TCPClient.class.getSimpleName();
     private final static String TCP_HOST = Constants.SOCKET_API_HOST;
@@ -165,6 +175,69 @@ public class TCPClient implements AsyncConnectorListener {
         }
     }
 
+    private class AsyncConnectionWatcher implements AsyncConnectorListener, AsyncReaderErrorListener, AsyncWriterErrorListener {
+
+        private Handler mHandler = new Handler();
+        private boolean mIsReconnecting;
+
+        private final int RECONNECT_DELAY = 5000;
+
+        /**
+         *
+         * @return
+         */
+        private boolean canReconnect() {
+            return !mIsReconnecting && !mIsConnected; // && NetworkConnectivityReceiver.isNetworkAvailable();
+        }
+
+        /**
+         *
+         */
+        public void reconnect() {
+            if (!canReconnect()) return;
+
+            mIsReconnecting = true;
+
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (!canReconnect())
+                        return;
+                    connect();
+                    mHandler.postDelayed(this, RECONNECT_DELAY);
+                }
+            }, RECONNECT_DELAY);
+        }
+
+        @Override
+        public void onWriteError(Exception e) {
+            reconnect();
+        }
+
+        @Override
+        public void onReadError(Exception e) {
+            reconnect();
+        }
+
+        @Override
+        public void onConnectResult(int status) {
+            // Let's see what's next?
+            mIsReconnecting = false;
+
+            if (status == AsyncConnectorListener.CONNECT_RESULT_AUTH_ERROR
+                    || status == AsyncConnectorListener.CONNECT_RESULT_CREATE_SOCKET_ERROR) {
+
+                reconnect();
+            }
+        }
+
+        @Override
+        public void onConnectionClosed(int status) {
+            // If the connection was normally closed, we do not need the reconnection tryings
+            mIsReconnecting = false;
+        }
+    }
+
 
     private class AsyncWriter implements Runnable {
 
@@ -172,9 +245,22 @@ public class TCPClient implements AsyncConnectorListener {
         private PrintWriter mOut;
         private volatile boolean mIsRunning;
 
+        private final AsyncWriterErrorListener mListener;
+
         private final String LOG_TAG = AsyncWriter.class.getName();
         private static final String MESSAGE_KEY = "key";
 
+        /**
+         *
+         * @param listener
+         */
+        public AsyncWriter(AsyncWriterErrorListener listener) {
+            mListener = listener;
+        }
+
+        /**
+         *
+         */
         @Override
         public void run() {
             if (mIsRunning) throw new IllegalStateException("AsyncWriter already running");
@@ -190,8 +276,18 @@ public class TCPClient implements AsyncConnectorListener {
                 mHandler = new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
-                        mOut.println(msg.getData().getString(MESSAGE_KEY));
-                        mOut.flush();
+                        try {
+                            mOut.println(msg.getData().getString(MESSAGE_KEY));
+                            mOut.flush();
+                        }
+                        catch (Exception e1) {
+                            try {
+                                mListener.onWriteError(e1);
+                            }
+                            catch (Exception e2) {
+                                Log.e(LOG_TAG, e2.toString());
+                            }
+                        }
                     }
                 };
 
@@ -253,7 +349,13 @@ public class TCPClient implements AsyncConnectorListener {
         private BufferedReader mIn;
         private volatile boolean mIsRunning;
 
+        private AsyncReaderErrorListener mListener;
+
         private final String LOG_TAG = AsyncReader.class.getName();
+
+        public AsyncReader(AsyncReaderErrorListener listener) {
+            mListener = listener;
+        }
 
         /**
          *
@@ -379,7 +481,7 @@ public class TCPClient implements AsyncConnectorListener {
         }
 
         if (mAsyncWriterThread == null) {
-            mAsyncWriter = new AsyncWriter();
+            mAsyncWriter = new AsyncWriter(mAsyncConnectionWatcher);
             mAsyncWriterThread = new Thread(mAsyncWriter);
             mAsyncWriterThread.setName("TCPClient async writer");
         }
@@ -400,7 +502,7 @@ public class TCPClient implements AsyncConnectorListener {
         }
 
         if (mAsyncReaderThread == null) {
-            mAsyncReader = new AsyncReader();
+            mAsyncReader = new AsyncReader(mAsyncConnectionWatcher);
             mAsyncReaderThread = new Thread(mAsyncReader);
             mAsyncReaderThread.setName("TCPClient async reader");
         }
@@ -415,6 +517,14 @@ public class TCPClient implements AsyncConnectorListener {
     public void onConnectResult(int status) {
         if (status == AsyncConnectorListener.CONNECT_RESULT_OK) {
             mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_OK);
+
+
+
+            // TODO - startAsyncConnectionWatcher()!
+            mAsyncConnectionWatcher = new AsyncConnectionWatcher();
+
+
+
             startAsyncWriter();
             startAsyncReader();
         }
