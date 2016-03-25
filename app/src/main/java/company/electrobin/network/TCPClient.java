@@ -34,6 +34,9 @@ public class TCPClient implements AsyncConnectorListener {
 
     private TCPClientListener mTCPClientListener;
 
+    private volatile SSLSocket mSocket;
+    private volatile boolean mIsConnected;
+
     private AsyncWriter mAsyncWriter;
     private Thread mAsyncWriterThread;
 
@@ -42,22 +45,17 @@ public class TCPClient implements AsyncConnectorListener {
 
     private AsyncConnector mAsyncConnector;
 
-    private volatile BufferedReader mIn;
-    private volatile PrintWriter mOut;
-
-    private volatile boolean mIsConnected;
-
     private final static String LOG_TAG = TCPClient.class.getSimpleName();
     private final static String TCP_HOST = Constants.SOCKET_API_HOST;
     private final static int TCP_PORT = Constants.SOCKET_API_PORT;
 
 
-
     private class AsyncConnector implements Runnable {
 
-        private SSLSocket mSocket;
-
         private final AsyncConnectorListener mAsyncConnectorListener;
+
+        private BufferedReader mIn;
+        private PrintWriter mOut;
 
         private static final String HANDSHAKE_PROMPT = "HELLO!";
         private static final String HANDSHAKE_RESULT_OK = "200 AUTH_OK";
@@ -78,10 +76,7 @@ public class TCPClient implements AsyncConnectorListener {
          */
         @Override
         public void run() {
-            if (mIsConnected) {
-                Log.e(LOG_TAG, "Already connected");
-                return;
-            }
+            if (mIsConnected) throw new IllegalStateException("AsyncConnector already connected");
 
             try {
                 TLSSocketFactory tlsFact = new TLSSocketFactory();
@@ -174,6 +169,7 @@ public class TCPClient implements AsyncConnectorListener {
     private class AsyncWriter implements Runnable {
 
         private Handler mHandler;
+        private PrintWriter mOut;
         private volatile boolean mIsRunning;
 
         private final String LOG_TAG = AsyncWriter.class.getName();
@@ -182,8 +178,12 @@ public class TCPClient implements AsyncConnectorListener {
         @Override
         public void run() {
             if (mIsRunning) throw new IllegalStateException("AsyncWriter already running");
+            if (!mIsConnected) throw new IllegalStateException("Not connected");
 
             try {
+                mOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(mSocket
+                        .getOutputStream())), true);
+
                 Looper.prepare();
 
                 // Construct fore the current thread
@@ -213,6 +213,9 @@ public class TCPClient implements AsyncConnectorListener {
          * @param data
          */
         public void sendData(String data) {
+
+            if (!mIsConnected) throw new IllegalStateException("Not connected");
+
             Message msg = new Message();
             Bundle bundle = new Bundle();
             bundle.putString(MESSAGE_KEY, data);
@@ -226,6 +229,9 @@ public class TCPClient implements AsyncConnectorListener {
          */
         public void shutdown() {
             Looper.myLooper().quit();
+
+            if (mOut != null)
+                mOut.close();
 
             mHandler = null;
             mIsRunning = false; // Paranoid feelings
@@ -243,7 +249,10 @@ public class TCPClient implements AsyncConnectorListener {
 
     private class AsyncReader implements Runnable {
 
+        private PrintWriter mOut;
+        private BufferedReader mIn;
         private volatile boolean mIsRunning;
+
         private final String LOG_TAG = AsyncReader.class.getName();
 
         /**
@@ -251,10 +260,14 @@ public class TCPClient implements AsyncConnectorListener {
          */
         @Override
         public void run() {
-            if (mIsRunning)
-                throw new IllegalStateException("AsyncReader already running");
+            if (mIsRunning) throw new IllegalStateException("AsyncReader already running");
+            if (!mIsConnected) throw new IllegalStateException("Not connected");
 
             try {
+                mIn = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+                mOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(mSocket
+                        .getOutputStream())), true);
+
                 mIsRunning = true;
 
                 while (mIsRunning) {
@@ -284,7 +297,16 @@ public class TCPClient implements AsyncConnectorListener {
          */
         public void shutdown() {
             mIsRunning = false;
-            // Thread.currentThread().interrupt();
+            if (mIn != null) {
+                try {
+                    mIn.close();
+                }
+                catch (Throwable e) {
+                    // Unhandled exception
+                }
+
+                mIn = null;
+            }
         }
 
         /**
@@ -361,6 +383,9 @@ public class TCPClient implements AsyncConnectorListener {
             mAsyncWriterThread = new Thread(mAsyncWriter);
             mAsyncWriterThread.setName("TCPClient async writer");
         }
+        else if (mAsyncWriterThread.isAlive()) {
+            throw new IllegalStateException("AsyncWriter thread is alive!");
+        }
 
         mAsyncWriterThread.start();
     }
@@ -378,6 +403,9 @@ public class TCPClient implements AsyncConnectorListener {
             mAsyncReader = new AsyncReader();
             mAsyncReaderThread = new Thread(mAsyncReader);
             mAsyncReaderThread.setName("TCPClient async reader");
+        }
+        else if (mAsyncReaderThread.isAlive()) {
+            throw new IllegalStateException("AsyncReader thread is alive!");
         }
 
         mAsyncReaderThread.start();
