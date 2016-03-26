@@ -51,6 +51,7 @@ public class TCPClient implements AsyncConnectorListener {
     private TCPClientListener mTCPClientListener;
 
     private Context mContext;
+    private Handler mHandler = new Handler();
 
     private volatile SSLSocket mSocket;
     private volatile boolean mIsConnected;
@@ -576,12 +577,21 @@ public class TCPClient implements AsyncConnectorListener {
     public void onConnectResult(int status) {
         if (status == AsyncConnectorListener.CONNECT_RESULT_OK) {
             mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_OK);
-
-            startAsyncWriter();
-            startAsyncReader();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startAsyncWriter();
+                    startAsyncReader();
+                }
+            }, 1000);
         }
         else {
-            mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_ERROR);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_ERROR);
+                }
+            });
         }
     }
 
