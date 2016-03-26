@@ -16,6 +16,8 @@ import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 
 import javax.net.ssl.SSLSocket;
@@ -111,14 +113,12 @@ public class TCPClient implements AsyncConnectorListener {
 
             try {
                 TLSSocketFactory tlsFact = new TLSSocketFactory();
-
                 mSocket = (SSLSocket)tlsFact.createSocket(TCP_HOST, TCP_PORT);
                 mSocket.setKeepAlive(true);
 
                 mIn = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
                 mOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(mSocket
                         .getOutputStream())), true);
-
             }
             catch (Exception e) {
                 for (AsyncConnectorListener listener : mListenerList) {
