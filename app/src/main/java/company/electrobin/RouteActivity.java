@@ -1,5 +1,6 @@
 package company.electrobin;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -17,18 +18,27 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import company.electrobin.i10n.I10n;
-import company.electrobin.network.TCPClient;
-import company.electrobin.network.TCPClientAuthHandler;
 import company.electrobin.network.TCPClientListener;
-import company.electrobin.network.TCPClientResponseHandler;
 import company.electrobin.user.User;
 
 public class RouteActivity extends AppCompatActivity {
@@ -40,7 +50,10 @@ public class RouteActivity extends AppCompatActivity {
     private Button mBtn;
     private WebView mWvMap;
 
-    private RelativeLayout mRlMain;
+    private RelativeLayout mRlRouteMap;
+    private RelativeLayout mRlRouteWaiting;
+    private RelativeLayout mRlRouteReview;
+
     private RelativeLayout mRlLoading;
     private RelativeLayout mRlLoadRetry;
 
@@ -229,63 +242,167 @@ public class RouteActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_route);
+    private class SocketAPIEventsHandler implements TCPClientListener {
 
-        mApp = (ElectrobinApplication)getApplicationContext();
-        mUser = mApp.getUser();
-        mI10n = mApp.getI10n();
+        private final String LOG_TAG = SocketAPIEventsHandler.class.getName();
 
-        mBtn = (Button)findViewById(R.id.jump_button);
+        private final static String JSON_ACTION_KEY = "action";
+        private final static String JSON_ACTION_NEW_ROUTE = "new_route";
+        private final static String JSON_ACTION_UPDATE_TOKEN = "update_token";
 
-        mRlMain = (RelativeLayout)findViewById(R.id.main_layout);
+        @Override
+        public void onConnectResult(int result) {
+            Log.d(LOG_TAG, "Connect result: " + result);
+            mBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-        mRlLoading = (RelativeLayout)findViewById(R.id.loading_layout);
-        mRlLoading.setVisibility(View.VISIBLE);
+                    // String cmd = "{\"action\":\"start_route\", \"route_id\":\"234\", \"created\":\"2014-12-28T19:50:40.964531Z\"}";
+                    // tcpClient.sendData(cmd);
+                }
+            });
+        }
 
-        mRlLoadRetry = (RelativeLayout)findViewById(R.id.load_retry_layout);
-        mRlLoadRetry.setVisibility(View.GONE);
+        @Override
+        public String onAuthToken() {
+            return mUser.getAuthToken();
+        }
 
-        mWvMap = (WebView)findViewById(R.id.map);
+        @Override
+        public void onDataReceived(final String data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Log.d(LOG_TAG, "Data received: " + data);
+                        final JSONObject json = new JSONObject(data);
+                        if (!json.has(JSON_ACTION_KEY)) {
+                            Log.i(LOG_TAG, "No action");
+                            return;
+                        }
 
-        WebSettings webSettings = mWvMap.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-
-        mWvMap.addJavascriptInterface(new WebAppInterface(this), "Android");
-        mWvMap.setWebViewClient(new MyWebViewClient());
-
-        loadMap();
-
-        final TCPClient tcpClient = mApp.getTCPClient();
-        tcpClient.start(new TCPClientListener() {
-            @Override
-            public void onConnectResult(int result) {
-                Log.d(LOG_TAG, "Connect result: " + result);
-
-                mBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        String cmd = "{\"action\":\"start_route\", \"route_id\":\"234\", \"created\":\"2014-12-28T19:50:40.964531Z\"}";
-                        tcpClient.sendData(cmd);
+                        String action = json.getString(JSON_ACTION_KEY);
+                        switch (action) {
+                            case JSON_ACTION_NEW_ROUTE:
+                                showRouteReview(json);
+                                break;
+                            case JSON_ACTION_UPDATE_TOKEN:
+                                break;
+                        }
                     }
-                });
-            }
-
-            @Override
-            public String onAuthToken() {
-                return mUser.getAuthToken();
-            }
-
-            @Override
-            public void onDataReceived(String data) {
-                Log.d(LOG_TAG, "Data received: " + data);
-            }
-        });
+                    catch (Exception e) {
+                        Log.d(LOG_TAG, e.getMessage());
+                    }
+                }
+            });
+        }
     }
 
+    /**
+     *
+     */
+    private void showRouteWaiting() {
+        mRlRouteWaiting.setVisibility(View.VISIBLE);
+        mRlRouteReview.setVisibility(View.GONE);
+
+        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_1)).setText(mI10n.l("route_waiting_1"));
+        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_2)).setText(mI10n.l("route_waiting_2"));
+    }
+
+    /**
+     *
+     */
+    private void showRouteReview(JSONObject json) {
+        mRlRouteReview.setVisibility(View.VISIBLE);
+        mRlRouteWaiting.setVisibility(View.GONE);
+
+        final Button btnRouteStart = (Button)mRlRouteReview.findViewById(R.id.route_start_button);
+        btnRouteStart.setText(mI10n.l("route_start"));
+
+        final TextView tvRouteDate = (TextView)mRlRouteReview.findViewById(R.id.route_date_text);
+        tvRouteDate.setVisibility(View.GONE);
+
+        final String JSON_DATE_KEY = "created";
+        if (json.has(JSON_DATE_KEY)) {
+            String strDate = null;
+            try {
+                // 2014-12-28T19:50:40.964531Z
+                strDate = json.getString(JSON_DATE_KEY);
+
+                @SuppressLint("SimpleDateFormat")
+                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+                Date date = df.parse(strDate);
+
+                @SuppressLint("SimpleDateFormat")
+                Format formatter = new SimpleDateFormat("H:mm d.MM.yyyy");
+                strDate = formatter.format(date);
+            }
+            catch(Exception e) {
+                strDate = null;
+                Log.e(LOG_TAG, e.getMessage());
+            }
+
+            if (strDate != null) {
+                tvRouteDate.setVisibility(View.VISIBLE);
+                tvRouteDate.setText(String.format(mI10n.l("route_date"), strDate));
+            }
+        }
+
+        final ListView lvRoutePoints = (ListView)mRlRouteReview.findViewById(R.id.route_points_list);
+        lvRoutePoints.setVisibility(View.GONE);
+
+        final String JSON_POINTS_KEY = "points";
+        final String JSON_POINTS_ADDRESS = "address";
+
+        if (json.has(JSON_POINTS_KEY)) {
+            List<String> addressList = new ArrayList<>();
+            try {
+                JSONArray pointList = json.getJSONArray(JSON_POINTS_KEY);
+                for (int i = 0; i < pointList.length(); i++) {
+                    JSONObject point = pointList.getJSONObject(i);
+                    addressList.add(point.getString(JSON_POINTS_ADDRESS));
+                }
+            }
+            catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+                addressList.clear();
+
+                (Toast.makeText(getApplicationContext(), "Для отладки: ошибка в данных о точках маршрута", Toast.LENGTH_LONG)).show();
+                showRouteWaiting();
+            }
+
+            if (!addressList.isEmpty()) {
+                lvRoutePoints.setVisibility(View.VISIBLE);
+                lvRoutePoints.setAdapter(new ArrayAdapter<String>(getApplicationContext(), R.layout.route_points_item_layout, addressList));
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    @SuppressLint("SetJavaScriptEnabled")
+    private void showRouteMap() {
+        if (mWvMap == null) { // TODO: do we really need to cache map?
+            mWvMap = (WebView)findViewById(R.id.map);
+
+            WebSettings webSettings = mWvMap.getSettings();
+            webSettings.setJavaScriptEnabled(true);
+
+            mWvMap.addJavascriptInterface(new WebAppInterface(this), "Android");
+            mWvMap.setWebViewClient(new MyWebViewClient());
+        }
+
+        mRlRouteReview.setVisibility(View.GONE);
+        mRlRouteWaiting.setVisibility(View.GONE);
+        mRlRouteMap.setVisibility(View.VISIBLE);
+
+        loadMap();
+    }
+
+    /**
+     *
+     */
     private void loadMap() {
         try {
             InputStream is = getAssets().open("map.html");
@@ -311,11 +428,41 @@ public class RouteActivity extends AppCompatActivity {
         }
 
         mIsMapLoading = true;
+        mRlLoading.setVisibility(View.VISIBLE);
 
         if (mMapLoadBreaker != null) mHandler.removeCallbacks(mMapLoadBreaker);
 
         mMapLoadBreaker = new MapLoadBreaker();
         mHandler.postDelayed(mMapLoadBreaker, TIMEOUT_MAP_LOAD);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_route);
+
+        mApp = (ElectrobinApplication)getApplicationContext();
+        mUser = mApp.getUser();
+        mI10n = mApp.getI10n();
+
+        mBtn = (Button)findViewById(R.id.jump_button);
+
+        mRlRouteMap = (RelativeLayout)findViewById(R.id.route_map_layout);
+        mRlRouteWaiting = (RelativeLayout)findViewById(R.id.route_waiting_layout);
+        mRlRouteReview = (RelativeLayout)findViewById(R.id.route_review_layout);
+
+        mRlLoading = (RelativeLayout)findViewById(R.id.loading_layout);
+
+        mRlLoadRetry = (RelativeLayout)findViewById(R.id.load_retry_layout);
+        mRlLoadRetry.setVisibility(View.GONE);
+
+        showRouteWaiting();
+
+        try {
+            mApp.getTCPClient().start(new SocketAPIEventsHandler());
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Failed to start TCPClient: " + e.getMessage());
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package company.electrobin.network;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -429,7 +430,11 @@ public class TCPClient implements AsyncConnectorListener {
                     continue;
                 }
 
-                Log.d(LOG_TAG, "Got data from server: " + data);
+                try {
+                    mTCPClientListener.onDataReceived(data);
+                } catch (Exception e) {
+                    Log.d(LOG_TAG, e.getMessage());
+                }
             }
 
             mIsRunning = false;
@@ -563,6 +568,10 @@ public class TCPClient implements AsyncConnectorListener {
         mAsyncReaderThread.start();
     }
 
+    /**
+     *
+     * @param status
+     */
     @Override
     public void onConnectResult(int status) {
         if (status == AsyncConnectorListener.CONNECT_RESULT_OK) {
@@ -576,6 +585,10 @@ public class TCPClient implements AsyncConnectorListener {
         }
     }
 
+    /**
+     *
+     * @param status
+     */
     @Override
     public void onConnectionClosed(int status) {
 
