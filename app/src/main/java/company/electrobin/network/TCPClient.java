@@ -134,18 +134,16 @@ public class TCPClient implements AsyncConnectorListener {
 
             try {
                 String data = mIn.readLine();
-                if (data == null || !data.equals(HANDSHAKE_PROMPT)) {
+                if (data == null || !data.equals(HANDSHAKE_PROMPT))
                     throw new IllegalStateException("Bad handshake prompt: " + data);
-                }
 
                 String token = String.format("Token:%1$s", mTCPClientListener.onAuthToken());
                 mOut.println(token);
                 mOut.flush();
 
                 data = mIn.readLine();
-                if (data == null || !data.equals(HANDSHAKE_RESULT_OK)) {
+                if (data == null || !data.equals(HANDSHAKE_RESULT_OK))
                     throw new IllegalStateException("Bad handshake result: " + data);
-                }
             }
             catch (Exception e) {
                 for (AsyncConnectorListener listener : mListenerList) {
@@ -204,7 +202,7 @@ public class TCPClient implements AsyncConnectorListener {
         private Handler mHandler = new Handler();
         private boolean mIsReconnecting;
 
-        private final int RECONNECT_DELAY = 5000;
+        private final int RECONNECT_DELAY = 1000;
 
         /**
          *
@@ -222,23 +220,22 @@ public class TCPClient implements AsyncConnectorListener {
          * @return
          */
         private boolean canReconnect() {
-            return !mIsConnected && isNetworkAvailable();
+            return !mIsReconnecting && !mIsConnected && isNetworkAvailable();
         }
 
         /**
          *
          */
         public void reconnect() {
-            if (!canReconnect() || mIsReconnecting) return;
+            if (!canReconnect()) return;
 
             mIsReconnecting = true;
 
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (!canReconnect())
-                        return;
                     connect();
+                    if (!canReconnect()) return;
                     mHandler.postDelayed(this, RECONNECT_DELAY);
                 }
             }, RECONNECT_DELAY);
@@ -246,13 +243,15 @@ public class TCPClient implements AsyncConnectorListener {
 
         @Override
         public void onWriteError(Exception e) {
-            mIsConnected = false;
+            // mIsConnected = false;
+            shutdown();
             reconnect();
         }
 
         @Override
         public void onReadError(Exception e) {
-            mIsConnected = false;
+            // mIsConnected = false;
+            shutdown();
             reconnect();
         }
 
@@ -262,7 +261,7 @@ public class TCPClient implements AsyncConnectorListener {
             mIsReconnecting = false;
             if (status == AsyncConnectorListener.CONNECT_RESULT_AUTH_ERROR
                     || status == AsyncConnectorListener.CONNECT_RESULT_CREATE_SOCKET_ERROR) {
-
+                shutdown();
                 reconnect();
             }
         }
@@ -312,7 +311,6 @@ public class TCPClient implements AsyncConnectorListener {
                             mOut.flush();
                         }
                         catch (Exception e1) {
-                            shutdown();
                             try {
                                 mListener.onWriteError(e1);
                             } catch (Exception e2) {
@@ -353,8 +351,9 @@ public class TCPClient implements AsyncConnectorListener {
         /**
          *
          */
-        public void shutdown() {
-            Looper.myLooper().quit();
+        public synchronized void shutdown() {
+            Looper looper = Looper.myLooper();
+            if (looper != null) looper.quit();
 
             if (mOut != null) mOut.close();
 
@@ -411,7 +410,6 @@ public class TCPClient implements AsyncConnectorListener {
                 catch (Exception e1) {
                     // Not IO error - "correct" shutdown by the mIn.close();
                     if (!mIsShutdown) {
-                        shutdown();
                         try {
                             mListener.onReadError(e1);
                         } catch (Exception e2) {
@@ -440,15 +438,14 @@ public class TCPClient implements AsyncConnectorListener {
         /**
          *
          */
-        public void shutdown() {
+        public synchronized void shutdown() {
             mIsRunning = false;
             mIsShutdown = true;
 
             if (mIn != null) {
                 try {
                     mIn.close();
-                }
-                catch (Throwable e) {
+                } catch (Throwable e) {
                     // Unhandled exception
                 }
 
@@ -483,8 +480,7 @@ public class TCPClient implements AsyncConnectorListener {
 
         try {
             mAsyncWriter.sendData(data);
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             Log.e(LOG_TAG, e.getMessage());
         }
     }
