@@ -120,7 +120,7 @@ public class TCPClient implements AsyncConnectorListener {
                         .getOutputStream())), true);
 
             }
-            catch(Exception e) {
+            catch (Exception e) {
                 for (AsyncConnectorListener listener : mListenerList) {
                     try {
                         listener.onConnectResult(AsyncConnectorListener.CONNECT_RESULT_CREATE_SOCKET_ERROR);
@@ -182,8 +182,7 @@ public class TCPClient implements AsyncConnectorListener {
             if (mSocket != null) {
                 try {
                     mSocket.close();
-                }
-                catch(Exception e) {
+                } catch (Exception e) {
                     // Ignore exception
                 }
 
@@ -223,15 +222,17 @@ public class TCPClient implements AsyncConnectorListener {
          * @return
          */
         private boolean canReconnect() {
-            return !mIsReconnecting && !mIsConnected && isNetworkAvailable();
+            return !mIsConnected && isNetworkAvailable();
         }
 
         /**
          *
          */
         public void reconnect() {
-            if (!canReconnect()) return;
+            if (!canReconnect() || mIsReconnecting) return;
+
             mIsReconnecting = true;
+
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -497,13 +498,9 @@ public class TCPClient implements AsyncConnectorListener {
             return;
         }
 
-        if (mAsyncConnectorThread == null) {
+        if (mAsyncConnectorThread == null || mAsyncConnectorThread.getState() != Thread.State.NEW) {
             mAsyncConnectorThread = new Thread(mAsyncConnector);
             mAsyncConnectorThread.setName("TCPClient async connector");
-        }
-        else if (mAsyncConnectorThread.isAlive()) {
-            Log.i(LOG_TAG, "AsyncConnector thread is alive!");
-            return;
         }
 
         mAsyncConnectorThread.start();
@@ -543,14 +540,10 @@ public class TCPClient implements AsyncConnectorListener {
             return;
         }
 
-        if (mAsyncWriterThread == null) {
+        if (mAsyncWriterThread == null || mAsyncWriterThread.getState() != Thread.State.NEW) {
             mAsyncWriter = new AsyncWriter(mAsyncConnectionWatcher);
             mAsyncWriterThread = new Thread(mAsyncWriter);
             mAsyncWriterThread.setName("TCPClient async writer");
-        }
-        else if (mAsyncWriterThread.isAlive()) {
-            Log.i(LOG_TAG, "AsyncWriter thread is alive!");
-            return;
         }
 
         mAsyncWriterThread.start();
@@ -565,14 +558,10 @@ public class TCPClient implements AsyncConnectorListener {
             return;
         }
 
-        if (mAsyncReaderThread == null) {
+        if (mAsyncReaderThread == null || mAsyncReaderThread.getState() != Thread.State.NEW) {
             mAsyncReader = new AsyncReader(mAsyncConnectionWatcher);
             mAsyncReaderThread = new Thread(mAsyncReader);
             mAsyncReaderThread.setName("TCPClient async reader");
-        }
-        else if (mAsyncReaderThread.isAlive()) {
-            Log.i(LOG_TAG, "AsyncReader thread is alive!");
-            return;
         }
 
         mAsyncReaderThread.start();
