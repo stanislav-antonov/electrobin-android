@@ -70,7 +70,6 @@ public class TCPClient implements AsyncConnectorListener {
     private final static String TCP_HOST = Constants.SOCKET_API_HOST;
     private final static int TCP_PORT = Constants.SOCKET_API_PORT;
 
-
     private class AsyncConnector implements Runnable {
 
         private ArrayList<AsyncConnectorListener> mListenerList;
@@ -246,11 +245,13 @@ public class TCPClient implements AsyncConnectorListener {
 
         @Override
         public void onWriteError(Exception e) {
+            mIsConnected = false;
             reconnect();
         }
 
         @Override
         public void onReadError(Exception e) {
+            mIsConnected = false;
             reconnect();
         }
 
@@ -310,10 +311,10 @@ public class TCPClient implements AsyncConnectorListener {
                             mOut.flush();
                         }
                         catch (Exception e1) {
+                            shutdown();
                             try {
                                 mListener.onWriteError(e1);
-                            }
-                            catch (Exception e2) {
+                            } catch (Exception e2) {
                                 Log.e(LOG_TAG, e2.toString());
                             }
                         }
@@ -397,40 +398,42 @@ public class TCPClient implements AsyncConnectorListener {
             mIsRunning = true;
             mIsShutdown = false;
 
-            try {
-                while (mIsRunning) {
-                    String data = null;
-                    try {
-                        // Assume the server always respond us the data trailing with the \n
-                        data = mIn.readLine();
-
-                        // And we need to answer to each message from server
-                        mOut.println("OK");
-                        mOut.flush();
-                    }
-                    catch (Exception e1) {
-                        // Not IO error - "correct" shutdown by the mIn.close();
-                        if (mIsShutdown) break;
-
+            while (mIsRunning) {
+                String data;
+                try {
+                    // Assume the server always respond us the data trailing with the \n
+                    data = mIn.readLine();
+                    if (data == null)
+                        // If we fall her with null, the connection was lost during the network problems
+                        throw new Exception();
+                }
+                catch (Exception e1) {
+                    // Not IO error - "correct" shutdown by the mIn.close();
+                    if (!mIsShutdown) {
+                        shutdown();
                         try {
                             mListener.onReadError(e1);
-                        }
-                        catch (Exception e2) {
+                        } catch (Exception e2) {
                             Log.e(LOG_TAG, e2.toString());
                         }
                     }
 
-                    if (data != null) {
-                        Log.d(LOG_TAG, "Got data from server: " + data);
-                    }
+                    break;
                 }
 
-                mIsRunning = false;
+                try {
+                    // And we need to answer to each message from server
+                    mOut.println("OK");
+                    mOut.flush();
+                } catch(Exception e) {
+                    Log.e(LOG_TAG, e.getMessage());
+                    continue;
+                }
+
+                Log.d(LOG_TAG, "Got data from server: " + data);
             }
-            catch (Exception e) {
-                mIsRunning = false;
-                Log.e(LOG_TAG, "Error: " + e.getMessage());
-            }
+
+            mIsRunning = false;
         }
 
         /**
