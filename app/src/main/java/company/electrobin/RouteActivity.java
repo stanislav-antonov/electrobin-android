@@ -270,31 +270,26 @@ public class RouteActivity extends AppCompatActivity {
 
         @Override
         public void onDataReceived(final String data) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Log.d(LOG_TAG, "Data received: " + data);
-                        final JSONObject json = new JSONObject(data);
-                        if (!json.has(JSON_ACTION_KEY)) {
-                            Log.i(LOG_TAG, "No action");
-                            return;
-                        }
-
-                        String action = json.getString(JSON_ACTION_KEY);
-                        switch (action) {
-                            case JSON_ACTION_NEW_ROUTE:
-                                showRouteReview(json);
-                                break;
-                            case JSON_ACTION_UPDATE_TOKEN:
-                                break;
-                        }
-                    }
-                    catch (Exception e) {
-                        Log.d(LOG_TAG, e.getMessage());
-                    }
+            try {
+                Log.d(LOG_TAG, "Data received: " + data);
+                final JSONObject json = new JSONObject(data);
+                if (!json.has(JSON_ACTION_KEY)) {
+                    Log.i(LOG_TAG, "No action");
+                    return;
                 }
-            });
+
+                String action = json.getString(JSON_ACTION_KEY);
+                switch (action) {
+                    case JSON_ACTION_NEW_ROUTE:
+                        showRouteReview(json);
+                        break;
+                    case JSON_ACTION_UPDATE_TOKEN:
+                        break;
+                }
+            }
+            catch (Exception e) {
+                Log.d(LOG_TAG, e.getMessage());
+            }
         }
     }
 
