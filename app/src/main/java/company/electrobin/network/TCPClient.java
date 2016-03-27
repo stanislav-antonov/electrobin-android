@@ -56,6 +56,9 @@ public class TCPClient implements AsyncConnectorListener {
     private volatile SSLSocket mSocket;
     private volatile boolean mIsConnected;
 
+    private volatile BufferedReader mIn;
+    private volatile PrintWriter mOut;
+
     private AsyncWriter mAsyncWriter;
     private Thread mAsyncWriterThread;
 
@@ -66,9 +69,6 @@ public class TCPClient implements AsyncConnectorListener {
     private Thread mAsyncConnectorThread;
 
     private AsyncConnectionWatcher mAsyncConnectionWatcher;
-
-    private BufferedReader mIn;
-    private PrintWriter mOut;
 
     private final static String LOG_TAG = TCPClient.class.getSimpleName();
     private final static String TCP_HOST = Constants.SOCKET_API_HOST;
@@ -114,6 +114,8 @@ public class TCPClient implements AsyncConnectorListener {
             if (mIsConnected) throw new IllegalStateException("AsyncConnector already connected");
 
             try {
+                Log.i(LOG_TAG, "Try to connect...");
+
                 TLSSocketFactory tlsFact = new TLSSocketFactory();
                 mSocket = (SSLSocket)tlsFact.createSocket(TCP_HOST, TCP_PORT);
                 mSocket.setKeepAlive(true);
@@ -123,6 +125,7 @@ public class TCPClient implements AsyncConnectorListener {
                         .getOutputStream())), true);
             }
             catch (Exception e) {
+                Log.e(LOG_TAG, "Failed to connect: " + e.getMessage());
                 for (AsyncConnectorListener listener : mListenerList) {
                     try {
                         listener.onConnectResult(AsyncConnectorListener.CONNECT_RESULT_CREATE_SOCKET_ERROR);
@@ -162,6 +165,7 @@ public class TCPClient implements AsyncConnectorListener {
             // This means that we have established logical connection:
             // connected and authenticated by token
             mIsConnected = true;
+            Log.i(LOG_TAG, "Connected OK");
 
             for (AsyncConnectorListener listener : mListenerList) {
                 try {
@@ -354,7 +358,7 @@ public class TCPClient implements AsyncConnectorListener {
          *
          */
         public synchronized void shutdown() {
-            Looper looper = Looper.myLooper();
+            Looper looper = mHandler.getLooper();
             if (looper != null) looper.quit();
 
             if (mOut != null) mOut.close();
