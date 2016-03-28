@@ -1,6 +1,7 @@
 package company.electrobin;
 
 import android.annotation.SuppressLint;
+// import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -9,10 +10,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 
 import android.webkit.WebSettings;
@@ -436,6 +439,8 @@ public class RouteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
 
+        setupCustomActionBar();
+
         mApp = (ElectrobinApplication)getApplicationContext();
         mUser = mApp.getUser();
         mI10n = mApp.getI10n();
@@ -484,5 +489,23 @@ public class RouteActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     *
+     */
+    private void setupCustomActionBar() {
+        final ViewGroup actionBarLayout = (ViewGroup) getLayoutInflater().inflate(
+                R.layout.action_bar_layout,
+                null);
+
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setCustomView(actionBarLayout);
+
+        final Button btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
+        btnActionBarUserProfile.setText("Sent");
     }
 }

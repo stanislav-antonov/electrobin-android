@@ -2,14 +2,21 @@ package company.electrobin.user;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.JsonReader;
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import company.electrobin.ElectrobinApplication;
 import company.electrobin.common.Constants;
@@ -21,10 +28,22 @@ public class User {
     private ElectrobinApplication mApp;
     private SharedPreferences mSharedPref;
 
-    private final static String URL_LOGIN = Constants.REST_API_BASE_URL + "/auth-token/";
+    private final static String URL_AUTH = Constants.REST_API_BASE_URL + "/auth-token/";
+    private final static String URL_PROFILE = Constants.REST_API_BASE_URL + "/profile/";
+
+    private Profile mProfile;
+
     private final static String LOG_TAG = User.class.getSimpleName();
-    private final static String AUTH_TOKEN_KEY = "auth_token";
+    private final static String JSON_AUTH_TOKEN_KEY = "token";
     public final static String SHARED_PREFERENCES_FILE_KEY = User.class.getName();
+    private final static String PREFERENCES_AUTH_TOKEN_KEY = "auth_token";
+    private final static String PREFERENCES_PROFILE_KEY = "profile";
+
+    private static class Profile {
+        public String mName;
+        public String mEmail;
+        public String mDescription;
+    }
 
     /**
      *
@@ -41,7 +60,7 @@ public class User {
      * @return
      */
     public String getAuthToken() {
-        return mSharedPref.getString(AUTH_TOKEN_KEY, null);
+        return mSharedPref.getString(PREFERENCES_AUTH_TOKEN_KEY, null);
     }
 
     /**
@@ -49,7 +68,7 @@ public class User {
      * @return
      */
     public boolean isLoggedIn() {
-        return mSharedPref.getString(AUTH_TOKEN_KEY, null) != null;
+        return mSharedPref.getString(PREFERENCES_AUTH_TOKEN_KEY, null) != null;
     }
 
     /**
@@ -59,6 +78,7 @@ public class User {
      * @param listener
      */
     public void auth(final String username, final String password, final UserAuthListener listener) {
+        // curl -X POST -d "username=test88&password=test&install_id=68753A44-4D6F-1226-9C60-0050E4C00067" https://138.201.20.149/v1.02/auth-token/
         if (username == null || username.isEmpty()) throw new IllegalArgumentException();
         if (password == null  || password.isEmpty())  throw new IllegalArgumentException();
         if (listener == null) throw new IllegalArgumentException();
@@ -74,7 +94,7 @@ public class User {
             return;
         }
 
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, URL_LOGIN, params,
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, URL_AUTH, params,
             new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
@@ -83,14 +103,14 @@ public class User {
                         return;
                     }
 
-                    if (!response.has("token")) {
-                        listener.onAuthError(UserAuthListener.ERROR_BAD_AUTH_CREDENTIALS);
+                    if (!response.has(JSON_AUTH_TOKEN_KEY)) {
+                        listener.onAuthError(UserAuthListener.ERROR_INVALID_AUTH_CREDENTIALS);
                         return;
                     }
 
                     try {
                         SharedPreferences.Editor editor = mSharedPref.edit();
-                        editor.putString(AUTH_TOKEN_KEY, response.getString("token"));
+                        editor.putString(PREFERENCES_AUTH_TOKEN_KEY, response.getString(JSON_AUTH_TOKEN_KEY));
                         editor.commit();
                     }
                     catch(Exception e) {
@@ -107,7 +127,7 @@ public class User {
                     // For a proper reason API give us 400 *error* code when auth credentials are wrong.
                     // So we need to handle it here.
                     if (error.networkResponse.statusCode == 400) {
-                        listener.onAuthError(UserAuthListener.ERROR_BAD_AUTH_CREDENTIALS);
+                        listener.onAuthError(UserAuthListener.ERROR_INVALID_AUTH_CREDENTIALS);
                         return;
                     }
 
@@ -120,14 +140,108 @@ public class User {
         mApp.getRequestQueue().add(jsObjRequest);
     }
 
+
+    private void storeProfile(String strProfileJSON) {
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putString(PREFERENCES_PROFILE_KEY, strProfileJSON);
+        editor.commit();
+    }
+
+
+    private String retrieveProfile() {
+        return mSharedPref.getString(PREFERENCES_PROFILE_KEY, null);
+    }
+
+    /**
+     *
+     * @param strProfileJSON
+     * @return
+     * @throws JSONException
+     */
+    private boolean setProfile(String strProfileJSON) throws JSONException {
+        JSONObject joProfile = new JSONObject(strProfileJSON);
+        Profile profile = new Profile();
+
+        profile.mName = joProfile.getString("username");
+        profile.mEmail = joProfile.getString("email");
+        profile.mDescription = joProfile.getString("description");
+
+        mProfile = profile;
+
+        return true;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Profile getProfile() {
+        return mProfile;
+    }
+
+    /**
+     *
+     * @param listener
+     */
+    public void loadProfile(final UserLoadProfileListener listener) {
+        // curl -k -X GET https://185.118.64.121/v1.02/profile/ -H 'Authorization: Token some-token-string'
+        if (!isLoggedIn()) throw new IllegalStateException("User is not logged in");
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_PROFILE,
+            new Response.Listener<String>() {
+                @Override
+                public void onResponse(String strNewProfileJSON) {
+                    String strCurrentProfileJSON = retrieveProfile();
+                    try {
+                        setProfile(strNewProfileJSON);
+                        storeProfile(strNewProfileJSON);
+                    }
+                    catch (Exception e) {
+                        Log.i(LOG_TAG, "Failed to set new profile: " + e.getMessage());
+                        try {
+                            setProfile(strCurrentProfileJSON);
+                        } catch (Exception e1) {
+                            Log.e(LOG_TAG, "Failed to load profile: " + e1.getMessage());
+                            listener.onGetProfileError(UserLoadProfileListener.ERROR_SYSTEM);
+
+                            return;
+                        }
+                    }
+
+                    listener.onGetProfileSuccess();
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    if (error != null && error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        listener.onGetProfileError(UserLoadProfileListener.ERROR_INVALID_AUTH_TOKEN);
+                        return;
+                    }
+
+                    Log.e(LOG_TAG, "Failed to load profile");
+                    listener.onGetProfileError(UserLoadProfileListener.ERROR_SYSTEM);
+                }
+            }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", String.format("Token %s", getAuthToken()));
+
+                return params;
+            }
+        };
+
+        mApp.getRequestQueue().add(stringRequest);
+    }
+
     /**
      *
      */
     public void logOut() {
         SharedPreferences.Editor editor = mSharedPref.edit();
-        editor.remove(AUTH_TOKEN_KEY);
+        editor.remove(PREFERENCES_AUTH_TOKEN_KEY);
         editor.commit();
     }
 }
-
-// curl -X POST -d "username=test88&password=test&install_id=68753A44-4D6F-1226-9C60-0050E4C00067" https://138.201.20.149/v1.02/auth-token/

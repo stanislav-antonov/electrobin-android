@@ -15,6 +15,7 @@ import android.widget.Toast;
 import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
 import company.electrobin.user.UserAuthListener;
+import company.electrobin.user.UserLoadProfileListener;
 
 public class AuthActivity extends AppCompatActivity {
 
@@ -31,7 +32,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private final static String LOG_TAG = AuthActivity.class.getSimpleName();
 
-    private class SignInActionHandler implements View.OnClickListener, UserAuthListener {
+    private class SignInActionHandler implements View.OnClickListener, UserAuthListener, UserLoadProfileListener {
         @Override
         public void onClick(View v) {
             String username = mEtUsername.getText().toString().trim();
@@ -59,10 +60,7 @@ public class AuthActivity extends AppCompatActivity {
 
         @Override
         public void onAuthSuccess() {
-            mRlLoading.setVisibility(View.GONE);
-
-            Log.d(LOG_TAG, "Successfully authenticated, auth token is " + mUser.getAuthToken());
-            startActivity(new Intent(AuthActivity.this, RouteActivity.class));
+            mUser.loadProfile(this);
         }
 
         @Override
@@ -75,12 +73,34 @@ public class AuthActivity extends AppCompatActivity {
             mRlMain.setVisibility(View.VISIBLE);
 
             String strMessage = mI10n.l("error_common");
-            if (error == UserAuthListener.ERROR_BAD_AUTH_CREDENTIALS) {
+            if (error == UserAuthListener.ERROR_INVALID_AUTH_CREDENTIALS) {
                 strMessage = mI10n.l("username_or_password_wrong");
                 mEtPassword.getText().clear();
             }
 
             Toast.makeText(getBaseContext(), strMessage, Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onGetProfileSuccess() {
+            mRlLoading.setVisibility(View.GONE);
+
+            Log.d(LOG_TAG, "Successfully authenticated, auth token is " + mUser.getAuthToken());
+            startActivity(new Intent(AuthActivity.this, RouteActivity.class));
+        }
+
+        @Override
+        public void onGetProfileError(int error) {
+            mSignInBtn.setEnabled(true);
+            mEtUsername.setEnabled(true);
+            mEtPassword.setEnabled(true);
+
+            mRlLoading.setVisibility(View.GONE);
+            mRlMain.setVisibility(View.VISIBLE);
+
+            mUser.logOut();
+
+            Toast.makeText(getBaseContext(), mI10n.l("error_common"), Toast.LENGTH_LONG).show();
         }
     }
 
