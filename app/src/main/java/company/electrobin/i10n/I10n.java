@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URI;
 import java.util.Locale;
 
 import company.electrobin.ElectrobinApplication;
@@ -60,7 +59,7 @@ public class I10n {
     public void initialize(final I10nInitializeListener listener) {
 
         if (mSharedPref.getString(LAST_LANG_KEY, null) != null) {
-            listener.onInitializeSuccess();
+            listener.onI10nInitializeSuccess();
             return;
         }
 
@@ -71,7 +70,7 @@ public class I10n {
                 public void onResponse(JSONArray response) {
                     if (response == null || response.length() == 0) {
                         Log.e(LOG_TAG, "I10n initialize error: empty data");
-                        listener.onInitializeError(I10nInitializeListener.ERROR_EMPTY_DATA);
+                        listener.onI10nInitializeError(I10nInitializeListener.ERROR_EMPTY_DATA);
                         return;
                     }
 
@@ -104,18 +103,18 @@ public class I10n {
                     }
                     catch (Exception e) {
                         Log.e(LOG_TAG, "I10n initialize error: " + e.getMessage());
-                        listener.onInitializeError(I10nInitializeListener.ERROR_SYSTEM);
+                        listener.onI10nInitializeError(I10nInitializeListener.ERROR_SYSTEM);
                         return;
                     }
 
-                    listener.onInitializeSuccess();
+                    listener.onI10nInitializeSuccess();
                 }
             },
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Log.e(LOG_TAG, "I10n initialize error: " + error.getMessage());
-                    listener.onInitializeError(I10nInitializeListener.ERROR_NETWORK);
+                    listener.onI10nInitializeError(I10nInitializeListener.ERROR_NETWORK);
                 }
             }
         );

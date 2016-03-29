@@ -43,6 +43,7 @@ import java.util.List;
 import company.electrobin.i10n.I10n;
 import company.electrobin.network.TCPClientListener;
 import company.electrobin.user.User;
+import company.electrobin.user.UserProfile;
 
 public class RouteActivity extends AppCompatActivity {
 
@@ -439,11 +440,11 @@ public class RouteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
 
-        setupCustomActionBar();
-
         mApp = (ElectrobinApplication)getApplicationContext();
         mUser = mApp.getUser();
         mI10n = mApp.getI10n();
+
+        setupCustomActionBar();
 
         mBtn = (Button)findViewById(R.id.jump_button);
 
@@ -495,6 +496,9 @@ public class RouteActivity extends AppCompatActivity {
      *
      */
     private void setupCustomActionBar() {
+        UserProfile uProfile = mUser.getProfile();
+        if (uProfile == null) return;
+
         final ViewGroup actionBarLayout = (ViewGroup) getLayoutInflater().inflate(
                 R.layout.action_bar_layout,
                 null);
@@ -506,6 +510,7 @@ public class RouteActivity extends AppCompatActivity {
         actionBar.setCustomView(actionBarLayout);
 
         final Button btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
-        btnActionBarUserProfile.setText("Sent");
+
+        btnActionBarUserProfile.setText(uProfile.mName);
     }
 }

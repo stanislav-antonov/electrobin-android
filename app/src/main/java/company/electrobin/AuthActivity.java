@@ -15,7 +15,7 @@ import android.widget.Toast;
 import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
 import company.electrobin.user.UserAuthListener;
-import company.electrobin.user.UserLoadProfileListener;
+import company.electrobin.user.UserProfileLoadListener;
 
 public class AuthActivity extends AppCompatActivity {
 
@@ -32,7 +32,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private final static String LOG_TAG = AuthActivity.class.getSimpleName();
 
-    private class SignInActionHandler implements View.OnClickListener, UserAuthListener, UserLoadProfileListener {
+    private class SignInActionHandler implements View.OnClickListener, UserAuthListener, UserProfileLoadListener {
         @Override
         public void onClick(View v) {
             String username = mEtUsername.getText().toString().trim();
@@ -82,7 +82,7 @@ public class AuthActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onGetProfileSuccess() {
+        public void onUserProfileLoadSuccess() {
             mRlLoading.setVisibility(View.GONE);
 
             Log.d(LOG_TAG, "Successfully authenticated, auth token is " + mUser.getAuthToken());
@@ -90,7 +90,7 @@ public class AuthActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onGetProfileError(int error) {
+        public void onUserProfileLoadError(int error) {
             mSignInBtn.setEnabled(true);
             mEtUsername.setEnabled(true);
             mEtPassword.setEnabled(true);

@@ -6,7 +6,7 @@ public interface I10nInitializeListener {
     public final static int ERROR_EMPTY_DATA = 2;
     public final static int ERROR_NETWORK = 3;
 
-    void onInitializeSuccess();
-    void onInitializeError(int error);
+    void onI10nInitializeSuccess();
+    void onI10nInitializeError(int error);
 }
 
