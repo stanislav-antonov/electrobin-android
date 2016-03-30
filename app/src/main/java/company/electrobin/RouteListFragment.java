@@ -28,15 +28,6 @@ import java.util.List;
 import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link RouteListFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link RouteListFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class RouteListFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -59,7 +50,14 @@ public class RouteListFragment extends Fragment {
     private RelativeLayout mRlRouteWaiting;
     private RelativeLayout mRlRouteReview;
 
+    private boolean mRouteListDisplayed;
+
     private OnFragmentInteractionListener mListener;
+
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        public void onFragmentInteraction(Uri uri);
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -110,7 +108,11 @@ public class RouteListFragment extends Fragment {
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        showRouteWaiting();
+
+        if (mRouteListDisplayed)
+            showRouteList(      );
+        else
+            showRouteWaiting();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -137,23 +139,30 @@ public class RouteListFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     *
-     */
-    public void showRouteWaiting() {
+    private void switchRouteWaitingLayout() {
         mRlRouteWaiting.setVisibility(View.VISIBLE);
         mRlRouteReview.setVisibility(View.GONE);
+    }
 
-        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_1)).setText(mI10n.l("route_waiting_1"));
-        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_2)).setText(mI10n.l("route_waiting_2"));
+    private void switchRouteListLayout() {
+        mRlRouteReview.setVisibility(View.VISIBLE);
+        mRlRouteWaiting.setVisibility(View.GONE);
     }
 
     /**
      *
      */
-    public void showRouteList(JSONObject json) {
-        mRlRouteReview.setVisibility(View.VISIBLE);
-        mRlRouteWaiting.setVisibility(View.GONE);
+    public void showRouteWaiting() {
+        switchRouteWaitingLayout();
+
+        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_1)).setText(mI10n.l("route_waiting_1"));
+        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_2)).setText(mI10n.l("route_waiting_2"));
+
+        mRouteListDisplayed = false;
+    }
+
+    private void showRouteList(List<String> addressList, final String strDate) {
+        switchRouteListLayout();
 
         final Button btnRouteStart = (Button)mRlRouteReview.findViewById(R.id.route_start_button);
         btnRouteStart.setText(mI10n.l("route_start"));
@@ -161,8 +170,27 @@ public class RouteListFragment extends Fragment {
         final TextView tvRouteDate = (TextView)mRlRouteReview.findViewById(R.id.route_date_text);
         tvRouteDate.setVisibility(View.GONE);
 
+        final ListView lvRoutePoints = (ListView)mRlRouteReview.findViewById(R.id.route_points_list);
+        lvRoutePoints.setVisibility(View.GONE);
+
+        if (strDate != null) {
+            tvRouteDate.setVisibility(View.VISIBLE);
+            tvRouteDate.setText(String.format(mI10n.l("route_date"), strDate));
+        }
+
+        if (!addressList.isEmpty()) {
+            lvRoutePoints.setVisibility(View.VISIBLE);
+            lvRoutePoints.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.route_points_item_layout, addressList));
+            mRouteListDisplayed = true;
+        }
+    }
+
+    /**
+     *
+     */
+    public void showRouteList(JSONObject json) {
+        String strDate = null;
         if (json.has(JSON_DATE_KEY)) {
-            String strDate = null;
             try {
                 // 2014-12-28T19:50:40.964531Z
                 strDate = json.getString(JSON_DATE_KEY);
@@ -179,15 +207,7 @@ public class RouteListFragment extends Fragment {
                 strDate = null;
                 Log.e(LOG_TAG, e.getMessage());
             }
-
-            if (strDate != null) {
-                tvRouteDate.setVisibility(View.VISIBLE);
-                tvRouteDate.setText(String.format(mI10n.l("route_date"), strDate));
-            }
         }
-
-        final ListView lvRoutePoints = (ListView)mRlRouteReview.findViewById(R.id.route_points_list);
-        lvRoutePoints.setVisibility(View.GONE);
 
         if (json.has(JSON_POINTS_KEY)) {
             List<String> addressList = new ArrayList<>();
@@ -197,36 +217,12 @@ public class RouteListFragment extends Fragment {
                     JSONObject point = pointList.getJSONObject(i);
                     addressList.add(point.getString(JSON_POINTS_ADDRESS));
                 }
+
+                showRouteList(addressList, strDate);
             }
             catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
-                addressList.clear();
-
-                (Toast.makeText(getActivity(), "Для отладки: ошибка в данных о точках маршрута", Toast.LENGTH_LONG)).show();
-                showRouteWaiting();
-            }
-
-            if (!addressList.isEmpty()) {
-                lvRoutePoints.setVisibility(View.VISIBLE);
-                lvRoutePoints.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.route_points_item_layout, addressList));
             }
         }
     }
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
-    }
-
 }

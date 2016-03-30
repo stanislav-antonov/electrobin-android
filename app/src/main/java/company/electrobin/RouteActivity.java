@@ -51,7 +51,7 @@ import company.electrobin.network.TCPClientService;
 import company.electrobin.user.User;
 import company.electrobin.user.UserProfile;
 
-public class RouteActivity extends AppCompatActivity implements RouteListFragment.OnFragmentInteractionListener {
+public class RouteActivity extends AppCompatActivity implements RouteListFragment.OnFragmentInteractionListener, UserProfileFragment.OnFragmentInteractionListener, FragmentManager.OnBackStackChangedListener {
 
     private ElectrobinApplication mApp;
     private User mUser;
@@ -298,7 +298,10 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
     private class UserProfileShowHandler implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, UserProfileFragment.newInstance()).addToBackStack("Profile");
+            fragmentTransaction.commit();
         }
     }
 
@@ -404,6 +407,9 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, routeListFragment);
         fragmentTransaction.commit();
+
+        fragmentManager.addOnBackStackChangedListener(this);
+        shouldDisplayHomeUp();
     }
 
     @Override
@@ -467,12 +473,33 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         actionBar.setCustomView(actionBarLayout);
 
         final Button btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
-
         btnActionBarUserProfile.setText(uProfile.mName);
+        btnActionBarUserProfile.setOnClickListener(new UserProfileShowHandler());
     }
 
+    /**
+     *
+     * @param uri
+     */
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        shouldDisplayHomeUp();
+    }
+
+    public void shouldDisplayHomeUp(){
+        //Enable Up button only  if there are entries in the back stack
+        getSupportActionBar().setDisplayHomeAsUpEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        //This method is called when the up button is pressed. Just the pop back stack.
+        getSupportFragmentManager().popBackStack();
+        return true;
     }
 }
