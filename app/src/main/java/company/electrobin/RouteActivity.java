@@ -2,6 +2,12 @@ package company.electrobin;
 
 import android.annotation.SuppressLint;
 // import android.app.ActionBar;
+import android.content.ComponentName;
+import android.content.ServiceConnection;
+import android.net.Uri;
+import android.os.IBinder;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -33,7 +39,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,10 +47,11 @@ import java.util.List;
 
 import company.electrobin.i10n.I10n;
 import company.electrobin.network.TCPClientListener;
+import company.electrobin.network.TCPClientService;
 import company.electrobin.user.User;
 import company.electrobin.user.UserProfile;
 
-public class RouteActivity extends AppCompatActivity {
+public class RouteActivity extends AppCompatActivity implements RouteListFragment.OnFragmentInteractionListener {
 
     private ElectrobinApplication mApp;
     private User mUser;
@@ -55,11 +61,11 @@ public class RouteActivity extends AppCompatActivity {
     private WebView mWvMap;
 
     private RelativeLayout mRlRouteMap;
-    private RelativeLayout mRlRouteWaiting;
-    private RelativeLayout mRlRouteReview;
 
     private RelativeLayout mRlLoading;
     private RelativeLayout mRlLoadRetry;
+
+    private RouteListFragment routeListFragment;
 
     private boolean mIsMapLoading;
 
@@ -222,27 +228,27 @@ public class RouteActivity extends AppCompatActivity {
         @Override
         public void run() {
             // Mark the map is not loading anymore
-            mIsMapLoading = false;
-            mWvMap.stopLoading();
+            // mIsMapLoading = false;
+            // mWvMap.stopLoading();
 
-            mRlLoading.setVisibility(View.GONE);
-            mRlLoadRetry.setVisibility(View.VISIBLE);
+            // mRlLoading.setVisibility(View.GONE);
+            // mRlLoadRetry.setVisibility(View.VISIBLE);
 
-            Button btnLoadRetry = (Button)mRlLoadRetry.findViewById(R.id.load_retry_button);
-            btnLoadRetry.setText(mI10n.l("retry"));
-            btnLoadRetry.setOnClickListener(new MapLoadRetryHandler());
+            // Button btnLoadRetry = (Button)mRlLoadRetry.findViewById(R.id.load_retry_button);
+            // btnLoadRetry.setText(mI10n.l("retry"));
+            // btnLoadRetry.setOnClickListener(new MapLoadRetryHandler());
 
-            TextView tvErrorMapLoad =(TextView)mRlLoadRetry.findViewById(R.id.error_map_load_text);
-            tvErrorMapLoad.setText(mI10n.l("error_map_load"));
+            // TextView tvErrorMapLoad =(TextView)mRlLoadRetry.findViewById(R.id.error_map_load_text);
+            // tvErrorMapLoad.setText(mI10n.l("error_map_load"));
         }
     }
 
     private class MapLoadRetryHandler implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            mRlLoadRetry.setVisibility(View.GONE);
-            mRlLoading.setVisibility(View.VISIBLE);
-            loadMap();
+            // mRlLoadRetry.setVisibility(View.GONE);
+            // mRlLoading.setVisibility(View.VISIBLE);
+            // loadMap();
         }
     }
 
@@ -257,14 +263,6 @@ public class RouteActivity extends AppCompatActivity {
         @Override
         public void onConnectResult(int result) {
             Log.d(LOG_TAG, "Connect result: " + result);
-            mBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    // String cmd = "{\"action\":\"start_route\", \"route_id\":\"234\", \"created\":\"2014-12-28T19:50:40.964531Z\"}";
-                    // tcpClient.sendData(cmd);
-                }
-            });
         }
 
         @Override
@@ -285,7 +283,7 @@ public class RouteActivity extends AppCompatActivity {
                 String action = json.getString(JSON_ACTION_KEY);
                 switch (action) {
                     case JSON_ACTION_NEW_ROUTE:
-                        showRouteReview(json);
+                        routeListFragment.showRouteList(json);
                         break;
                     case JSON_ACTION_UPDATE_TOKEN:
                         break;
@@ -297,85 +295,33 @@ public class RouteActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     *
-     */
-    private void showRouteWaiting() {
-        mRlRouteWaiting.setVisibility(View.VISIBLE);
-        mRlRouteReview.setVisibility(View.GONE);
+    private class UserProfileShowHandler implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
 
-        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_1)).setText(mI10n.l("route_waiting_1"));
-        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_2)).setText(mI10n.l("route_waiting_2"));
-    }
-
-    /**
-     *
-     */
-    private void showRouteReview(JSONObject json) {
-        mRlRouteReview.setVisibility(View.VISIBLE);
-        mRlRouteWaiting.setVisibility(View.GONE);
-
-        final Button btnRouteStart = (Button)mRlRouteReview.findViewById(R.id.route_start_button);
-        btnRouteStart.setText(mI10n.l("route_start"));
-
-        final TextView tvRouteDate = (TextView)mRlRouteReview.findViewById(R.id.route_date_text);
-        tvRouteDate.setVisibility(View.GONE);
-
-        final String JSON_DATE_KEY = "created";
-        if (json.has(JSON_DATE_KEY)) {
-            String strDate = null;
-            try {
-                // 2014-12-28T19:50:40.964531Z
-                strDate = json.getString(JSON_DATE_KEY);
-
-                @SuppressLint("SimpleDateFormat")
-                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-                Date date = df.parse(strDate);
-
-                @SuppressLint("SimpleDateFormat")
-                Format formatter = new SimpleDateFormat("H:mm d.MM.yyyy");
-                strDate = formatter.format(date);
-            }
-            catch(Exception e) {
-                strDate = null;
-                Log.e(LOG_TAG, e.getMessage());
-            }
-
-            if (strDate != null) {
-                tvRouteDate.setVisibility(View.VISIBLE);
-                tvRouteDate.setText(String.format(mI10n.l("route_date"), strDate));
-            }
-        }
-
-        final ListView lvRoutePoints = (ListView)mRlRouteReview.findViewById(R.id.route_points_list);
-        lvRoutePoints.setVisibility(View.GONE);
-
-        final String JSON_POINTS_KEY = "points";
-        final String JSON_POINTS_ADDRESS = "address";
-
-        if (json.has(JSON_POINTS_KEY)) {
-            List<String> addressList = new ArrayList<>();
-            try {
-                JSONArray pointList = json.getJSONArray(JSON_POINTS_KEY);
-                for (int i = 0; i < pointList.length(); i++) {
-                    JSONObject point = pointList.getJSONObject(i);
-                    addressList.add(point.getString(JSON_POINTS_ADDRESS));
-                }
-            }
-            catch (Exception e) {
-                Log.e(LOG_TAG, e.getMessage());
-                addressList.clear();
-
-                (Toast.makeText(getApplicationContext(), "Для отладки: ошибка в данных о точках маршрута", Toast.LENGTH_LONG)).show();
-                showRouteWaiting();
-            }
-
-            if (!addressList.isEmpty()) {
-                lvRoutePoints.setVisibility(View.VISIBLE);
-                lvRoutePoints.setAdapter(new ArrayAdapter<String>(getApplicationContext(), R.layout.route_points_item_layout, addressList));
-            }
         }
     }
+
+
+    private TCPClientService mService;
+    private boolean mBound = false;
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            TCPClientService.TCPClientServiceBinder binder = (TCPClientService.TCPClientServiceBinder)service;
+            mService = binder.getService();
+            mBound = true;
+
+            mService.start(new SocketAPIEventsHandler());
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     /**
      *
@@ -383,7 +329,7 @@ public class RouteActivity extends AppCompatActivity {
     @SuppressLint("SetJavaScriptEnabled")
     private void showRouteMap() {
         if (mWvMap == null) { // TODO: do we really need to cache map?
-            mWvMap = (WebView)findViewById(R.id.map);
+            // mWvMap = (WebView)findViewById(R.id.map);
 
             WebSettings webSettings = mWvMap.getSettings();
             webSettings.setJavaScriptEnabled(true);
@@ -392,8 +338,6 @@ public class RouteActivity extends AppCompatActivity {
             mWvMap.setWebViewClient(new MyWebViewClient());
         }
 
-        mRlRouteReview.setVisibility(View.GONE);
-        mRlRouteWaiting.setVisibility(View.GONE);
         mRlRouteMap.setVisibility(View.VISIBLE);
 
         loadMap();
@@ -446,23 +390,35 @@ public class RouteActivity extends AppCompatActivity {
 
         setupCustomActionBar();
 
-        mBtn = (Button)findViewById(R.id.jump_button);
+        //mBtn = (Button)findViewById(R.id.jump_button);
 
-        mRlRouteMap = (RelativeLayout)findViewById(R.id.route_map_layout);
-        mRlRouteWaiting = (RelativeLayout)findViewById(R.id.route_waiting_layout);
-        mRlRouteReview = (RelativeLayout)findViewById(R.id.route_review_layout);
-
+        //mRlRouteMap = (RelativeLayout)findViewById(R.id.route_map_layout);
         mRlLoading = (RelativeLayout)findViewById(R.id.loading_layout);
 
-        mRlLoadRetry = (RelativeLayout)findViewById(R.id.load_retry_layout);
-        mRlLoadRetry.setVisibility(View.GONE);
+        //mRlLoadRetry = (RelativeLayout)findViewById(R.id.load_retry_layout);
+        // mRlLoadRetry.setVisibility(View.GONE);
 
-        showRouteWaiting();
+        routeListFragment = RouteListFragment.newInstance();
 
-        try {
-            mApp.getTCPClient().start(new SocketAPIEventsHandler());
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Failed to start TCPClient: " + e.getMessage());
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, routeListFragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, TCPClientService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
         }
     }
 
@@ -487,6 +443,7 @@ public class RouteActivity extends AppCompatActivity {
         else if (id == R.id.action_logout) {
             mUser.logOut();
             startActivity(new Intent(RouteActivity.this, AuthActivity.class));
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -512,5 +469,10 @@ public class RouteActivity extends AppCompatActivity {
         final Button btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
 
         btnActionBarUserProfile.setText(uProfile.mName);
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }

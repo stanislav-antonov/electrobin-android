@@ -12,6 +12,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
+        <service android:name=".network.TCPClientService" />
+
         <activity
             android:name="company.electrobin.MainActivity"
             android:label="@string/app_name" >

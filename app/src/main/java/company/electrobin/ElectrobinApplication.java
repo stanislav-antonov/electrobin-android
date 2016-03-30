@@ -4,7 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import company.electrobin.i10n.I10n;
-import company.electrobin.network.TCPClient;
+import company.electrobin.network.TCPClientService;
 import company.electrobin.network.TLSSocketFactory;
 import company.electrobin.user.User;
 import com.android.volley.RequestQueue;
@@ -25,7 +25,7 @@ public class ElectrobinApplication extends Application  {
     private User mUser;
     private RequestQueue mRequestQueue;
     private I10n mI10n;
-    private TCPClient mTCPClient;
+    private TCPClientService mTCPClient;
 
     private static final String LOG_TAG = ElectrobinApplication.class.getName();
 
@@ -35,17 +35,6 @@ public class ElectrobinApplication extends Application  {
      */
     public synchronized ElectrobinApplication getInstance() {
         return ElectrobinApplication.this;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public synchronized TCPClient getTCPClient() {
-        if (mTCPClient == null)
-            mTCPClient = new TCPClient(getApplicationContext());
-
-        return mTCPClient;
     }
 
     /**

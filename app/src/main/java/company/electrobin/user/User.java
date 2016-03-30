@@ -118,12 +118,11 @@ public class User {
                 public void onErrorResponse(VolleyError error) {
                     // For a proper reason API give us 400 *error* code when auth credentials are wrong.
                     // So we need to handle it here.
-                    if (error.networkResponse.statusCode == 400) {
+                    if (error != null && error.networkResponse != null && error.networkResponse.statusCode == 400) {
                         listener.onAuthError(UserAuthListener.ERROR_INVALID_AUTH_CREDENTIALS);
                         return;
                     }
 
-                    Log.e(LOG_TAG, "Login error: " + error.getMessage());
                     listener.onAuthError(UserAuthListener.ERROR_SYSTEM);
                 }
             }
