@@ -2,6 +2,7 @@ package company.electrobin;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -35,9 +36,6 @@ public class RouteListFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     private final static String LOG_TAG = RouteListFragment.class.getSimpleName();
-    private final static String JSON_DATE_KEY = "created";
-    private final static String JSON_POINTS_KEY = "points";
-    private final static String JSON_POINTS_ADDRESS = "address";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -57,6 +55,42 @@ public class RouteListFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
+    }
+
+    private static class RouteListAdapter extends ArrayAdapter<RouteActivity.Route.Point> {
+
+        private static class ViewHolder {
+            private TextView mTvAddress;
+        }
+
+        public RouteListAdapter(Context context, List<RouteActivity.Route.Point> items) {
+            super(context, R.layout.route_points_item_layout, items);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            ViewHolder viewHolder;
+
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext())
+                        .inflate(R.layout.route_points_item_layout, parent, false);
+
+                viewHolder = new ViewHolder();
+                viewHolder.mTvAddress = (TextView)convertView.findViewById(R.id.address_text);
+
+                convertView.setTag(viewHolder);
+            }
+            else {
+                viewHolder = (ViewHolder)convertView.getTag();
+            }
+
+            RouteActivity.Route.Point item = getItem(position);
+            if (item != null)
+                viewHolder.mTvAddress.setText(item.mAddress);
+
+            return convertView;
+        }
     }
 
     /**
@@ -110,7 +144,7 @@ public class RouteListFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         if (mRouteListDisplayed)
-            showRouteList(      );
+            showRouteList();
         else
             showRouteWaiting();
     }
@@ -161,7 +195,14 @@ public class RouteListFragment extends Fragment {
         mRouteListDisplayed = false;
     }
 
-    private void showRouteList(List<String> addressList, final String strDate) {
+    /**
+     *
+     */
+    public void showRouteList() {
+
+        RouteActivity activity = (RouteActivity)getActivity();
+        RouteActivity.Route route = activity.getCurrentRoute();
+
         switchRouteListLayout();
 
         final Button btnRouteStart = (Button)mRlRouteReview.findViewById(R.id.route_start_button);
@@ -173,56 +214,15 @@ public class RouteListFragment extends Fragment {
         final ListView lvRoutePoints = (ListView)mRlRouteReview.findViewById(R.id.route_points_list);
         lvRoutePoints.setVisibility(View.GONE);
 
-        if (strDate != null) {
+        if (route.getDate() != null) {
             tvRouteDate.setVisibility(View.VISIBLE);
-            tvRouteDate.setText(String.format(mI10n.l("route_date"), strDate));
+            tvRouteDate.setText(String.format(mI10n.l("route_date"), route.getDate()));
         }
 
-        if (!addressList.isEmpty()) {
+        if (!route.getPointList().isEmpty()) {
             lvRoutePoints.setVisibility(View.VISIBLE);
-            lvRoutePoints.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.route_points_item_layout, addressList));
+            lvRoutePoints.setAdapter(new RouteListAdapter(getActivity(), route.getPointList()));
             mRouteListDisplayed = true;
-        }
-    }
-
-    /**
-     *
-     */
-    public void showRouteList(JSONObject json) {
-        String strDate = null;
-        if (json.has(JSON_DATE_KEY)) {
-            try {
-                // 2014-12-28T19:50:40.964531Z
-                strDate = json.getString(JSON_DATE_KEY);
-
-                @SuppressLint("SimpleDateFormat")
-                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-                Date date = df.parse(strDate);
-
-                @SuppressLint("SimpleDateFormat")
-                Format formatter = new SimpleDateFormat("H:mm d.MM.yyyy");
-                strDate = formatter.format(date);
-            }
-            catch(Exception e) {
-                strDate = null;
-                Log.e(LOG_TAG, e.getMessage());
-            }
-        }
-
-        if (json.has(JSON_POINTS_KEY)) {
-            List<String> addressList = new ArrayList<>();
-            try {
-                JSONArray pointList = json.getJSONArray(JSON_POINTS_KEY);
-                for (int i = 0; i < pointList.length(); i++) {
-                    JSONObject point = pointList.getJSONObject(i);
-                    addressList.add(point.getString(JSON_POINTS_ADDRESS));
-                }
-
-                showRouteList(addressList, strDate);
-            }
-            catch (Exception e) {
-                Log.e(LOG_TAG, e.getMessage());
-            }
         }
     }
 }

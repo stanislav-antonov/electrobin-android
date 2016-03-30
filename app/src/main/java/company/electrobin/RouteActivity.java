@@ -27,12 +27,8 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -49,7 +45,7 @@ import company.electrobin.i10n.I10n;
 import company.electrobin.network.TCPClientListener;
 import company.electrobin.network.TCPClientService;
 import company.electrobin.user.User;
-import company.electrobin.user.UserProfile;
+import company.electrobin.user.User.UserProfile;
 
 public class RouteActivity extends AppCompatActivity implements RouteListFragment.OnFragmentInteractionListener, UserProfileFragment.OnFragmentInteractionListener, FragmentManager.OnBackStackChangedListener {
 
@@ -67,6 +63,9 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
 
     private RouteListFragment routeListFragment;
 
+    private ArrayList<String> mAddressList;
+    private Route mCurrentRoute;
+
     private boolean mIsMapLoading;
 
     private Handler mHandler = new Handler();
@@ -74,6 +73,32 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
 
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
     private final static int TIMEOUT_MAP_LOAD = 30000;
+
+    public static class Route {
+        private Integer mId;
+        private String mDate;
+        private List<Point> mPointList;
+
+        public Route(int id, String date, List<Point> pointList) {
+            mId = id;
+            mDate = date;
+            mPointList = pointList;
+        }
+
+        public static class Point {
+            public Integer mId;
+            public String mAddress;
+            public String mCity;
+            public double mLat;
+            public double mLng;
+        }
+
+        public String getDate() { return mDate; }
+
+        public List<Point> getPointList() { return mPointList; }
+
+        public Integer getId() { return mId; }
+    }
 
     private class MyLocationListener implements LocationListener {
 
@@ -260,6 +285,16 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         private final static String JSON_ACTION_NEW_ROUTE = "new_route";
         private final static String JSON_ACTION_UPDATE_TOKEN = "update_token";
 
+        private final static String JSON_ROUTE_ID_KEY = "id";
+        private final static String JSON_ROUTE_DATE_KEY = "created";
+        private final static String JSON_ROUTE_POINTS_KEY = "points";
+        private final static String JSON_ROUTE_POINT_ID_KEY = "id";
+        private final static String JSON_ROUTE_POINT_ADDRESS_KEY = "address";
+        private final static String JSON_ROUTE_POINT_CITY_KEY = "city";
+        private final static String JSON_ROUTE_POINT_LONGITUDE_KEY = "longitude";
+        private final static String JSON_ROUTE_POINT_LATITUDE_KEY = "latitude";
+
+
         @Override
         public void onConnectResult(int result) {
             Log.d(LOG_TAG, "Connect result: " + result);
@@ -283,15 +318,79 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
                 String action = json.getString(JSON_ACTION_KEY);
                 switch (action) {
                     case JSON_ACTION_NEW_ROUTE:
-                        routeListFragment.showRouteList(json);
+                        setCurrentRoute(newRoute(json));
+                        routeListFragment.showRouteList();
                         break;
                     case JSON_ACTION_UPDATE_TOKEN:
                         break;
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.d(LOG_TAG, e.getMessage());
             }
+        }
+
+        /**
+         *
+         */
+        private Route newRoute(JSONObject json) throws Exception {
+            Integer routeId = null;
+            if (json.has(JSON_ROUTE_ID_KEY)) {
+                try {
+                    routeId = json.getInt(JSON_ROUTE_ID_KEY);
+                } catch (Exception e) {
+                    throw new Exception(e.getMessage());
+                }
+            }
+
+            if (routeId == null) throw new Exception("No route id");
+
+            String routeDate = null;
+            if (json.has(JSON_ROUTE_DATE_KEY)) {
+                try {
+                    // 2014-12-28T19:50:40.964531Z
+                    routeDate = json.getString(JSON_ROUTE_DATE_KEY);
+
+                    @SuppressLint("SimpleDateFormat")
+                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+                    Date date = df.parse(routeDate);
+
+                    @SuppressLint("SimpleDateFormat")
+                    Format formatter = new SimpleDateFormat("H:mm d.MM.yyyy");
+                    routeDate = formatter.format(date);
+                }
+                catch (Exception e) {
+                    throw new Exception(e.getMessage());
+                }
+            }
+
+            if (routeDate == null) throw new Exception("No route date");
+
+            List<RouteActivity.Route.Point> pointList = new ArrayList<>();
+            if (json.has(JSON_ROUTE_POINTS_KEY)) {
+                try {
+                    JSONArray jaPointList = json.getJSONArray(JSON_ROUTE_POINTS_KEY);
+                    for (int i = 0; i < jaPointList.length(); i++) {
+                        JSONObject joPoint = jaPointList.getJSONObject(i);
+
+                        Route.Point point = new Route.Point();
+
+                        point.mId = joPoint.getInt(JSON_ROUTE_POINT_ID_KEY);
+                        point.mAddress = joPoint.getString(JSON_ROUTE_POINT_ADDRESS_KEY);
+                        point.mCity = joPoint.getString(JSON_ROUTE_POINT_CITY_KEY);
+                        point.mLng = joPoint.getDouble(JSON_ROUTE_POINT_LONGITUDE_KEY);
+                        point.mLat = joPoint.getDouble(JSON_ROUTE_POINT_LATITUDE_KEY);
+
+                        pointList.add(point);
+                    }
+                }
+                catch (Exception e) {
+                    throw new Exception(e.getMessage());
+                }
+            }
+
+            if (pointList.isEmpty()) throw new Exception("Route point list is empty");
+
+            return new Route(routeId, routeDate, pointList);
         }
     }
 
@@ -304,7 +403,6 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
             fragmentTransaction.commit();
         }
     }
-
 
     private TCPClientService mService;
     private boolean mBound = false;
@@ -325,6 +423,21 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
             mBound = false;
         }
     };
+
+    /**
+     *
+     */
+    private void setCurrentRoute(Route route) {
+        mCurrentRoute = route;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Route getCurrentRoute() {
+        return mCurrentRoute;
+    }
 
     /**
      *
@@ -462,18 +575,20 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         UserProfile uProfile = mUser.getProfile();
         if (uProfile == null) return;
 
-        final ViewGroup actionBarLayout = (ViewGroup) getLayoutInflater().inflate(
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null) return;
+
+        final ViewGroup actionBarLayout = (ViewGroup)getLayoutInflater().inflate(
                 R.layout.action_bar_layout,
                 null);
 
-        final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setCustomView(actionBarLayout);
 
         final Button btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
-        btnActionBarUserProfile.setText(uProfile.mName);
+        btnActionBarUserProfile.setText(uProfile.mUsername);
         btnActionBarUserProfile.setOnClickListener(new UserProfileShowHandler());
     }
 
@@ -492,8 +607,9 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
     }
 
     public void shouldDisplayHomeUp(){
-        //Enable Up button only  if there are entries in the back stack
-        getSupportActionBar().setDisplayHomeAsUpEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
     }
 
     @Override

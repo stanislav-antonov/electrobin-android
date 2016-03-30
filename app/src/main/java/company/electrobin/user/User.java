@@ -37,6 +37,13 @@ public class User {
     private final static String PREFERENCES_AUTH_TOKEN_KEY = "auth_token";
     private final static String PREFERENCES_PROFILE_KEY = "profile";
 
+    public static class UserProfile {
+        public String mUsername;
+        public String mFirstName;
+        public String mLastName;
+        public String mEmail;
+    }
+
     /**
      *
      * @param context
@@ -153,9 +160,10 @@ public class User {
         JSONObject joProfile = new JSONObject(strProfileJSON);
         UserProfile profile = new UserProfile();
 
-        profile.mName = joProfile.getString("username");
+        profile.mUsername = joProfile.getString("username");
+        profile.mFirstName = joProfile.getString("first_name");
+        profile.mLastName = joProfile.getString("last_name");
         profile.mEmail = joProfile.getString("email");
-        profile.mDescription = joProfile.getString("description");
 
         mProfile = profile;
 
@@ -205,25 +213,13 @@ public class User {
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-
-                    try {
-                        setProfile("{\"username\":\"Иван Васильев\",\"email\":\"nick@gmail.com\",\"description\":\"Text\",\"optional\":[{\"phone\":\"+712312312123\",\"address\":\"Moscow\"}]}");
-                        listener.onUserProfileLoadSuccess();
-
-                    } catch(Exception e) {
-                        //
-                    }
-
-/*
-
                     if (error != null && error.networkResponse != null && error.networkResponse.statusCode == 401) {
-                        listener.onUserProfileLoadError(UserLoadProfileListener.ERROR_INVALID_AUTH_TOKEN);
+                        listener.onUserProfileLoadError(UserProfileLoadListener.ERROR_INVALID_AUTH_TOKEN);
                         return;
                     }
 
                     Log.e(LOG_TAG, "Failed to load profile");
-                    listener.onUserProfileLoadError(UserLoadProfileListener.ERROR_SYSTEM);
-*/
+                    listener.onUserProfileLoadError(UserProfileLoadListener.ERROR_SYSTEM);
                 }
             }
         ) {
