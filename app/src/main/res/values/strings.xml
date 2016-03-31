@@ -25,6 +25,8 @@
     <string name="connection_status_connected">connected</string>
     <string name="connection_status_disconnected">disconnected</string>
 
+    <string name="driver_is">Driver: %s</string>
+
     <string name="title_activity_auth">Authentication</string>
     <string name="title_activity_route">Route</string>
 

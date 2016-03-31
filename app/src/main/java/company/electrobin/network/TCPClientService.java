@@ -73,6 +73,12 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
     private final static String TCP_HOST = Constants.SOCKET_API_HOST;
     private final static int TCP_PORT = Constants.SOCKET_API_PORT;
 
+    private final static String MESSAGE_BUNDLE_KEY_CONNECT_RESULT = "connect_result";
+    private final static String MESSAGE_BUNDLE_KEY_RECEIVED_DATA = "received_data";
+
+    private final static int MESSAGE_TYPE_CONNECT_RESULT = 1;
+    private final static int MESSAGE_TYPE_DATA_RECEIVED = 2;
+
     private class AsyncConnector {
 
         private ArrayList<AsyncConnectorListener> mListenerList;
@@ -349,7 +355,6 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
 
         private Thread mAsyncReaderThread;
 
-        public static final String MESSAGE_KEY = "message_received";
         private final String LOG_TAG = AsyncReader.class.getName();
 
         /**
@@ -412,9 +417,9 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
                         }
 
                         try {
-                            Message msg = new Message();
+                            Message msg = Message.obtain(mOnDataReceivedHandler, MESSAGE_TYPE_DATA_RECEIVED);
                             Bundle bundle = new Bundle();
-                            bundle.putString(MESSAGE_KEY, data);
+                            bundle.putString(MESSAGE_BUNDLE_KEY_RECEIVED_DATA, data);
                             msg.setData(bundle);
 
                             mOnDataReceivedHandler.sendMessage(msg);
@@ -462,8 +467,16 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
         public void handleMessage(Message msg)
         {
             TCPClientListener listener = mListener.get();
-            if (listener != null)
-                listener.onDataReceived(msg.getData().getString(AsyncReader.MESSAGE_KEY));
+            if (listener == null) return;
+
+            switch (msg.what) {
+                case MESSAGE_TYPE_CONNECT_RESULT:
+                    listener.onConnectResult(msg.getData().getInt(MESSAGE_BUNDLE_KEY_CONNECT_RESULT));
+                    break;
+                case MESSAGE_TYPE_DATA_RECEIVED:
+                    listener.onDataReceived(msg.getData().getString(MESSAGE_BUNDLE_KEY_RECEIVED_DATA));
+                    break;
+            }
         }
     }
 
@@ -524,6 +537,14 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
 
     /**
      *
+     * @return
+     */
+    public boolean isConnected() {
+        return mIsConnected;
+    }
+
+    /**
+     *
      */
     private void shutdown() {
         if (mAsyncReader != null) mAsyncReader.shutdown();
@@ -536,7 +557,6 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
     @Override
     public void onConnectResult(int status) {
         if (status == AsyncConnectorListener.CONNECT_RESULT_OK) {
-            mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_OK);
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -544,8 +564,17 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
                 }
             }, 100);
         }
-        else {
-            mTCPClientListener.onConnectResult(TCPClientListener.CONNECT_RESULT_ERROR);
+
+        try {
+            Message msg = Message.obtain(mOnDataReceivedHandler, MESSAGE_TYPE_CONNECT_RESULT);
+            Bundle bundle = new Bundle();
+            bundle.putInt(MESSAGE_BUNDLE_KEY_CONNECT_RESULT, status);
+            msg.setData(bundle);
+
+            mOnDataReceivedHandler.sendMessage(msg);
+        }
+        catch (Exception e) {
+            Log.d(LOG_TAG, e.getMessage());
         }
     }
 

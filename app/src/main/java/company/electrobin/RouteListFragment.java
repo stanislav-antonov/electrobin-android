@@ -20,16 +20,6 @@ import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
 
 public class RouteListFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    private final static String LOG_TAG = RouteListFragment.class.getSimpleName();
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private User mUser;
     private I10n mI10n;
@@ -44,12 +34,15 @@ public class RouteListFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private static final int LAYOUT_DISPLAYED_ROUTE_LIST = 1;
-    private static final int LAYOUT_DISPLAYED_ROUTE_WAITING = 2;
+    public static final int LAYOUT_DISPLAYED_ROUTE_LIST = 1;
+    public static final int LAYOUT_DISPLAYED_ROUTE_WAITING = 2;
+
+    private static final String BUNDLE_KEY_DISPLAY_LAYOUT = "display_layout";
+    private final static String LOG_TAG = RouteListFragment.class.getSimpleName();
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+
+        public RouteActivity.Route onGetRoute();
     }
 
     private static class RouteListAdapter extends ArrayAdapter<RouteActivity.Route.Point> {
@@ -89,11 +82,14 @@ public class RouteListFragment extends Fragment {
     }
 
     public static RouteListFragment newInstance() {
+        return new RouteListFragment();
+    }
+
+    public static RouteListFragment newInstance(int displayLayout) {
         RouteListFragment fragment = new RouteListFragment();
-        // Bundle args = new Bundle();
-        // args.putString(ARG_PARAM1, param1);
-        // args.putString(ARG_PARAM2, param2);
-        // fragment.setArguments(args);
+        Bundle args = new Bundle();
+        args.putInt(BUNDLE_KEY_DISPLAY_LAYOUT, displayLayout);
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -104,10 +100,9 @@ public class RouteListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // if (getArguments() != null) {
-        //    mParam1 = getArguments().getString(ARG_PARAM1);
-        //    mParam2 = getArguments().getString(ARG_PARAM2);
-        //}
+        if (getArguments() != null) {
+            mLayoutDisplayed = getArguments().getInt(BUNDLE_KEY_DISPLAY_LAYOUT);
+        }
 
         mApp = (ElectrobinApplication)getActivity().getApplicationContext();
         mUser = mApp.getUser();
@@ -201,7 +196,7 @@ public class RouteListFragment extends Fragment {
         final ListView lvRoutePoints = (ListView)mRlRouteList.findViewById(R.id.route_point_list);
         lvRoutePoints.setVisibility(View.GONE);
 
-        RouteActivity.Route route = ((RouteActivity)getActivity()).getCurrentRoute();
+        RouteActivity.Route route = mListener.onGetRoute();
 
         if (route.getDate() != null) {
             tvRouteDate.setVisibility(View.VISIBLE);

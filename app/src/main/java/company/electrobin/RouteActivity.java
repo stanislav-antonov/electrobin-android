@@ -61,9 +61,6 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
     private RelativeLayout mRlLoading;
     private RelativeLayout mRlLoadRetry;
 
-    private RouteListFragment routeListFragment;
-
-    private ArrayList<String> mAddressList;
     private Route mCurrentRoute;
 
     private boolean mIsMapLoading;
@@ -71,8 +68,13 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
     private Handler mHandler = new Handler();
     private MapLoadBreaker mMapLoadBreaker;
 
+    private FragmentManager mFragmentManager;
+
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
     private final static int TIMEOUT_MAP_LOAD = 30000;
+
+    private final static String FRAGMENT_USER_PROFILE = "fragment_user_profile";
+    private final static String FRAGMENT_ROUTE_LIST = "fragment_route_list";
 
     public static class Route {
         private Integer mId;
@@ -298,6 +300,11 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         @Override
         public void onConnectResult(int result) {
             Log.d(LOG_TAG, "Connect result: " + result);
+
+            // FragmentManager fragmentManager = getSupportFragmentManager();
+            // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            // fragmentTransaction.replace(R.id.fragment_container, UserProfileFragment.newInstance()).addToBackStack("Profile");
+            // fragmentTransaction.commit();
         }
 
         @Override
@@ -309,18 +316,33 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         public void onDataReceived(final String data) {
             try {
                 Log.d(LOG_TAG, "Data received: " + data);
-                final JSONObject json = new JSONObject(data);
-                if (!json.has(JSON_ACTION_KEY)) {
-                    Log.i(LOG_TAG, "No action");
-                    return;
-                }
 
+                final JSONObject json = new JSONObject(data);
+
+                if (!json.has(JSON_ACTION_KEY)) return;
                 String action = json.getString(JSON_ACTION_KEY);
+
                 switch (action) {
-                    case JSON_ACTION_NEW_ROUTE:
+                    case JSON_ACTION_NEW_ROUTE: {
                         setCurrentRoute(newRoute(json));
-                        routeListFragment.showRouteList();
+
+                        RouteListFragment routeListFragment = (RouteListFragment)mFragmentManager
+                                .findFragmentByTag(FRAGMENT_ROUTE_LIST);
+
+                        if (routeListFragment != null && routeListFragment.isVisible()) {
+                            // Just update route list
+                            routeListFragment.showRouteList();
+                        }
+                        else {
+                            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+                            fragmentTransaction.replace(R.id.fragment_container, RouteListFragment.newInstance(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST),
+                                    FRAGMENT_ROUTE_LIST).addToBackStack(null);
+                            fragmentTransaction.commit();
+                        }
+
                         break;
+                    }
+
                     case JSON_ACTION_UPDATE_TOKEN:
                         break;
                 }
@@ -397,9 +419,8 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
     private class UserProfileShowHandler implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, UserProfileFragment.newInstance()).addToBackStack("Profile");
+            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, UserProfileFragment.newInstance(), FRAGMENT_USER_PROFILE).addToBackStack(null);
             fragmentTransaction.commit();
         }
     }
@@ -514,14 +535,14 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         //mRlLoadRetry = (RelativeLayout)findViewById(R.id.load_retry_layout);
         // mRlLoadRetry.setVisibility(View.GONE);
 
-        routeListFragment = RouteListFragment.newInstance();
+        mFragmentManager = getSupportFragmentManager();
+        mFragmentManager.addOnBackStackChangedListener(this);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, routeListFragment);
+        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, RouteListFragment.newInstance(),
+                FRAGMENT_ROUTE_LIST);
         fragmentTransaction.commit();
 
-        fragmentManager.addOnBackStackChangedListener(this);
         shouldDisplayHomeUp();
     }
 
@@ -543,25 +564,14 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_route, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
-        }
-        else if (id == R.id.action_logout) {
-            mUser.logOut();
-            startActivity(new Intent(RouteActivity.this, AuthActivity.class));
             return true;
         }
 
@@ -594,11 +604,21 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
 
     /**
      *
-     * @param uri
      */
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public boolean onGetIsConnected() {
+        if (mBound)
+            return mService.isConnected();
 
+        return false;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public Route onGetRoute() {
+        return getCurrentRoute();
     }
 
     @Override
