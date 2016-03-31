@@ -1,14 +1,11 @@
 package company.electrobin;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-// import android.app.ActionBar;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
-import android.net.Uri;
 import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -58,14 +55,12 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
     private User mUser;
     private I10n mI10n;
 
-    private Button mBtn;
     private WebView mWvMap;
 
     private RelativeLayout mRlRouteMap;
 
     private RelativeLayout mRlLoading;
     private RelativeLayout mRlLoadRetry;
-
     private RelativeLayout mRlRouteUpdated;
 
     private Route mCurrentRoute;
@@ -585,6 +580,9 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     *
+     */
     private void showRouteUpdatedNotification() {
         ObjectAnimator fadeIn = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.0f, 0.95f);
         fadeIn.setDuration(1000);
@@ -645,10 +643,7 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
      */
     @Override
     public boolean onGetIsConnected() {
-        if (mBound)
-            return mService.isConnected();
-
-        return false;
+        return mBound && mService.isConnected();
     }
 
     /**
@@ -672,7 +667,6 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
 
     @Override
     public boolean onSupportNavigateUp() {
-        //This method is called when the up button is pressed. Just the pop back stack.
         getSupportFragmentManager().popBackStack();
         return true;
     }
