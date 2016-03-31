@@ -588,7 +588,7 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         actionBar.setCustomView(actionBarLayout);
 
         final Button btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
-        btnActionBarUserProfile.setText(uProfile.mUsername);
+        btnActionBarUserProfile.setText(String.format("%s %s", uProfile.mFirstName, uProfile.mLastName));
         btnActionBarUserProfile.setOnClickListener(new UserProfileShowHandler());
     }
 

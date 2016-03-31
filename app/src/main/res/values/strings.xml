@@ -21,12 +21,13 @@
     <string name="route_start">Start route</string>
     <string name="route_date">Your route at %s</string>
 
+    <string name="connection_status">Connection status: %s</string>
+    <string name="connection_status_connected">connected</string>
+    <string name="connection_status_disconnected">disconnected</string>
+
     <string name="title_activity_auth">Authentication</string>
     <string name="title_activity_route">Route</string>
 
     <string name="error_common">System error</string>
     <string name="error_map_load">Network problem during loading the map</string>
-
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

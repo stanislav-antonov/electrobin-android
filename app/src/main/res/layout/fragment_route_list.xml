@@ -5,7 +5,7 @@
     tools:context="company.electrobin.RouteListFragment"
     >
     <RelativeLayout
-        android:id="@+id/route_review_layout"
+        android:id="@+id/route_list_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#fff4f4d3"
@@ -23,7 +23,7 @@
             android:layout_marginTop="30dp"
             />
         <ListView
-            android:id="@+id/route_points_list"
+            android:id="@+id/route_point_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"

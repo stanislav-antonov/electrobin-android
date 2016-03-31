@@ -37,6 +37,11 @@ public class User {
     private final static String PREFERENCES_AUTH_TOKEN_KEY = "auth_token";
     private final static String PREFERENCES_PROFILE_KEY = "profile";
 
+    private final static String JSON_USER_PROFILE_USERNAME_KEY = "username";
+    private final static String JSON_USER_PROFILE_FIRST_NAME_KEY = "first_name";
+    private final static String JSON_USER_PROFILE_LAST_NAME_KEY = "last_name";
+    private final static String JSON_USER_PROFILE_EMAIL_KEY = "email";
+
     public static class UserProfile {
         public String mUsername;
         public String mFirstName;
@@ -160,10 +165,10 @@ public class User {
         JSONObject joProfile = new JSONObject(strProfileJSON);
         UserProfile profile = new UserProfile();
 
-        profile.mUsername = joProfile.getString("username");
-        profile.mFirstName = joProfile.getString("first_name");
-        profile.mLastName = joProfile.getString("last_name");
-        profile.mEmail = joProfile.getString("email");
+        if (joProfile.has(JSON_USER_PROFILE_USERNAME_KEY)) profile.mUsername = joProfile.getString(JSON_USER_PROFILE_USERNAME_KEY);
+        if (joProfile.has(JSON_USER_PROFILE_FIRST_NAME_KEY)) profile.mFirstName = joProfile.getString(JSON_USER_PROFILE_FIRST_NAME_KEY);
+        if (joProfile.has(JSON_USER_PROFILE_LAST_NAME_KEY)) profile.mLastName = joProfile.getString(JSON_USER_PROFILE_LAST_NAME_KEY);
+        if (joProfile.has(JSON_USER_PROFILE_EMAIL_KEY)) profile.mEmail = joProfile.getString(JSON_USER_PROFILE_EMAIL_KEY);
 
         mProfile = profile;
 
@@ -190,19 +195,26 @@ public class User {
             new Response.Listener<String>() {
                 @Override
                 public void onResponse(String strNewProfileJSON) {
+                    try {
+                        strNewProfileJSON = new String(strNewProfileJSON.getBytes("ISO-8859-1"), "UTF-8");
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Failed to load profile: " + e.getMessage());
+                        listener.onUserProfileLoadError(UserProfileLoadListener.ERROR_SYSTEM);
+                        return;
+                    }
+
                     String strCurrentProfileJSON = retrieveProfile();
                     try {
                         setProfile(strNewProfileJSON);
                         storeProfile(strNewProfileJSON);
                     }
                     catch (Exception e) {
-                        Log.i(LOG_TAG, "Failed to set new profile: " + e.getMessage());
+                        Log.i(LOG_TAG, "Failed to load profile: " + e.getMessage());
                         try {
                             setProfile(strCurrentProfileJSON);
                         } catch (Exception e1) {
                             Log.e(LOG_TAG, "Failed to load profile: " + e1.getMessage());
                             listener.onUserProfileLoadError(UserProfileLoadListener.ERROR_SYSTEM);
-
                             return;
                         }
                     }
