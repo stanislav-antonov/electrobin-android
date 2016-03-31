@@ -1,5 +1,9 @@
 package company.electrobin;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 // import android.app.ActionBar;
 import android.content.ComponentName;
@@ -29,6 +33,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -60,6 +65,8 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
 
     private RelativeLayout mRlLoading;
     private RelativeLayout mRlLoadRetry;
+
+    private RelativeLayout mRlRouteUpdated;
 
     private Route mCurrentRoute;
 
@@ -300,11 +307,6 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         @Override
         public void onConnectResult(int result) {
             Log.d(LOG_TAG, "Connect result: " + result);
-
-            // FragmentManager fragmentManager = getSupportFragmentManager();
-            // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            // fragmentTransaction.replace(R.id.fragment_container, UserProfileFragment.newInstance()).addToBackStack("Profile");
-            // fragmentTransaction.commit();
         }
 
         @Override
@@ -339,6 +341,8 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
                                     FRAGMENT_ROUTE_LIST).addToBackStack(null);
                             fragmentTransaction.commit();
                         }
+
+                        showRouteUpdatedNotification();
 
                         break;
                     }
@@ -527,7 +531,10 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
 
         setupCustomActionBar();
 
-        //mBtn = (Button)findViewById(R.id.jump_button);
+        mRlRouteUpdated = (RelativeLayout)findViewById(R.id.route_updated_layout);
+        mRlRouteUpdated.setVisibility(View.GONE);
+
+        ((TextView)mRlRouteUpdated.findViewById(R.id.route_updated_text)).setText(mI10n.l("route_updated"));
 
         //mRlRouteMap = (RelativeLayout)findViewById(R.id.route_map_layout);
         mRlLoading = (RelativeLayout)findViewById(R.id.loading_layout);
@@ -576,6 +583,37 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showRouteUpdatedNotification() {
+        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.0f, 0.95f);
+        fadeIn.setDuration(1000);
+
+        ObjectAnimator fadeOut = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.95f, 0.0f);
+        fadeOut.setDuration(1000);
+
+        final AnimatorSet as = new AnimatorSet();
+        as.play(fadeOut).after(fadeIn).after(2000L);
+
+        as.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mRlRouteUpdated.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mRlRouteUpdated.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {}
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {}
+        });
+
+        as.start();
     }
 
     /**
