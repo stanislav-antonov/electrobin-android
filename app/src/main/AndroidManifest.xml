@@ -32,6 +32,9 @@
             android:name="company.electrobin.RouteActivity"
             android:label="@string/title_activity_route" >
         </activity>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="c4520e326ed55903eb5b4cdeaf1a5e6cbbbf09ed" />
     </application>
 
 </manifest>

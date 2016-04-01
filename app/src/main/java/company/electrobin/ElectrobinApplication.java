@@ -3,6 +3,7 @@ package company.electrobin;
 import android.app.Application;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import company.electrobin.i10n.I10n;
 import company.electrobin.network.TCPClientService;
 import company.electrobin.network.TLSSocketFactory;
@@ -11,6 +12,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.Volley;
 
+import io.fabric.sdk.android.Fabric;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -99,5 +101,6 @@ public class ElectrobinApplication extends Application  {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
     }
 }
