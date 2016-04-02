@@ -39,7 +39,9 @@ import company.electrobin.network.TCPClientService;
 import company.electrobin.user.User;
 import company.electrobin.user.User.UserProfile;
 
-public class RouteActivity extends AppCompatActivity implements RouteListFragment.OnFragmentInteractionListener,
+public class RouteActivity extends AppCompatActivity implements
+        RouteListFragment.OnFragmentInteractionListener,
+        RouteMapFragment.OnFragmentInteractionListener,
         UserProfileFragment.OnFragmentInteractionListener,
         FragmentManager.OnBackStackChangedListener {
 
@@ -54,6 +56,7 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
 
     private final static String FRAGMENT_USER_PROFILE = "fragment_user_profile";
     private final static String FRAGMENT_ROUTE_LIST = "fragment_route_list";
+    private final static String FRAGMENT_ROUTE_MAP = "fragment_route_map";
 
     /**
      *
@@ -80,6 +83,14 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
         public String getDate() { return mDate; }
 
         public List<Point> getPointList() { return mPointList; }
+
+        public String getPointsJSON() {
+            String result = "";
+            for (Point point : getPointList())
+                result += String.format(", [%s, %s]", point.mLat, point.mLng);
+
+            return String.format("[%s]", result.replaceFirst(", ", ""));
+        }
 
         public Integer getId() { return mId; }
     }
@@ -418,6 +429,16 @@ public class RouteActivity extends AppCompatActivity implements RouteListFragmen
     @Override
     public Route onGetRoute() {
         return getCurrentRoute();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onRouteStart() {
+        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, RouteMapFragment.newInstance(), FRAGMENT_ROUTE_MAP).addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     /**

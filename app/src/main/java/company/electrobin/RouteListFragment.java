@@ -28,8 +28,6 @@ public class RouteListFragment extends Fragment {
     private RelativeLayout mRlRouteWaiting;
     private RelativeLayout mRlRouteList;
 
-    // private boolean mRouteListDisplayed;
-
     private int mLayoutDisplayed;
 
     private OnFragmentInteractionListener mListener;
@@ -41,8 +39,8 @@ public class RouteListFragment extends Fragment {
     private final static String LOG_TAG = RouteListFragment.class.getSimpleName();
 
     public interface OnFragmentInteractionListener {
-
         public RouteActivity.Route onGetRoute();
+        public void onRouteStart();
     }
 
     private static class RouteListAdapter extends ArrayAdapter<RouteActivity.Route.Point> {
@@ -91,10 +89,6 @@ public class RouteListFragment extends Fragment {
         args.putInt(BUNDLE_KEY_DISPLAY_LAYOUT, displayLayout);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public RouteListFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -197,16 +191,20 @@ public class RouteListFragment extends Fragment {
         lvRoutePoints.setVisibility(View.GONE);
 
         RouteActivity.Route route = mListener.onGetRoute();
-
         if (route.getDate() != null) {
             tvRouteDate.setVisibility(View.VISIBLE);
             tvRouteDate.setText(String.format(mI10n.l("route_date"), route.getDate()));
         }
 
-        if (!route.getPointList().isEmpty()) {
-            lvRoutePoints.setVisibility(View.VISIBLE);
-            lvRoutePoints.setAdapter(new RouteListAdapter(getActivity(), route.getPointList()));
-        }
+        lvRoutePoints.setVisibility(View.VISIBLE);
+        lvRoutePoints.setAdapter(new RouteListAdapter(getActivity(), route.getPointList()));
+
+        btnRouteStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onRouteStart();
+            }
+        });
 
         mLayoutDisplayed = LAYOUT_DISPLAYED_ROUTE_LIST;
     }

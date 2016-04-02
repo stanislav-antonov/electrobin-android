@@ -47,6 +47,18 @@
                     this
                 );
             }
+
+            function displayRoute(points) {
+                points = $.parseJSON(points);
+                ymaps.route(points, {avoidTrafficJams: true, mapStateAutoApply: true}).then(
+                    function (route) {
+                        myMap.geoObjects.add(route);
+                    },
+                    function (error) {
+                        alert(error.message);
+                    }
+                );
+            }
         </script>
         <style>
             html, body, #map {

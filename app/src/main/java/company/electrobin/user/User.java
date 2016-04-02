@@ -165,10 +165,10 @@ public class User {
         JSONObject joProfile = new JSONObject(strProfileJSON);
         UserProfile profile = new UserProfile();
 
-        if (joProfile.has(JSON_USER_PROFILE_USERNAME_KEY)) profile.mUsername = joProfile.getString(JSON_USER_PROFILE_USERNAME_KEY);
-        if (joProfile.has(JSON_USER_PROFILE_FIRST_NAME_KEY)) profile.mFirstName = joProfile.getString(JSON_USER_PROFILE_FIRST_NAME_KEY);
-        if (joProfile.has(JSON_USER_PROFILE_LAST_NAME_KEY)) profile.mLastName = joProfile.getString(JSON_USER_PROFILE_LAST_NAME_KEY);
-        if (joProfile.has(JSON_USER_PROFILE_EMAIL_KEY)) profile.mEmail = joProfile.getString(JSON_USER_PROFILE_EMAIL_KEY);
+        profile.mUsername = joProfile.optString(JSON_USER_PROFILE_USERNAME_KEY);
+        profile.mFirstName = joProfile.optString(JSON_USER_PROFILE_FIRST_NAME_KEY);
+        profile.mLastName = joProfile.optString(JSON_USER_PROFILE_LAST_NAME_KEY);
+        profile.mEmail = joProfile.optString(JSON_USER_PROFILE_EMAIL_KEY);
 
         mProfile = profile;
 

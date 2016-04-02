@@ -8,7 +8,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,12 +18,21 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+import company.electrobin.i10n.I10n;
+import company.electrobin.user.User;
+
 public class RouteMapFragment extends Fragment {
+
+    private User mUser;
+    private I10n mI10n;
+    private ElectrobinApplication mApp;
 
     private WebView mWvMap;
 
@@ -39,13 +48,18 @@ public class RouteMapFragment extends Fragment {
     private Handler mHandler = new Handler();
 
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
-    private final static int TIMEOUT_MAP_LOAD = 30000;
 
+    /**
+     *
+     */
     public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(Uri uri);
+        public RouteActivity.Route onGetRoute();
     }
 
-    private class MyLocationListener implements LocationListener {
+    /**
+     *
+     */
+    private class UserLocationListener implements LocationListener {
 
         private Location mCurrentLocation;
         private static final int LOCATION_EXPIRES_TIME_INTERVAL = 1000 * 60 * 2;
@@ -65,8 +79,8 @@ public class RouteMapFragment extends Fragment {
             Log.d(LOG_TAG, String.format("coords: [%1$s, %2$s], provider: %3$s, accuracy: %4$s, bearing: %5$s",
                     lat, lng, provider, accuracy, mCurrentLocation.getBearing()));
 
-            String strJs = String.format("javascript:updatePosition(%1$s, %2$s)", lat, lng);
-            mWvMap.loadUrl(strJs);
+            // String strJs = String.format("javascript:updatePosition(%1$s, %2$s)", lat, lng);
+            // mWvMap.loadUrl(strJs);
         }
 
         @Override
@@ -141,12 +155,15 @@ public class RouteMapFragment extends Fragment {
         }
     }
 
+    /**
+     *
+     */
     private class MapWebViewClient extends WebViewClient {
 
         @Override
         public void onPageFinished(WebView view, String url) {
             LocationManager locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-            MyLocationListener locationListener = new MyLocationListener();
+            UserLocationListener locationListener = new UserLocationListener();
 
             try {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000L, 0F, locationListener);
@@ -169,6 +186,9 @@ public class RouteMapFragment extends Fragment {
         }
     }
 
+    /**
+     *
+     */
     private class MapJavaScriptInterface {
 
         private Context mContext;
@@ -181,63 +201,99 @@ public class RouteMapFragment extends Fragment {
         public void onMapReady() {
             // Mark the map is not loading anymore
             mIsMapLoading = false;
+            mMapLoadBreaker.cancel();
 
-            // Important: it must go before we make mRlLoading invisible
-            if (mMapLoadBreaker != null) mHandler.removeCallbacks(mMapLoadBreaker);
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mRlLoading.setVisibility(View.GONE);
+                    RouteActivity.Route route = mListener.onGetRoute();
+                    String json = route.getPointsJSON();
+                    mWvMap.loadUrl(String.format("javascript:displayRoute('%s')", json));
                 }
             });
         }
     }
 
+    /**
+     *
+     */
     private class MapLoadBreaker implements Runnable  {
+
+        private final static int TIMEOUT_MAP_LOAD = 30000;
+
+        public void watch() {
+            cancel();
+            mHandler.postDelayed(this, TIMEOUT_MAP_LOAD);
+        }
+
+        public void cancel() {
+            mHandler.removeCallbacks(this);
+        }
+
         @Override
         public void run() {
-            // Mark the map is not loading anymore
-            // mIsMapLoading = false;
-            // mWvMap.stopLoading();
+            // Break the map loading
+            mWvMap.stopLoading();
+            mIsMapLoading = false;
 
-            // mRlLoading.setVisibility(View.GONE);
-            // mRlLoadRetry.setVisibility(View.VISIBLE);
+            mRlLoading.setVisibility(View.GONE);
+            mRlLoadRetry.setVisibility(View.VISIBLE);
 
-            // Button btnLoadRetry = (Button)mRlLoadRetry.findViewById(R.id.load_retry_button);
-            // btnLoadRetry.setText(mI10n.l("retry"));
-            // btnLoadRetry.setOnClickListener(new MapLoadRetryHandler());
+            Button btnLoadRetry = (Button)mRlLoadRetry.findViewById(R.id.load_retry_button);
+            btnLoadRetry.setText(mI10n.l("retry"));
+            btnLoadRetry.setOnClickListener(new MapLoadRetryHandler());
 
-            // TextView tvErrorMapLoad =(TextView)mRlLoadRetry.findViewById(R.id.error_map_load_text);
-            // tvErrorMapLoad.setText(mI10n.l("error_map_load"));
+            TextView tvErrorMapLoad =(TextView)mRlLoadRetry.findViewById(R.id.error_map_load_text);
+            tvErrorMapLoad.setText(mI10n.l("error_map_load"));
         }
     }
 
+    /**
+     *
+     */
     private class MapLoadRetryHandler implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            // mRlLoadRetry.setVisibility(View.GONE);
-            // mRlLoading.setVisibility(View.VISIBLE);
-            // loadMap();
+            mRlLoadRetry.setVisibility(View.GONE);
+            mRlLoading.setVisibility(View.VISIBLE);
+            loadMap();
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public static RouteMapFragment newInstance() {
         return new RouteMapFragment();
     }
 
-    public RouteMapFragment() {
-
-    }
-
+    /**
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mApp = (ElectrobinApplication)getActivity().getApplicationContext();
+        mUser = mApp.getUser();
+        mI10n = mApp.getI10n();
+
+        mMapLoadBreaker = new MapLoadBreaker();
     }
 
+    /**
+     *
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_route_map, container, false);
 
         mRlRouteMap = (RelativeLayout)view.findViewById(R.id.route_map_layout);
@@ -249,6 +305,10 @@ public class RouteMapFragment extends Fragment {
         return view;
     }
 
+    /**
+     *
+     * @param activity
+     */
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -260,6 +320,15 @@ public class RouteMapFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onActivityCreated (Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        showRouteMap();
+    }
+
+    /**
+     *
+     */
     @Override
     public void onDetach() {
         super.onDetach();
@@ -290,6 +359,8 @@ public class RouteMapFragment extends Fragment {
      *
      */
     private void loadMap() {
+        if (mIsMapLoading) return;
+
         try {
             InputStream is = getActivity().getAssets().open("map.html");
             byte[] buffer = new byte[is.available()];
@@ -297,8 +368,6 @@ public class RouteMapFragment extends Fragment {
             is.close();
 
             String htmlText = new String(buffer);
-
-            if (mIsMapLoading) mWvMap.stopLoading();
 
             mWvMap.loadDataWithBaseURL(
                     "http://ru.yandex.api.yandexmapswebviewexample.ymapapp",
@@ -315,10 +384,14 @@ public class RouteMapFragment extends Fragment {
 
         mIsMapLoading = true;
         mRlLoading.setVisibility(View.VISIBLE);
-
-        if (mMapLoadBreaker != null) mHandler.removeCallbacks(mMapLoadBreaker);
-
-        mMapLoadBreaker = new MapLoadBreaker();
-        mHandler.postDelayed(mMapLoadBreaker, TIMEOUT_MAP_LOAD);
+        mMapLoadBreaker.watch();
     }
 }
+
+
+/*
+
+{"action":"new_route","created":"2014-12-28T19:50:40.964531Z","id":"21","points" : [{"id":333, "address":"Leninsky 21 22 33","city":"Moscow", "latitude":48.785346371124746, "longitude":44.57456924862674}, {"id":211, "address":"Ленинский","city":"Moscow", "latitude":48.78560940518449, "longitude":44.58332181428101}]}
+
+
+ */
