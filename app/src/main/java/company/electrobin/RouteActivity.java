@@ -65,6 +65,7 @@ public class RouteActivity extends AppCompatActivity implements
         private Integer mId;
         private String mDate;
         private List<Point> mPointList;
+        private Point mCurrentStartPoint;
 
         public Route(int id, String date, List<Point> pointList) {
             mId = id;
@@ -90,6 +91,22 @@ public class RouteActivity extends AppCompatActivity implements
                 result += String.format(", [%s, %s]", point.mLat, point.mLng);
 
             return String.format("[%s]", result.replaceFirst(", ", ""));
+        }
+
+        public void setStartPoint(double lat, double lng) {
+            Point point = new Point();
+            point.mLat = lat;
+            point.mLng = lng;
+            getPointList().add(0, point);
+            mCurrentStartPoint = point;
+        }
+
+        public Point getStartPoint() {
+            return mCurrentStartPoint;
+        }
+
+        public boolean hasStartPoint() {
+            return mCurrentStartPoint != null;
         }
 
         public Integer getId() { return mId; }
@@ -429,6 +446,22 @@ public class RouteActivity extends AppCompatActivity implements
     @Override
     public Route onGetRoute() {
         return getCurrentRoute();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onRouteDisplayWaiting() {
+
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onRouteDisplayReady() {
+
     }
 
     /**

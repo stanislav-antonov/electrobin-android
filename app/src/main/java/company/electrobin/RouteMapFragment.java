@@ -6,7 +6,6 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.os.Handler;
@@ -24,6 +23,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
@@ -39,21 +39,29 @@ public class RouteMapFragment extends Fragment {
     private RelativeLayout mRlRouteMap;
     private RelativeLayout mRlLoading;
     private RelativeLayout mRlLoadRetry;
+    private RelativeLayout mRlRouteWaiting;
 
     private MapLoadBreaker mMapLoadBreaker;
+    private RouteViewer mRouteViewer;
 
-    private boolean mIsMapLoading;
+    private int mMapCurrentState;
 
     private OnFragmentInteractionListener mListener;
     private Handler mHandler = new Handler();
 
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
 
+    private final static int MAP_STATE_INITIAL = 0;
+    private final static int MAP_STATE_LOADING = 1;
+    private final static int MAP_STATE_READY = 2;
+
     /**
      *
      */
     public interface OnFragmentInteractionListener {
         public RouteActivity.Route onGetRoute();
+        public void onRouteDisplayWaiting();
+        public void onRouteDisplayReady();
     }
 
     /**
@@ -70,17 +78,7 @@ public class RouteMapFragment extends Fragment {
             if (isBetterLocation(location, mCurrentLocation))
                 mCurrentLocation = location;
 
-            double lat = mCurrentLocation.getLatitude();
-            double lng = mCurrentLocation.getLongitude();
-
-            double accuracy = mCurrentLocation.getAccuracy();
-            String provider = mCurrentLocation.getProvider();
-
-            Log.d(LOG_TAG, String.format("coords: [%1$s, %2$s], provider: %3$s, accuracy: %4$s, bearing: %5$s",
-                    lat, lng, provider, accuracy, mCurrentLocation.getBearing()));
-
-            // String strJs = String.format("javascript:updatePosition(%1$s, %2$s)", lat, lng);
-            // mWvMap.loadUrl(strJs);
+            mRouteViewer.notifyGotUserLocation(mCurrentLocation);
         }
 
         @Override
@@ -199,17 +197,35 @@ public class RouteMapFragment extends Fragment {
 
         @JavascriptInterface
         public void onMapReady() {
-            // Mark the map is not loading anymore
-            mIsMapLoading = false;
-            mMapLoadBreaker.cancel();
-
-            mHandler.post(new Runnable() {
+            // Mark the map is ready
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mRlLoading.setVisibility(View.GONE);
-                    RouteActivity.Route route = mListener.onGetRoute();
-                    String json = route.getPointsJSON();
-                    mWvMap.loadUrl(String.format("javascript:displayRoute('%s')", json));
+                    mMapCurrentState = MAP_STATE_READY;
+                    mMapLoadBreaker.cancel();
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mRlLoading.setVisibility(View.GONE);
+                            mRouteViewer.notifyMapReady();
+                        }
+                    });
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void onRouteDisplayStart() {
+
+        }
+
+        @JavascriptInterface
+        public void onRouteDisplayReady() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mRouteViewer.notifyRouteDisplayed();
                 }
             });
         }
@@ -235,7 +251,7 @@ public class RouteMapFragment extends Fragment {
         public void run() {
             // Break the map loading
             mWvMap.stopLoading();
-            mIsMapLoading = false;
+            mMapCurrentState = MAP_STATE_INITIAL;
 
             mRlLoading.setVisibility(View.GONE);
             mRlLoadRetry.setVisibility(View.VISIBLE);
@@ -263,6 +279,84 @@ public class RouteMapFragment extends Fragment {
 
     /**
      *
+     */
+    private class RouteViewer {
+
+        private boolean mHasMapReady;
+        private boolean mGotFirstLocation;
+
+        private Location mCurrentLocation;
+
+        /**
+         *
+         */
+        public void notifyMapReady() {
+            if (mHasMapReady) return;
+            mHasMapReady = true;
+
+            if (!mGotFirstLocation)
+                mRlRouteWaiting.setVisibility(View.VISIBLE);
+
+            drawFirstRoute();
+        }
+
+        /**
+         *
+         * @param location
+         */
+        public void notifyGotUserLocation(Location location) {
+            mCurrentLocation = location;
+
+            if (mGotFirstLocation) return;
+            mListener.onGetRoute().setStartPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+            mGotFirstLocation = true;
+
+            drawFirstRoute();
+        }
+
+        /**
+         *
+         */
+        public void notifyRouteDisplayed() {
+            mRlRouteWaiting.setVisibility(View.GONE);
+            drawUserLocation();
+        }
+
+        /**
+         *
+         */
+        private void drawFirstRoute() {
+            if (mGotFirstLocation && mHasMapReady)
+                drawRoute();
+        }
+
+        /**
+         *
+         */
+        private void reset() {
+            mHasMapReady = false;
+            mGotFirstLocation = false;
+        }
+
+        /**
+         *
+         */
+        private void drawRoute() {
+            final RouteActivity.Route route = mListener.onGetRoute();
+            mWvMap.loadUrl(String.format("javascript:displayRoute('%s')", route.getPointsJSON()));
+        }
+
+        /**
+         *
+         */
+        public void drawUserLocation() {
+            mWvMap.loadUrl(String.format("javascript:updatePosition(%1$s, %2$s)",
+                    mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()));
+        }
+    }
+
+    /**
+     *
      * @return
      */
     public static RouteMapFragment newInstance() {
@@ -282,6 +376,7 @@ public class RouteMapFragment extends Fragment {
         mI10n = mApp.getI10n();
 
         mMapLoadBreaker = new MapLoadBreaker();
+        mRouteViewer = new RouteViewer();
     }
 
     /**
@@ -301,6 +396,9 @@ public class RouteMapFragment extends Fragment {
 
         mRlLoadRetry = (RelativeLayout)view.findViewById(R.id.load_retry_layout);
         mRlLoadRetry.setVisibility(View.GONE);
+
+        mRlRouteWaiting = (RelativeLayout)view.findViewById(R.id.route_waiting_layout);
+        mRlRouteWaiting.setVisibility(View.GONE);
 
         return view;
     }
@@ -359,7 +457,7 @@ public class RouteMapFragment extends Fragment {
      *
      */
     private void loadMap() {
-        if (mIsMapLoading) return;
+        if (mMapCurrentState == MAP_STATE_LOADING) return;
 
         try {
             InputStream is = getActivity().getAssets().open("map.html");
@@ -382,7 +480,7 @@ public class RouteMapFragment extends Fragment {
             throw new IllegalArgumentException(e.getMessage());
         }
 
-        mIsMapLoading = true;
+        mMapCurrentState = MAP_STATE_LOADING;
         mRlLoading.setVisibility(View.VISIBLE);
         mMapLoadBreaker.watch();
     }
