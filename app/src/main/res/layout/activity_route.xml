@@ -28,7 +28,6 @@
         <Button
             android:id="@+id/route_list_button"
             android:layout_below="@+id/route_updated_text"
-            android:text="К маршрутному листу"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:minHeight="40dp"

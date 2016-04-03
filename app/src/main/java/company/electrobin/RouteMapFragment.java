@@ -23,7 +23,6 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
 
 import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
@@ -39,7 +38,7 @@ public class RouteMapFragment extends Fragment {
     private RelativeLayout mRlRouteMap;
     private RelativeLayout mRlLoading;
     private RelativeLayout mRlLoadRetry;
-    private RelativeLayout mRlRouteWaiting;
+    private RelativeLayout mRlRouteBuilding;
 
     private MapLoadBreaker mMapLoadBreaker;
     private RouteViewer mRouteViewer;
@@ -60,8 +59,8 @@ public class RouteMapFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         public RouteActivity.Route onGetRoute();
-        public void onRouteDisplayWaiting();
-        public void onRouteDisplayReady();
+        public void onRouteBuildingStart();
+        public void onRouteBuildingReady();
     }
 
     /**
@@ -225,11 +224,11 @@ public class RouteMapFragment extends Fragment {
          *
          */
         @JavascriptInterface
-        public void onRouteDisplayWaiting() {
+        public void onRouteBuildingStart() {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onRouteDisplayWaiting();
+                    mListener.onRouteBuildingStart();
                 }
             });
         }
@@ -238,12 +237,12 @@ public class RouteMapFragment extends Fragment {
          *
          */
         @JavascriptInterface
-        public void onRouteDisplayReady() {
+        public void onRouteBuildingReady() {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mRouteViewer.notifyRouteDisplayed();
-                    mListener.onRouteDisplayReady();
+                    mListener.onRouteBuildingReady();
                 }
             });
         }
@@ -326,7 +325,7 @@ public class RouteMapFragment extends Fragment {
             mHasMapReady = true;
 
             if (!mGotFirstLocation)
-                mRlRouteWaiting.setVisibility(View.VISIBLE);
+                mRlRouteBuilding.setVisibility(View.VISIBLE);
 
             drawFirstRoute();
         }
@@ -349,7 +348,7 @@ public class RouteMapFragment extends Fragment {
          *
          */
         public void notifyRouteDisplayed() {
-            mRlRouteWaiting.setVisibility(View.GONE);
+            mRlRouteBuilding.setVisibility(View.GONE);
             drawUserLocation();
         }
 
@@ -428,8 +427,9 @@ public class RouteMapFragment extends Fragment {
         mRlLoadRetry = (RelativeLayout)view.findViewById(R.id.load_retry_layout);
         mRlLoadRetry.setVisibility(View.GONE);
 
-        mRlRouteWaiting = (RelativeLayout)view.findViewById(R.id.route_waiting_layout);
-        mRlRouteWaiting.setVisibility(View.GONE);
+        mRlRouteBuilding = (RelativeLayout)view.findViewById(R.id.route_building_layout);
+        mRlRouteBuilding.setVisibility(View.GONE);
+        ((TextView) mRlRouteBuilding.findViewById(R.id.route_building_text)).setText(mI10n.l("route_building"));
 
         return view;
     }

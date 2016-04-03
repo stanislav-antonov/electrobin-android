@@ -14,15 +14,14 @@
             />
     </RelativeLayout>
     <RelativeLayout
-        android:id="@+id/route_waiting_layout"
+        android:id="@+id/route_building_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:background="#98000000"
         >
         <TextView
-            android:text="Построение маршрута..."
-            android:id="@+id/route_waiting_text"
+            android:id="@+id/route_building_text"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_gravity="center_horizontal"

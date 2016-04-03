@@ -50,11 +50,11 @@
 
             function displayRoute(points) {
                 points = $.parseJSON(points);
-                Android.onRouteDisplayWaiting();
+                Android.onRouteBuildingStart();
                 ymaps.route(points, {avoidTrafficJams: true, mapStateAutoApply: true}).then(
                     function (route) {
                         myMap.geoObjects.add(route);
-                        Android.onRouteDisplayReady();
+                        Android.onRouteBuildingReady();
                     },
                     function (error) {
                         alert(error.message);

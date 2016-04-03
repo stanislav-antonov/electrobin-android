@@ -416,6 +416,8 @@ public class RouteActivity extends AppCompatActivity implements
             btnRouteList.setVisibility(View.VISIBLE);
             btnClose.setVisibility(View.VISIBLE);
 
+            btnRouteList.setText(mI10n.l("to_route_list"));
+
             fadeIn.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
@@ -500,7 +502,7 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     @Override
-    public void onRouteDisplayWaiting() {
+    public void onRouteBuildingStart() {
 
     }
 
@@ -508,7 +510,7 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     @Override
-    public void onRouteDisplayReady() {
+    public void onRouteBuildingReady() {
 
     }
 
