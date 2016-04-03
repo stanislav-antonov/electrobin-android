@@ -197,7 +197,6 @@ public class RouteMapFragment extends Fragment {
 
         @JavascriptInterface
         public void onMapReady() {
-            // Mark the map is ready
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -216,8 +215,13 @@ public class RouteMapFragment extends Fragment {
         }
 
         @JavascriptInterface
-        public void onRouteDisplayStart() {
-
+        public void onRouteDisplayWaiting() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onRouteDisplayWaiting();
+                }
+            });
         }
 
         @JavascriptInterface
@@ -226,6 +230,7 @@ public class RouteMapFragment extends Fragment {
                 @Override
                 public void run() {
                     mRouteViewer.notifyRouteDisplayed();
+                    mListener.onRouteDisplayReady();
                 }
             });
         }
