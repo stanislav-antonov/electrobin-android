@@ -1,6 +1,7 @@
 package company.electrobin;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
@@ -21,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -159,18 +161,20 @@ public class RouteActivity extends AppCompatActivity implements
                         RouteListFragment routeListFragment = (RouteListFragment)mFragmentManager
                                 .findFragmentByTag(FRAGMENT_ROUTE_LIST);
 
-                        if (routeListFragment != null && routeListFragment.isVisible()) {
-                            // Just update route list
-                            routeListFragment.showRouteList();
-                        }
-                        else {
+                        if (routeListFragment == null) {
                             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
                             fragmentTransaction.replace(R.id.fragment_container, RouteListFragment.newInstance(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST),
                                     FRAGMENT_ROUTE_LIST).addToBackStack(null);
                             fragmentTransaction.commit();
                         }
-
-                        showRouteUpdatedNotification();
+                        else if (routeListFragment.isVisible()) {
+                            // Just update route list
+                            routeListFragment.showRouteList();
+                            showRouteUpdatedNotification(true);
+                        }
+                        else {
+                            showRouteUpdatedNotification(false);
+                        }
 
                         break;
                     }
@@ -377,35 +381,79 @@ public class RouteActivity extends AppCompatActivity implements
     /**
      *
      */
-    private void showRouteUpdatedNotification() {
-        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.0f, 0.95f);
+    private void showRouteUpdatedNotification(boolean isOnRouteList) {
+        final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.0f, 0.95f);
         fadeIn.setDuration(1000);
 
-        ObjectAnimator fadeOut = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.95f, 0.0f);
+        final ObjectAnimator fadeOut = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.95f, 0.0f);
         fadeOut.setDuration(1000);
 
-        final AnimatorSet as = new AnimatorSet();
-        as.play(fadeOut).after(fadeIn).after(2000L);
+        final Button btnRouteList = (Button)mRlRouteUpdated.findViewById(R.id.route_list_button);
+        final ImageButton btnClose = (ImageButton)mRlRouteUpdated.findViewById(R.id.close_button);
 
-        as.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mRlRouteUpdated.setVisibility(View.VISIBLE);
-            }
+        if (isOnRouteList) {
+            btnRouteList.setVisibility(View.GONE);
+            btnClose.setVisibility(View.GONE);
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mRlRouteUpdated.setVisibility(View.GONE);
-            }
+            final AnimatorSet as = new AnimatorSet();
+            as.play(fadeOut).after(fadeIn).after(2000L);
 
-            @Override
-            public void onAnimationCancel(Animator animation) {}
+            as.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mRlRouteUpdated.setVisibility(View.VISIBLE);
+                }
 
-            @Override
-            public void onAnimationRepeat(Animator animation) {}
-        });
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRlRouteUpdated.setVisibility(View.GONE);
+                }
+            });
 
-        as.start();
+            as.start();
+        }
+        else {
+            btnRouteList.setVisibility(View.VISIBLE);
+            btnClose.setVisibility(View.VISIBLE);
+
+            fadeIn.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mRlRouteUpdated.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    btnClose.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) { fadeOut.start(); }
+                    });
+
+                    btnRouteList.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            fadeOut.start();
+
+                            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+                            fragmentTransaction.replace(R.id.fragment_container,
+                                    RouteListFragment.newInstance(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST),
+                                    FRAGMENT_ROUTE_LIST).addToBackStack(null);
+
+                            fragmentTransaction.commit();
+                        }
+                    });
+                }
+            });
+
+            fadeOut.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRlRouteUpdated.setVisibility(View.GONE);
+                }
+            });
+
+            fadeIn.start();
+        }
     }
 
     /**

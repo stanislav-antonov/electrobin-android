@@ -191,10 +191,17 @@ public class RouteMapFragment extends Fragment {
 
         private Context mContext;
 
+        /**
+         *
+         * @param context
+         */
         public MapJavaScriptInterface(Context context) {
             mContext = context;
         }
 
+        /**
+         *
+         */
         @JavascriptInterface
         public void onMapReady() {
             getActivity().runOnUiThread(new Runnable() {
@@ -214,6 +221,9 @@ public class RouteMapFragment extends Fragment {
             });
         }
 
+        /**
+         *
+         */
         @JavascriptInterface
         public void onRouteDisplayWaiting() {
             getActivity().runOnUiThread(new Runnable() {
@@ -224,6 +234,9 @@ public class RouteMapFragment extends Fragment {
             });
         }
 
+        /**
+         *
+         */
         @JavascriptInterface
         public void onRouteDisplayReady() {
             getActivity().runOnUiThread(new Runnable() {
@@ -243,15 +256,24 @@ public class RouteMapFragment extends Fragment {
 
         private final static int TIMEOUT_MAP_LOAD = 30000;
 
+        /**
+         *
+         */
         public void watch() {
             cancel();
             mHandler.postDelayed(this, TIMEOUT_MAP_LOAD);
         }
 
+        /**
+         *
+         */
         public void cancel() {
             mHandler.removeCallbacks(this);
         }
 
+        /**
+         *
+         */
         @Override
         public void run() {
             // Break the map loading
@@ -274,6 +296,10 @@ public class RouteMapFragment extends Fragment {
      *
      */
     private class MapLoadRetryHandler implements View.OnClickListener {
+        /**
+         *
+         * @param v
+         */
         @Override
         public void onClick(View v) {
             mRlLoadRetry.setVisibility(View.GONE);

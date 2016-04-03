@@ -25,5 +25,29 @@
             android:textSize="16sp"
             android:textColor="#FFFFFFFF"
             />
+        <Button
+            android:id="@+id/route_list_button"
+            android:layout_below="@+id/route_updated_text"
+            android:text="К маршрутному листу"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:minHeight="40dp"
+            android:textSize="14sp"
+            android:textColor="#FFFFFFFF"
+            android:textAllCaps="false"
+            android:background="@drawable/custom_round_button_1"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:layout_marginTop="15dp"
+            />
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_action_close"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            />
     </RelativeLayout>
 </RelativeLayout>
