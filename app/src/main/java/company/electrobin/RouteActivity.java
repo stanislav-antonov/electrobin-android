@@ -45,6 +45,7 @@ public class RouteActivity extends AppCompatActivity implements
         RouteListFragment.OnFragmentInteractionListener,
         RouteMapFragment.OnFragmentInteractionListener,
         UserProfileFragment.OnFragmentInteractionListener,
+        BinCardFragment.OnFragmentInteractionListener,
         FragmentManager.OnBackStackChangedListener {
 
     private User mUser;
@@ -59,6 +60,7 @@ public class RouteActivity extends AppCompatActivity implements
     private final static String FRAGMENT_USER_PROFILE = "fragment_user_profile";
     private final static String FRAGMENT_ROUTE_LIST = "fragment_route_list";
     private final static String FRAGMENT_ROUTE_MAP = "fragment_route_map";
+    private final static String FRAGMENT_BIN_CARD = "fragment_bin_card";
 
     /**
      *
@@ -524,6 +526,17 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRoutePointClick(int idx) {
+        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, BinCardFragment.newInstance(),
+                FRAGMENT_BIN_CARD).addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onNextRoutePoint() {
 
     }
 
@@ -538,7 +551,8 @@ public class RouteActivity extends AppCompatActivity implements
 
         // TODO: Not totally correct to make this call here..
         final Route route = getCurrentRoute();
-        final String strJSON = String.format("{\"action\":\"start_route\", \"route_id\":\"%s\", \"created\":\"%s\"}", route.getId(), route.getDateFormatted(Route.FORMAT_DATE_ORIGINAL));
+        final String strJSON = String.format("{\"action\":\"start_route\", \"route_id\":\"%s\", \"created\":\"%s\"}",
+                route.getId(), route.getDateFormatted(Route.FORMAT_DATE_ORIGINAL));
         mService.sendData(strJSON);
     }
 

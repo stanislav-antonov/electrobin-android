@@ -15,6 +15,12 @@
 
     <string name="username_or_password_wrong">Username or password is wrong</string>
 
+    <string name="comment">Comment</string>
+
+    <string name="container_status">Container status</string>
+    <string name="container_status_unloaded_ok">Unloaded</string>
+    <string name="container_status_unloaded_error">Error</string>
+
     <string name="route_waiting_1">Waiting for the route&#8239;</string>
     <string name="route_waiting_2">The route will be displayed on this screen</string>
 
@@ -24,6 +30,9 @@
     <string name="route_date">Your route at %s</string>
     <string name="route_updated">Your route was updated</string>
     <string name="to_route_list">To route list</string>
+    <string name="to_next_route_point">To next route point</string>
+
+    <string name="have_arrived_the_route_point">You have arrived the route point</string>
 
     <string name="connection_status">Connection status: %s</string>
     <string name="connection_status_connected">connected</string>
