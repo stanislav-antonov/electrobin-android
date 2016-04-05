@@ -48,11 +48,46 @@
                 );
             }
 
-            function displayRoute(points) {
-                points = $.parseJSON(points);
+            function displayRoute(p) {
+                p = $.parseJSON(p);
+
+                var points = [];
+                for (i = 0; i < p.length; i++) {
+                    points.push({ type: "wayPoint", point: p[i] });
+                }
+
                 Android.onRouteBuildingStart();
+
                 ymaps.route(points, {avoidTrafficJams: true, mapStateAutoApply: true}).then(
                     function (route) {
+                        // var points = route.getViaPoints();
+                        var points = route.getWayPoints();
+
+                        // Remove the first point with a current user location
+                        var locationPoint = points.get(0);
+                        points.remove(locationPoint);
+
+                        points.each(function (point, i) {
+                            point.properties.set("idx", i);
+                            point.properties.set("iconContent", "");
+
+                            // https://tech.yandex.ru/maps/doc/jsapi/2.0/ref/reference/GeoObject-docpage/
+                            point.options.set({
+                                hasBalloon: false
+                            });
+
+                            point.events.add("click", function () {
+                                Android.onRoutePointClick(point.properties.get("idx"));
+                             });
+                        });
+
+                        var locationPlacemark = new ymaps.Placemark(locationPoint.geometry.getCoordinates(), {}, {
+                            hasBalloon: false,
+                            iconColor: "0066ff99"
+                        });
+
+                        points.add(locationPlacemark, 0);
+
                         myMap.geoObjects.add(route);
                         Android.onRouteBuildingReady();
                     },

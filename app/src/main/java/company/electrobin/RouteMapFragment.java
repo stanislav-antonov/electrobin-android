@@ -20,6 +20,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,6 +62,7 @@ public class RouteMapFragment extends Fragment {
         public RouteActivity.Route onGetRoute();
         public void onRouteBuildingStart();
         public void onRouteBuildingReady();
+        public void onRoutePointClick(int idx);
     }
 
     /**
@@ -243,6 +245,21 @@ public class RouteMapFragment extends Fragment {
                 public void run() {
                     mRouteViewer.notifyRouteDisplayed();
                     mListener.onRouteBuildingReady();
+                }
+            });
+        }
+
+
+        /**
+         *
+         */
+        @JavascriptInterface
+        public void onRoutePointClick(final int idx) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    (Toast.makeText(getActivity(), "Point idx: " + idx, Toast.LENGTH_SHORT)).show();
+                    mListener.onRoutePointClick(idx);
                 }
             });
         }

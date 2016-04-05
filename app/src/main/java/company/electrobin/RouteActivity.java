@@ -65,11 +65,83 @@ public class RouteActivity extends AppCompatActivity implements
      */
     public static class Route {
         private Integer mId;
-        private String mDate;
+        private Date mDate;
         private List<Point> mPointList;
         private Point mCurrentStartPoint;
 
-        public Route(int id, String date, List<Point> pointList) {
+        private final static String JSON_ROUTE_ID_KEY = "id";
+        private final static String JSON_ROUTE_DATE_KEY = "created";
+        private final static String JSON_ROUTE_POINTS_KEY = "points";
+        private final static String JSON_ROUTE_POINT_ID_KEY = "id";
+        private final static String JSON_ROUTE_POINT_ADDRESS_KEY = "address";
+        private final static String JSON_ROUTE_POINT_CITY_KEY = "city";
+        private final static String JSON_ROUTE_POINT_LONGITUDE_KEY = "longitude";
+        private final static String JSON_ROUTE_POINT_LATITUDE_KEY = "latitude";
+
+        public final static String FORMAT_DATE_ORIGINAL = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+        public final static String FORMAT_DATE_FORMATTED = "H:mm d.MM.yyyy";
+
+        /**
+         *
+         */
+        public static Route newInstance(JSONObject json) throws Exception {
+            Integer routeId = null;
+            if (json.has(JSON_ROUTE_ID_KEY)) {
+                try {
+                    routeId = json.getInt(JSON_ROUTE_ID_KEY);
+                } catch (Exception e) {
+                    throw new Exception(e.getMessage());
+                }
+            }
+
+            if (routeId == null) throw new Exception("No route id");
+
+            Date routeDate = null;
+            if (json.has(JSON_ROUTE_DATE_KEY)) {
+                try {
+                    // 2014-12-28T19:50:40.964531Z
+                    String strRouteDate = json.getString(JSON_ROUTE_DATE_KEY);
+
+                    @SuppressLint("SimpleDateFormat")
+                    SimpleDateFormat df = new SimpleDateFormat(FORMAT_DATE_ORIGINAL);
+                    routeDate = df.parse(strRouteDate);
+                }
+                catch (Exception e) {
+                    throw new Exception(e.getMessage());
+                }
+            }
+
+            if (routeDate == null) throw new Exception("No route date");
+
+            List<RouteActivity.Route.Point> pointList = new ArrayList<>();
+            if (json.has(JSON_ROUTE_POINTS_KEY)) {
+                try {
+                    JSONArray jaPointList = json.getJSONArray(JSON_ROUTE_POINTS_KEY);
+                    for (int i = 0; i < jaPointList.length(); i++) {
+                        JSONObject joPoint = jaPointList.getJSONObject(i);
+
+                        Route.Point point = new Route.Point();
+
+                        point.mId = joPoint.getInt(JSON_ROUTE_POINT_ID_KEY);
+                        point.mAddress = joPoint.getString(JSON_ROUTE_POINT_ADDRESS_KEY);
+                        point.mCity = joPoint.getString(JSON_ROUTE_POINT_CITY_KEY);
+                        point.mLng = joPoint.getDouble(JSON_ROUTE_POINT_LONGITUDE_KEY);
+                        point.mLat = joPoint.getDouble(JSON_ROUTE_POINT_LATITUDE_KEY);
+
+                        pointList.add(point);
+                    }
+                }
+                catch (Exception e) {
+                    throw new Exception(e.getMessage());
+                }
+            }
+
+            if (pointList.isEmpty()) throw new Exception("Route point list is empty");
+
+            return new Route(routeId, routeDate, pointList);
+        }
+
+        public Route(int id, Date date, List<Point> pointList) {
             mId = id;
             mDate = date;
             mPointList = pointList;
@@ -83,7 +155,13 @@ public class RouteActivity extends AppCompatActivity implements
             public double mLng;
         }
 
-        public String getDate() { return mDate; }
+        public Date getDate() { return mDate; }
+
+        public String getDateFormatted(String format) {
+            @SuppressLint("SimpleDateFormat")
+            Format formatter = new SimpleDateFormat(format);
+            return formatter.format(mDate);
+        }
 
         public List<Point> getPointList() { return mPointList; }
 
@@ -125,15 +203,6 @@ public class RouteActivity extends AppCompatActivity implements
         private final static String JSON_ACTION_NEW_ROUTE = "new_route";
         private final static String JSON_ACTION_UPDATE_TOKEN = "update_token";
 
-        private final static String JSON_ROUTE_ID_KEY = "id";
-        private final static String JSON_ROUTE_DATE_KEY = "created";
-        private final static String JSON_ROUTE_POINTS_KEY = "points";
-        private final static String JSON_ROUTE_POINT_ID_KEY = "id";
-        private final static String JSON_ROUTE_POINT_ADDRESS_KEY = "address";
-        private final static String JSON_ROUTE_POINT_CITY_KEY = "city";
-        private final static String JSON_ROUTE_POINT_LONGITUDE_KEY = "longitude";
-        private final static String JSON_ROUTE_POINT_LATITUDE_KEY = "latitude";
-
         @Override
         public void onConnectResult(int result) {
             Log.d(LOG_TAG, "Connect result: " + result);
@@ -156,7 +225,7 @@ public class RouteActivity extends AppCompatActivity implements
 
                 switch (action) {
                     case JSON_ACTION_NEW_ROUTE: {
-                        setCurrentRoute(newRoute(json));
+                        setCurrentRoute(Route.newInstance(json));
 
                         RouteListFragment routeListFragment = (RouteListFragment)mFragmentManager
                                 .findFragmentByTag(FRAGMENT_ROUTE_LIST);
@@ -185,70 +254,6 @@ public class RouteActivity extends AppCompatActivity implements
             } catch (Exception e) {
                 Log.d(LOG_TAG, e.getMessage());
             }
-        }
-
-        /**
-         *
-         */
-        private Route newRoute(JSONObject json) throws Exception {
-            Integer routeId = null;
-            if (json.has(JSON_ROUTE_ID_KEY)) {
-                try {
-                    routeId = json.getInt(JSON_ROUTE_ID_KEY);
-                } catch (Exception e) {
-                    throw new Exception(e.getMessage());
-                }
-            }
-
-            if (routeId == null) throw new Exception("No route id");
-
-            String routeDate = null;
-            if (json.has(JSON_ROUTE_DATE_KEY)) {
-                try {
-                    // 2014-12-28T19:50:40.964531Z
-                    routeDate = json.getString(JSON_ROUTE_DATE_KEY);
-
-                    @SuppressLint("SimpleDateFormat")
-                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-                    Date date = df.parse(routeDate);
-
-                    @SuppressLint("SimpleDateFormat")
-                    Format formatter = new SimpleDateFormat("H:mm d.MM.yyyy");
-                    routeDate = formatter.format(date);
-                }
-                catch (Exception e) {
-                    throw new Exception(e.getMessage());
-                }
-            }
-
-            if (routeDate == null) throw new Exception("No route date");
-
-            List<RouteActivity.Route.Point> pointList = new ArrayList<>();
-            if (json.has(JSON_ROUTE_POINTS_KEY)) {
-                try {
-                    JSONArray jaPointList = json.getJSONArray(JSON_ROUTE_POINTS_KEY);
-                    for (int i = 0; i < jaPointList.length(); i++) {
-                        JSONObject joPoint = jaPointList.getJSONObject(i);
-
-                        Route.Point point = new Route.Point();
-
-                        point.mId = joPoint.getInt(JSON_ROUTE_POINT_ID_KEY);
-                        point.mAddress = joPoint.getString(JSON_ROUTE_POINT_ADDRESS_KEY);
-                        point.mCity = joPoint.getString(JSON_ROUTE_POINT_CITY_KEY);
-                        point.mLng = joPoint.getDouble(JSON_ROUTE_POINT_LONGITUDE_KEY);
-                        point.mLat = joPoint.getDouble(JSON_ROUTE_POINT_LATITUDE_KEY);
-
-                        pointList.add(point);
-                    }
-                }
-                catch (Exception e) {
-                    throw new Exception(e.getMessage());
-                }
-            }
-
-            if (pointList.isEmpty()) throw new Exception("Route point list is empty");
-
-            return new Route(routeId, routeDate, pointList);
         }
     }
 
@@ -518,10 +523,23 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     @Override
+    public void onRoutePointClick(int idx) {
+
+    }
+
+    /**
+     *
+     */
+    @Override
     public void onRouteStart() {
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, RouteMapFragment.newInstance(), FRAGMENT_ROUTE_MAP).addToBackStack(null);
         fragmentTransaction.commit();
+
+        // TODO: Not totally correct to make this call here..
+        final Route route = getCurrentRoute();
+        final String strJSON = String.format("{\"action\":\"start_route\", \"route_id\":\"%s\", \"created\":\"%s\"}", route.getId(), route.getDateFormatted(Route.FORMAT_DATE_ORIGINAL));
+        mService.sendData(strJSON);
     }
 
     /**

@@ -191,10 +191,8 @@ public class RouteListFragment extends Fragment {
         lvRoutePoints.setVisibility(View.GONE);
 
         RouteActivity.Route route = mListener.onGetRoute();
-        if (route.getDate() != null) {
-            tvRouteDate.setVisibility(View.VISIBLE);
-            tvRouteDate.setText(String.format(mI10n.l("route_date"), route.getDate()));
-        }
+        tvRouteDate.setVisibility(View.VISIBLE);
+        tvRouteDate.setText(String.format(mI10n.l("route_date"), route.getDateFormatted(RouteActivity.Route.FORMAT_DATE_FORMATTED)));
 
         lvRoutePoints.setVisibility(View.VISIBLE);
         lvRoutePoints.setAdapter(new RouteListAdapter(getActivity(), route.getPointList()));
