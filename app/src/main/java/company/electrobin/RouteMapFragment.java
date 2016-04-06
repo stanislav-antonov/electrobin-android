@@ -258,7 +258,6 @@ public class RouteMapFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    (Toast.makeText(getActivity(), "Point idx: " + idx, Toast.LENGTH_SHORT)).show();
                     mListener.onRoutePointClick(idx);
                 }
             });
@@ -320,7 +319,12 @@ public class RouteMapFragment extends Fragment {
         public void onClick(View v) {
             mRlLoadRetry.setVisibility(View.GONE);
             mRlLoading.setVisibility(View.VISIBLE);
-            loadMap();
+
+            try {
+                loadMap();
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+            }
         }
     }
 
@@ -438,20 +442,24 @@ public class RouteMapFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_route_map, container, false);
 
-        mRlRouteMap = (RelativeLayout)view.findViewById(R.id.route_map_layout);
-        mRlLoading = (RelativeLayout)view.findViewById(R.id.loading_layout);
+        mRlRouteMap = (RelativeLayout) view.findViewById(R.id.route_map_layout);
+        mRlRouteMap.setVisibility(View.VISIBLE);
 
-        mRlLoadRetry = (RelativeLayout)view.findViewById(R.id.load_retry_layout);
+        mRlLoading = (RelativeLayout) view.findViewById(R.id.loading_layout);
+        mRlLoading.setVisibility(View.GONE);
+
+        mRlLoadRetry = (RelativeLayout) view.findViewById(R.id.load_retry_layout);
         mRlLoadRetry.setVisibility(View.GONE);
 
-        mRlRouteBuilding = (RelativeLayout)view.findViewById(R.id.route_building_layout);
+        mRlRouteBuilding = (RelativeLayout) view.findViewById(R.id.route_building_layout);
         mRlRouteBuilding.setVisibility(View.GONE);
+
         ((TextView) mRlRouteBuilding.findViewById(R.id.route_building_text)).setText(mI10n.l("route_building"));
 
         return view;
     }
 
-    /**
+     /**
      *
      * @param activity
      */
@@ -466,10 +474,65 @@ public class RouteMapFragment extends Fragment {
         }
     }
 
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
+    private WebView prepareMapWebView() throws Exception {
+        final View view = getView();
+        if (view == null) throw new IllegalStateException("Root view is null");
+
+        final WebView wv;
+        try {
+            wv = (WebView) view.findViewById(R.id.map);
+
+            WebSettings webSettings = wv.getSettings();
+            webSettings.setJavaScriptEnabled(true);
+            wv.addJavascriptInterface(new MapJavaScriptInterface(getActivity()), "Android");
+            wv.setWebViewClient(new MapWebViewClient());
+
+            return wv;
+        }
+        catch(Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    /**
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        showRouteMap();
+
+        if (mWvMap == null) {
+            try {
+                mWvMap = prepareMapWebView();
+                loadMap();
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+            }
+        }
+    }
+
+    /**
+     *
+     * @param outState
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     /**
@@ -484,27 +547,7 @@ public class RouteMapFragment extends Fragment {
     /**
      *
      */
-    @SuppressLint("SetJavaScriptEnabled")
-    private void showRouteMap() {
-        if (mWvMap == null) { // TODO: do we really need to cache map?
-            mWvMap = (WebView)getActivity().findViewById(R.id.map);
-
-            WebSettings webSettings = mWvMap.getSettings();
-            webSettings.setJavaScriptEnabled(true);
-
-            mWvMap.addJavascriptInterface(new MapJavaScriptInterface(getActivity()), "Android");
-            mWvMap.setWebViewClient(new MapWebViewClient());
-        }
-
-        mRlRouteMap.setVisibility(View.VISIBLE);
-
-        loadMap();
-    }
-
-    /**
-     *
-     */
-    private void loadMap() {
+    private void loadMap() throws Exception {
         if (mMapCurrentState == MAP_STATE_LOADING) return;
 
         try {
@@ -524,8 +567,7 @@ public class RouteMapFragment extends Fragment {
             );
         }
         catch (IOException e) {
-            Log.e(LOG_TAG, e.getMessage());
-            throw new IllegalArgumentException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
 
         mMapCurrentState = MAP_STATE_LOADING;

@@ -265,8 +265,29 @@ public class RouteActivity extends AppCompatActivity implements
     private class UserProfileShowHandler implements View.OnClickListener {
         @Override
         public void onClick(View v) {
+            RouteMapFragment routeMapFragment = (RouteMapFragment)mFragmentManager
+                    .findFragmentByTag(FRAGMENT_ROUTE_MAP);
+
             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, UserProfileFragment.newInstance(), FRAGMENT_USER_PROFILE).addToBackStack(null);
+
+            if (routeMapFragment != null && routeMapFragment.isVisible()) {
+
+                fragmentTransaction.hide(routeMapFragment);
+
+                UserProfileFragment userProfileFragment = (UserProfileFragment)mFragmentManager
+                        .findFragmentByTag(FRAGMENT_USER_PROFILE);
+
+                if (userProfileFragment != null) {
+                    fragmentTransaction.show(userProfileFragment);
+                } else {
+                    fragmentTransaction.add(R.id.fragment_container, UserProfileFragment.newInstance(), FRAGMENT_USER_PROFILE);
+                }
+            }
+            else {
+                fragmentTransaction.replace(R.id.fragment_container, UserProfileFragment.newInstance(), FRAGMENT_USER_PROFILE);
+            }
+
+            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
     }
@@ -526,9 +547,29 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRoutePointClick(int idx) {
+        RouteMapFragment routeMapFragment = (RouteMapFragment)mFragmentManager
+                .findFragmentByTag(FRAGMENT_ROUTE_MAP);
+
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, BinCardFragment.newInstance(),
-                FRAGMENT_BIN_CARD).addToBackStack(null);
+
+        if (routeMapFragment != null && routeMapFragment.isVisible()) {
+
+            fragmentTransaction.hide(routeMapFragment);
+
+            BinCardFragment binCardFragment = (BinCardFragment)mFragmentManager
+                    .findFragmentByTag(FRAGMENT_BIN_CARD);
+
+            if (binCardFragment != null) {
+                fragmentTransaction.show(binCardFragment);
+            } else {
+                fragmentTransaction.add(R.id.fragment_container, BinCardFragment.newInstance(), FRAGMENT_BIN_CARD);
+            }
+        }
+        else {
+            fragmentTransaction.replace(R.id.fragment_container, BinCardFragment.newInstance(), FRAGMENT_BIN_CARD);
+        }
+
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 
