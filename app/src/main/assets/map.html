@@ -80,8 +80,9 @@
                         }
 
                         points.each(function (point, i) {
-                            point.properties.set("unique_id", wayPoints[i].unique_id);
-                            point.properties.set("iconContent", "");
+                            var uniqueId = wayPoints[i].unique_id;
+                            point.properties.set("unique_id", uniqueId);
+                            point.properties.set("iconContent", uniqueId);
 
                             // https://tech.yandex.ru/maps/doc/jsapi/2.0/ref/reference/GeoObject-docpage/
                             point.options.set({

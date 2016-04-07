@@ -28,6 +28,8 @@ public class UserProfileFragment extends Fragment {
 
     private TextView mTvConnectionStatus;
 
+    public final static String FRAGMENT_TAG = "fragment_user_profile";
+
     public interface OnFragmentInteractionListener {
         public boolean onGetIsConnected();
     }

@@ -36,6 +36,7 @@ public class RouteListFragment extends Fragment {
 
     private static final String BUNDLE_KEY_DISPLAY_LAYOUT = "display_layout";
     private final static String LOG_TAG = RouteListFragment.class.getSimpleName();
+    public final static String FRAGMENT_TAG = "fragment_route_list";
 
     public interface OnFragmentInteractionListener {
         public RouteActivity.Route onGetRoute();
@@ -82,14 +83,6 @@ public class RouteListFragment extends Fragment {
         return new RouteListFragment();
     }
 
-    public static RouteListFragment newInstance(int displayLayout) {
-        RouteListFragment fragment = new RouteListFragment();
-        Bundle args = new Bundle();
-        args.putInt(BUNDLE_KEY_DISPLAY_LAYOUT, displayLayout);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,7 +114,7 @@ public class RouteListFragment extends Fragment {
                 showRouteWaiting();
                 break;
             case LAYOUT_DISPLAYED_ROUTE_LIST:
-                redrawUIRouteList();
+                showUIRouteList();
                 break;
             default:
                 showRouteWaiting();
@@ -164,6 +157,14 @@ public class RouteListFragment extends Fragment {
 
     /**
      *
+     * @param layout
+     */
+    public void setDisplayedLayout(int layout) {
+        mLayoutDisplayed = layout;
+    }
+
+    /**
+     *
      */
     public void showRouteWaiting() {
         switchRouteWaitingLayout();
@@ -177,7 +178,7 @@ public class RouteListFragment extends Fragment {
     /**
      *
      */
-    public void redrawUIRouteList() {
+    public void showUIRouteList() {
         switchRouteListLayout();
 
         final Button btnRouteStart = (Button)mRlRouteList.findViewById(R.id.route_start_button);

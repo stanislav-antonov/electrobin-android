@@ -33,19 +33,14 @@ public class BinCardFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private final static String BUNDLE_KEY_ROUTE_POINT = "route_point";
+    public final static String FRAGMENT_TAG = "fragment_bin_card";
 
     public interface OnFragmentInteractionListener {
         public void onNextRoutePoint(RouteActivity.Route.Point point);
     }
 
-    public static BinCardFragment newInstance(RouteActivity.Route.Point point) {
-
-        BinCardFragment fragment = new BinCardFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(BUNDLE_KEY_ROUTE_POINT, point);
-        fragment.setArguments(args);
-
-        return fragment;
+    public static BinCardFragment newInstance() {
+        return new BinCardFragment();
     }
 
     @Override
@@ -112,8 +107,7 @@ public class BinCardFragment extends Fragment {
         mListener = null;
     }
 
-    public void redrawUI(RouteActivity.Route.Point point) {
-        mTvRoutePointAddress.setText(point.mAddress);
+    public void setRoutePoint(RouteActivity.Route.Point point) {
         mRoutePoint = point;
     }
 }

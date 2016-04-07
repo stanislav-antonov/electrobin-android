@@ -49,6 +49,7 @@ public class RouteMapFragment extends Fragment {
     private Handler mHandler = new Handler();
 
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
+    public final static String FRAGMENT_TAG = "fragment_route_map";
 
     private final static int MAP_STATE_INITIAL = 0;
     private final static int MAP_STATE_LOADING = 1;
@@ -578,7 +579,6 @@ public class RouteMapFragment extends Fragment {
 
 /*
 
-{"action":"new_route","created":"2014-12-28T19:50:40.964531Z","id":"21","points" : [{"id":333, "address":"Leninsky 21 22 33","city":"Moscow", "latitude":48.785346371124746, "longitude":44.57456924862674}, {"id":211, "address":"Ленинский","city":"Moscow", "latitude":48.78560940518449, "longitude":44.58332181428101}]}
-
+{"action":"new_route","created":"2014-12-28T19:50:40.964531Z","id":"21","points":[{"id":333, "address":"Точка 1","city":"Moscow", "latitude":48.785346371124746, "longitude":44.57456924862674},{"id":211, "address":"Точка 2","city":"Moscow", "latitude":48.78560940518449, "longitude":44.58332181428101},{"id":213, "address":"Точка 3","city":"Moscow", "latitude":48.77855526553813, "longitude":44.5642583540142}]}
 
  */

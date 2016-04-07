@@ -10,6 +10,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
@@ -31,6 +32,7 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.lang.reflect.Method;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,11 +60,6 @@ public class RouteActivity extends AppCompatActivity implements
 
     private FragmentManager mFragmentManager;
     private Route mCurrentRoute;
-
-    private final static String FRAGMENT_USER_PROFILE = "fragment_user_profile";
-    private final static String FRAGMENT_ROUTE_LIST = "fragment_route_list";
-    private final static String FRAGMENT_ROUTE_MAP = "fragment_route_map";
-    private final static String FRAGMENT_BIN_CARD = "fragment_bin_card";
 
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
 
@@ -94,6 +91,7 @@ public class RouteActivity extends AppCompatActivity implements
             public String mCity;
             public double mLat;
             public double mLng;
+            public boolean mIsVisited;
 
             public Point() {}
 
@@ -104,6 +102,7 @@ public class RouteActivity extends AppCompatActivity implements
                 mCity = in.readString();
                 mLat = in.readDouble();
                 mLng = in.readDouble();
+                mIsVisited =  in.readByte() != 0;
             }
 
             public int describeContents() {
@@ -117,6 +116,7 @@ public class RouteActivity extends AppCompatActivity implements
                 out.writeString(mCity);
                 out.writeDouble(mLat);
                 out.writeDouble(mLng);
+                out.writeByte((byte) (mIsVisited ? 1 : 0));
             }
 
             public static final Parcelable.Creator<Point> CREATOR
@@ -252,6 +252,9 @@ public class RouteActivity extends AppCompatActivity implements
 
                 JSONArray jaWayPoints = new JSONArray();
                 for (Point wayPoint : getWayPointList()) {
+                    // We need only unvisited points
+                    if (wayPoint.mIsVisited) continue;
+
                     JSONObject joWayPoint = new JSONObject();
                     joWayPoint.put("unique_id", wayPoint.mUniqueId);
                     joWayPoint.put("latitude", wayPoint.mLat);
@@ -268,6 +271,14 @@ public class RouteActivity extends AppCompatActivity implements
                 Log.e(LOG_TAG, e.getMessage());
                 return null;
             }
+        }
+
+        public void setWayPointVisited(int uniqueId) {
+            final Point point = getWayPointByUniqueId(uniqueId);
+            if (point == null)
+                throw new IllegalArgumentException();
+
+            point.mIsVisited = true;
         }
 
         public void setStartPoint(double lat, double lng) {
@@ -341,18 +352,9 @@ public class RouteActivity extends AppCompatActivity implements
                     case JSON_ACTION_NEW_ROUTE: {
                         setCurrentRoute(Route.newInstance(json));
 
-                        RouteListFragment routeListFragment = (RouteListFragment)mFragmentManager
-                                .findFragmentByTag(FRAGMENT_ROUTE_LIST);
-
-                        if (routeListFragment == null) {
-                            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-                            fragmentTransaction.replace(R.id.fragment_container, RouteListFragment.newInstance(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST),
-                                    FRAGMENT_ROUTE_LIST).addToBackStack(null);
-                            fragmentTransaction.commit();
-                        }
-                        else if (routeListFragment.isVisible()) {
-                            // Just update route list
-                            routeListFragment.redrawUIRouteList();
+                        RouteListFragment routeListFragment = (RouteListFragment)mFragmentManager.findFragmentByTag(RouteListFragment.FRAGMENT_TAG);
+                        if (routeListFragment != null && routeListFragment.isVisible()) {
+                            routeListFragment.showUIRouteList();
                             showRouteUpdatedNotification(true);
                         }
                         else {
@@ -377,30 +379,7 @@ public class RouteActivity extends AppCompatActivity implements
     private class UserProfileShowHandler implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            RouteMapFragment routeMapFragment = (RouteMapFragment)mFragmentManager
-                    .findFragmentByTag(FRAGMENT_ROUTE_MAP);
-
-            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-
-            if (routeMapFragment != null && routeMapFragment.isVisible()) {
-
-                fragmentTransaction.hide(routeMapFragment);
-
-                UserProfileFragment userProfileFragment = (UserProfileFragment)mFragmentManager
-                        .findFragmentByTag(FRAGMENT_USER_PROFILE);
-
-                if (userProfileFragment != null) {
-                    fragmentTransaction.show(userProfileFragment);
-                } else {
-                    fragmentTransaction.add(R.id.fragment_container, UserProfileFragment.newInstance(), FRAGMENT_USER_PROFILE);
-                }
-            }
-            else {
-                fragmentTransaction.replace(R.id.fragment_container, UserProfileFragment.newInstance(), FRAGMENT_USER_PROFILE);
-            }
-
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
+            switchToFragment(UserProfileFragment.class);
         }
     }
 
@@ -441,6 +420,50 @@ public class RouteActivity extends AppCompatActivity implements
 
     /**
      *
+     * @param fragmentClass
+     * @return
+     */
+    private Fragment switchToFragment(Class fragmentClass) {
+        final FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+
+        // Hide all fragments
+        List<Fragment> fragmentList = mFragmentManager.getFragments();
+        if (fragmentList != null) {
+            for (Fragment fragment : fragmentList) {
+                if (fragment != null && fragment.isVisible())
+                    fragmentTransaction.hide(fragment);
+            }
+        }
+
+        String toFragmentTag = null;
+        try {
+            toFragmentTag = (String)fragmentClass.getDeclaredField("FRAGMENT_TAG").get(null);
+        } catch(Exception e) {
+            Log.e(LOG_TAG, e.getMessage());
+        }
+
+        Fragment toFragment = mFragmentManager.findFragmentByTag(toFragmentTag);
+        if (toFragment != null) {
+            fragmentTransaction.remove(toFragment);
+        }
+
+        try {
+            Method newInstanceMethod = fragmentClass.getMethod("newInstance", null);
+            toFragment = (Fragment) newInstanceMethod.invoke(null, null);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.getMessage());
+        }
+
+        fragmentTransaction.add(R.id.fragment_container, toFragment, toFragmentTag);
+
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+
+        return toFragment;
+    }
+
+    /**
+     *
      * @param savedInstanceState
      */
     @Override
@@ -462,10 +485,8 @@ public class RouteActivity extends AppCompatActivity implements
         mFragmentManager = getSupportFragmentManager();
         mFragmentManager.addOnBackStackChangedListener(this);
 
-        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, RouteListFragment.newInstance(),
-                FRAGMENT_ROUTE_LIST);
-        fragmentTransaction.commit();
+        // createRouteListFragment();
+        switchToFragment(RouteListFragment.class);
 
         shouldDisplayHomeUp();
     }
@@ -576,12 +597,8 @@ public class RouteActivity extends AppCompatActivity implements
                         public void onClick(View v) {
                             fadeOut.start();
 
-                            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-                            fragmentTransaction.replace(R.id.fragment_container,
-                                    RouteListFragment.newInstance(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST),
-                                    FRAGMENT_ROUTE_LIST).addToBackStack(null);
-
-                            fragmentTransaction.commit();
+                            RouteListFragment fragment = (RouteListFragment)switchToFragment(RouteListFragment.class);
+                            fragment.setDisplayedLayout(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
                         }
                     });
                 }
@@ -662,30 +679,8 @@ public class RouteActivity extends AppCompatActivity implements
         final Route.Point point = getCurrentRoute().getWayPointByUniqueId(uniqueId);
         if (point == null) return;
 
-        final FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-        final RouteMapFragment routeMapFragment = (RouteMapFragment)mFragmentManager
-                .findFragmentByTag(FRAGMENT_ROUTE_MAP);
-
-        if (routeMapFragment != null && routeMapFragment.isVisible()) {
-
-            fragmentTransaction.hide(routeMapFragment);
-
-            final BinCardFragment binCardFragment = (BinCardFragment)mFragmentManager
-                    .findFragmentByTag(FRAGMENT_BIN_CARD);
-
-            if (binCardFragment != null) {
-                fragmentTransaction.show(binCardFragment);
-                binCardFragment.redrawUI(point);
-            } else {
-                fragmentTransaction.add(R.id.fragment_container, BinCardFragment.newInstance(point), FRAGMENT_BIN_CARD);
-            }
-        }
-        else {
-            fragmentTransaction.replace(R.id.fragment_container, BinCardFragment.newInstance(point), FRAGMENT_BIN_CARD);
-        }
-
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        final BinCardFragment binCardFragment = (BinCardFragment)switchToFragment(BinCardFragment.class);
+        binCardFragment.setRoutePoint(point);
     }
 
     /**
@@ -693,14 +688,16 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onNextRoutePoint(Route.Point currentPoint) {
+        final Route route = getCurrentRoute();
 
+        try {
+            route.setWayPointVisited(currentPoint.mUniqueId);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.getMessage());
+            return;
+        }
 
-
-
-
-        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, RouteMapFragment.newInstance(), FRAGMENT_ROUTE_MAP).addToBackStack(null);
-        fragmentTransaction.commit();
+        switchToFragment(RouteMapFragment.class);
     }
 
     /**
@@ -708,9 +705,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteStart() {
-        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, RouteMapFragment.newInstance(), FRAGMENT_ROUTE_MAP).addToBackStack(null);
-        fragmentTransaction.commit();
+        switchToFragment(RouteMapFragment.class);
 
         // TODO: Not totally correct to make this call here..
         final Route route = getCurrentRoute();
