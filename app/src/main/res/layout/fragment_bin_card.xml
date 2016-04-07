@@ -16,7 +16,6 @@
         android:gravity="center_horizontal"
         >
         <TextView
-            android:text="Вы прибыли на точку маршрута"
             android:id="@+id/header_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,7 +24,6 @@
             />
         <TextView
             android:id="@+id/route_point_address_text"
-            android:text="Москва, Ленинский д.12"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
@@ -50,7 +48,6 @@
             android:id="@+id/bin_status_label_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Статус контейнера"
             android:textSize="20sp"
             android:textColor="#ff394445"
             />
@@ -64,21 +61,18 @@
                 android:layout_height="wrap_content"
                 android:textColor="#ff607677"
                 android:textSize="16sp"
-                android:text="Выгружен"
                 />
             <RadioButton android:id="@+id/bin_unloaded_error_radio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#ff607677"
                 android:textSize="16sp"
-                android:text="Ошибка"
                 />
         </RadioGroup>
         <TextView
             android:id="@+id/bin_comment_label_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Комментарий"
             android:textSize="20sp"
             android:textColor="#ff394445"
             android:layout_marginTop="20dp"

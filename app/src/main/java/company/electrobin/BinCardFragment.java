@@ -28,20 +28,32 @@ public class BinCardFragment extends Fragment {
 
     private TextView mTvRoutePointAddress;
 
+    private RouteActivity.Route.Point mRoutePoint;
+
     private OnFragmentInteractionListener mListener;
 
-    public interface OnFragmentInteractionListener {
+    private final static String BUNDLE_KEY_ROUTE_POINT = "route_point";
 
-        public void onNextRoutePoint();
+    public interface OnFragmentInteractionListener {
+        public void onNextRoutePoint(RouteActivity.Route.Point point);
     }
 
-    public static BinCardFragment newInstance() {
-        return new BinCardFragment();
+    public static BinCardFragment newInstance(RouteActivity.Route.Point point) {
+
+        BinCardFragment fragment = new BinCardFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(BUNDLE_KEY_ROUTE_POINT, point);
+        fragment.setArguments(args);
+
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mRoutePoint = getArguments().getParcelable(BUNDLE_KEY_ROUTE_POINT);
+        }
 
         mApp = (ElectrobinApplication)getActivity().getApplicationContext();
         mUser = mApp.getUser();
@@ -65,6 +77,7 @@ public class BinCardFragment extends Fragment {
         mRbBinUnloadedError.setText(mI10n.l("container_status_unloaded_error"));
 
         mTvRoutePointAddress = (TextView)view.findViewById(R.id.route_point_address_text);
+        mTvRoutePointAddress.setText(mRoutePoint.mAddress);
 
         ((TextView)view.findViewById(R.id.header_text)).setText(mI10n.l("have_arrived_the_route_point"));
 
@@ -85,11 +98,22 @@ public class BinCardFragment extends Fragment {
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        mBtnNextRoutePoint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onNextRoutePoint(mRoutePoint);
+            }
+        });
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public void redrawUI(RouteActivity.Route.Point point) {
+        mTvRoutePointAddress.setText(point.mAddress);
+        mRoutePoint = point;
     }
 }

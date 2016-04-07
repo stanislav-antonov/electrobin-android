@@ -48,12 +48,23 @@
                 );
             }
 
-            function displayRoute(p) {
-                p = $.parseJSON(p);
+            function displayRoute(route) {
+                // var route = '{"start_point":{"longitude":44.5837853,"latitude":48.7869476},"way_points":[{"unique_id":1,"longitude":44.57456924862674,"latitude":48.785346371124746},{"unique_id":2,"longitude":44.58332181428101,"latitude":48.78560940518449}]}';
+                route = $.parseJSON(route);
 
                 var points = [];
-                for (i = 0; i < p.length; i++) {
-                    points.push({ type: "wayPoint", point: p[i] });
+                var hasStartPoint = false;
+
+                if (route.hasOwnProperty("start_point")) {
+                    var startPoint = route.start_point;
+                    points.push({ type: "wayPoint", point: [ startPoint.latitude, startPoint.longitude ] });
+                    hasStartPoint = true;
+                }
+
+                var wayPoints = route.way_points;
+                for (i = 0; i < wayPoints.length; i++) {
+                    var wayPoint = wayPoints[i];
+                    points.push({ type: "wayPoint", point: [ wayPoint.latitude, wayPoint.longitude ] });
                 }
 
                 Android.onRouteBuildingStart();
@@ -63,12 +74,13 @@
                         // var points = route.getViaPoints();
                         var points = route.getWayPoints();
 
-                        // Remove the first point with a current user location
-                        var locationPoint = points.get(0);
-                        points.remove(locationPoint);
+                        if (hasStartPoint) {
+                            var locationPoint = points.get(0);
+                            points.remove(locationPoint);
+                        }
 
                         points.each(function (point, i) {
-                            point.properties.set("idx", i);
+                            point.properties.set("unique_id", wayPoints[i].unique_id);
                             point.properties.set("iconContent", "");
 
                             // https://tech.yandex.ru/maps/doc/jsapi/2.0/ref/reference/GeoObject-docpage/
@@ -77,18 +89,21 @@
                             });
 
                             point.events.add("click", function () {
-                                Android.onRoutePointClick(point.properties.get("idx"));
-                             });
+                                Android.onRoutePointClick(point.properties.get("unique_id"));
+                            });
                         });
 
-                        var locationPlacemark = new ymaps.Placemark(locationPoint.geometry.getCoordinates(), {}, {
-                            hasBalloon: false,
-                            iconColor: "0066ff99"
-                        });
+                        if (hasStartPoint) {
+                            var startPointPlacemark = new ymaps.Placemark(locationPoint.geometry.getCoordinates(), {}, {
+                                hasBalloon: false,
+                                iconColor: "0066ff99"
+                            });
 
-                        points.add(locationPlacemark, 0);
+                            points.add(startPointPlacemark, 0);
+                        }
 
                         myMap.geoObjects.add(route);
+
                         Android.onRouteBuildingReady();
                     },
                     function (error) {

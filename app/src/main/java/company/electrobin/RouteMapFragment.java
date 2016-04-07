@@ -20,7 +20,6 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -394,7 +393,7 @@ public class RouteMapFragment extends Fragment {
          */
         private void drawRoute() {
             final RouteActivity.Route route = mListener.onGetRoute();
-            mWvMap.loadUrl(String.format("javascript:displayRoute('%s')", route.getPointsJSON()));
+            mWvMap.loadUrl(String.format("javascript:displayRoute('%s')", route.asJSON()));
         }
 
         /**

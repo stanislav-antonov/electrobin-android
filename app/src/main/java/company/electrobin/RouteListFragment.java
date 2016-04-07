@@ -2,7 +2,6 @@ package company.electrobin;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -122,7 +121,7 @@ public class RouteListFragment extends Fragment {
                 showRouteWaiting();
                 break;
             case LAYOUT_DISPLAYED_ROUTE_LIST:
-                showRouteList();
+                redrawUIRouteList();
                 break;
             default:
                 showRouteWaiting();
@@ -178,7 +177,7 @@ public class RouteListFragment extends Fragment {
     /**
      *
      */
-    public void showRouteList() {
+    public void redrawUIRouteList() {
         switchRouteListLayout();
 
         final Button btnRouteStart = (Button)mRlRouteList.findViewById(R.id.route_start_button);
@@ -195,7 +194,7 @@ public class RouteListFragment extends Fragment {
         tvRouteDate.setText(String.format(mI10n.l("route_date"), route.getDateFormatted(RouteActivity.Route.FORMAT_DATE_FORMATTED)));
 
         lvRoutePoints.setVisibility(View.VISIBLE);
-        lvRoutePoints.setAdapter(new RouteListAdapter(getActivity(), route.getPointList()));
+        lvRoutePoints.setAdapter(new RouteListAdapter(getActivity(), route.getWayPointList()));
 
         btnRouteStart.setOnClickListener(new View.OnClickListener() {
             @Override

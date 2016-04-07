@@ -8,6 +8,8 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
@@ -62,14 +64,16 @@ public class RouteActivity extends AppCompatActivity implements
     private final static String FRAGMENT_ROUTE_MAP = "fragment_route_map";
     private final static String FRAGMENT_BIN_CARD = "fragment_bin_card";
 
+    private final static String LOG_TAG = RouteActivity.class.getSimpleName();
+
     /**
      *
      */
-    public static class Route {
+    public static class Route implements Parcelable {
         private Integer mId;
         private Date mDate;
-        private List<Point> mPointList;
-        private Point mCurrentStartPoint;
+        private List<Point> mWayPointList;
+        private Point mStartPoint;
 
         private final static String JSON_ROUTE_ID_KEY = "id";
         private final static String JSON_ROUTE_DATE_KEY = "created";
@@ -82,6 +86,50 @@ public class RouteActivity extends AppCompatActivity implements
 
         public final static String FORMAT_DATE_ORIGINAL = "yyyy-MM-dd'T'HH:mm:ss.SSS";
         public final static String FORMAT_DATE_FORMATTED = "H:mm d.MM.yyyy";
+
+        public static class Point implements Parcelable {
+            public Integer mId;
+            public int mUniqueId;
+            public String mAddress;
+            public String mCity;
+            public double mLat;
+            public double mLng;
+
+            public Point() {}
+
+            private Point(Parcel in) {
+                mId = in.readInt();
+                mUniqueId = in.readInt();
+                mAddress = in.readString();
+                mCity = in.readString();
+                mLat = in.readDouble();
+                mLng = in.readDouble();
+            }
+
+            public int describeContents() {
+                return 0;
+            }
+
+            public void writeToParcel(Parcel out, int flags) {
+                out.writeInt(mId);
+                out.writeInt(mUniqueId);
+                out.writeString(mAddress);
+                out.writeString(mCity);
+                out.writeDouble(mLat);
+                out.writeDouble(mLng);
+            }
+
+            public static final Parcelable.Creator<Point> CREATOR
+                    = new Parcelable.Creator<Point>() {
+                public Point createFromParcel(Parcel in) {
+                    return new Point(in);
+                }
+
+                public Point[] newArray(int size) {
+                    return new Point[size];
+                }
+            };
+        }
 
         /**
          *
@@ -130,6 +178,8 @@ public class RouteActivity extends AppCompatActivity implements
                         point.mLng = joPoint.getDouble(JSON_ROUTE_POINT_LONGITUDE_KEY);
                         point.mLat = joPoint.getDouble(JSON_ROUTE_POINT_LATITUDE_KEY);
 
+                        point.mUniqueId = i + 1;
+
                         pointList.add(point);
                     }
                 }
@@ -143,19 +193,40 @@ public class RouteActivity extends AppCompatActivity implements
             return new Route(routeId, routeDate, pointList);
         }
 
-        public Route(int id, Date date, List<Point> pointList) {
+        public Route(int id, Date date, List<Point> wayPointList) {
             mId = id;
             mDate = date;
-            mPointList = pointList;
+            mWayPointList = wayPointList;
         }
 
-        public static class Point {
-            public Integer mId;
-            public String mAddress;
-            public String mCity;
-            public double mLat;
-            public double mLng;
+        private Route(Parcel in) {
+            mId = in.readInt();
+            mDate = new Date(in.readLong());
+            in.readList(mWayPointList, Point.class.getClassLoader());
+            mStartPoint = in.readParcelable(Point.class.getClassLoader());
         }
+
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(mId);
+            out.writeLong(mDate.getTime());
+            out.writeList(mWayPointList);
+            out.writeParcelable(mStartPoint, flags);
+        }
+
+        public static final Parcelable.Creator<Route> CREATOR
+                = new Parcelable.Creator<Route>() {
+            public Route createFromParcel(Parcel in) {
+                return new Route(in);
+            }
+
+            public Route[] newArray(int size) {
+                return new Route[size];
+            }
+        };
 
         public Date getDate() { return mDate; }
 
@@ -165,30 +236,71 @@ public class RouteActivity extends AppCompatActivity implements
             return formatter.format(mDate);
         }
 
-        public List<Point> getPointList() { return mPointList; }
+        public List<Point> getWayPointList() { return mWayPointList; }
 
-        public String getPointsJSON() {
-            String result = "";
-            for (Point point : getPointList())
-                result += String.format(", [%s, %s]", point.mLat, point.mLng);
+        public String asJSON() {
+            try {
+                JSONObject jo = new JSONObject();
 
-            return String.format("[%s]", result.replaceFirst(", ", ""));
+                if (mStartPoint != null) {
+                    JSONObject joStartPoint = new JSONObject();
+                    joStartPoint.put("latitude", mStartPoint.mLat);
+                    joStartPoint.put("longitude", mStartPoint.mLng);
+
+                    jo.put("start_point", joStartPoint);
+                }
+
+                JSONArray jaWayPoints = new JSONArray();
+                for (Point wayPoint : getWayPointList()) {
+                    JSONObject joWayPoint = new JSONObject();
+                    joWayPoint.put("unique_id", wayPoint.mUniqueId);
+                    joWayPoint.put("latitude", wayPoint.mLat);
+                    joWayPoint.put("longitude", wayPoint.mLng);
+
+                    jaWayPoints.put(joWayPoint);
+                }
+
+                jo.put("way_points", jaWayPoints);
+
+                return jo.toString();
+            }
+            catch(Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+                return null;
+            }
         }
 
         public void setStartPoint(double lat, double lng) {
             Point point = new Point();
             point.mLat = lat;
             point.mLng = lng;
-            getPointList().add(0, point);
-            mCurrentStartPoint = point;
+
+            mStartPoint = point;
+        }
+
+        public Point getWayPoint(int idx) {
+            try {
+                return mWayPointList.get(idx);
+            } catch (IndexOutOfBoundsException e) {
+                return null;
+            }
+        }
+
+        public Point getWayPointByUniqueId(int uniqueId) {
+            for (Point point : getWayPointList()) {
+                if (point.mUniqueId == uniqueId)
+                    return point;
+            }
+
+            return null;
         }
 
         public Point getStartPoint() {
-            return mCurrentStartPoint;
+            return mStartPoint;
         }
 
         public boolean hasStartPoint() {
-            return mCurrentStartPoint != null;
+            return mStartPoint != null;
         }
 
         public Integer getId() { return mId; }
@@ -240,7 +352,7 @@ public class RouteActivity extends AppCompatActivity implements
                         }
                         else if (routeListFragment.isVisible()) {
                             // Just update route list
-                            routeListFragment.showRouteList();
+                            routeListFragment.redrawUIRouteList();
                             showRouteUpdatedNotification(true);
                         }
                         else {
@@ -546,27 +658,30 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     @Override
-    public void onRoutePointClick(int idx) {
-        RouteMapFragment routeMapFragment = (RouteMapFragment)mFragmentManager
-                .findFragmentByTag(FRAGMENT_ROUTE_MAP);
+    public void onRoutePointClick(int uniqueId) {
+        final Route.Point point = getCurrentRoute().getWayPointByUniqueId(uniqueId);
+        if (point == null) return;
 
-        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        final FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        final RouteMapFragment routeMapFragment = (RouteMapFragment)mFragmentManager
+                .findFragmentByTag(FRAGMENT_ROUTE_MAP);
 
         if (routeMapFragment != null && routeMapFragment.isVisible()) {
 
             fragmentTransaction.hide(routeMapFragment);
 
-            BinCardFragment binCardFragment = (BinCardFragment)mFragmentManager
+            final BinCardFragment binCardFragment = (BinCardFragment)mFragmentManager
                     .findFragmentByTag(FRAGMENT_BIN_CARD);
 
             if (binCardFragment != null) {
                 fragmentTransaction.show(binCardFragment);
+                binCardFragment.redrawUI(point);
             } else {
-                fragmentTransaction.add(R.id.fragment_container, BinCardFragment.newInstance(), FRAGMENT_BIN_CARD);
+                fragmentTransaction.add(R.id.fragment_container, BinCardFragment.newInstance(point), FRAGMENT_BIN_CARD);
             }
         }
         else {
-            fragmentTransaction.replace(R.id.fragment_container, BinCardFragment.newInstance(), FRAGMENT_BIN_CARD);
+            fragmentTransaction.replace(R.id.fragment_container, BinCardFragment.newInstance(point), FRAGMENT_BIN_CARD);
         }
 
         fragmentTransaction.addToBackStack(null);
@@ -577,8 +692,15 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     @Override
-    public void onNextRoutePoint() {
+    public void onNextRoutePoint(Route.Point currentPoint) {
 
+
+
+
+
+        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, RouteMapFragment.newInstance(), FRAGMENT_ROUTE_MAP).addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     /**
