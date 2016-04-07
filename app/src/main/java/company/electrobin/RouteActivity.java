@@ -435,23 +435,24 @@ public class RouteActivity extends AppCompatActivity implements
             }
         }
 
-        String toFragmentTag = null;
+        String toFragmentTag;
         try {
             toFragmentTag = (String)fragmentClass.getDeclaredField("FRAGMENT_TAG").get(null);
         } catch(Exception e) {
             Log.e(LOG_TAG, e.getMessage());
+            return null;
         }
 
         Fragment toFragment = mFragmentManager.findFragmentByTag(toFragmentTag);
-        if (toFragment != null) {
+        if (toFragment != null)
             fragmentTransaction.remove(toFragment);
-        }
 
         try {
             Method newInstanceMethod = fragmentClass.getMethod("newInstance", null);
             toFragment = (Fragment) newInstanceMethod.invoke(null, null);
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
+            return null;
         }
 
         fragmentTransaction.add(R.id.fragment_container, toFragment, toFragmentTag);
