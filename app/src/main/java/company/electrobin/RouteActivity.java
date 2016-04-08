@@ -306,6 +306,15 @@ public class RouteActivity extends AppCompatActivity implements
             return null;
         }
 
+        public boolean hasUnvisitedWayPoints() {
+            for (Point point : getWayPointList()) {
+                if (!point.mIsVisited)
+                    return true;
+            }
+
+            return false;
+        }
+
         public Point getStartPoint() {
             return mStartPoint;
         }
@@ -370,16 +379,6 @@ public class RouteActivity extends AppCompatActivity implements
             } catch (Exception e) {
                 Log.d(LOG_TAG, e.getMessage());
             }
-        }
-    }
-
-    /**
-     *
-     */
-    private class UserProfileShowHandler implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            switchToFragment(UserProfileFragment.class);
         }
     }
 
@@ -486,7 +485,6 @@ public class RouteActivity extends AppCompatActivity implements
         mFragmentManager = getSupportFragmentManager();
         mFragmentManager.addOnBackStackChangedListener(this);
 
-        // createRouteListFragment();
         switchToFragment(RouteListFragment.class);
 
         shouldDisplayHomeUp();
@@ -599,7 +597,7 @@ public class RouteActivity extends AppCompatActivity implements
                             fadeOut.start();
 
                             RouteListFragment fragment = (RouteListFragment)switchToFragment(RouteListFragment.class);
-                            fragment.setDisplayedLayout(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+                            fragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
                         }
                     });
                 }
@@ -620,7 +618,7 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     private void setupCustomActionBar() {
-        UserProfile uProfile = mUser.getProfile();
+        final UserProfile uProfile = mUser.getProfile();
         if (uProfile == null) return;
 
         final ActionBar actionBar = getSupportActionBar();
@@ -637,7 +635,12 @@ public class RouteActivity extends AppCompatActivity implements
 
         final Button btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
         btnActionBarUserProfile.setText(String.format("%s %s", uProfile.mFirstName, uProfile.mLastName));
-        btnActionBarUserProfile.setOnClickListener(new UserProfileShowHandler());
+        btnActionBarUserProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchToFragment(UserProfileFragment.class);
+            }
+        });
     }
 
     /**
@@ -688,17 +691,29 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     @Override
-    public void onNextRoutePoint(Route.Point currentPoint) {
+    public void onRoutePointDone(Route.Point point, BinCardFragment fragment) {
         final Route route = getCurrentRoute();
 
         try {
-            route.setWayPointVisited(currentPoint.mUniqueId);
+            route.setWayPointVisited(point.mUniqueId);
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
             return;
         }
 
-        switchToFragment(RouteMapFragment.class);
+        if (route.hasUnvisitedWayPoints()) {
+            switchToFragment(RouteMapFragment.class);
+        } else {
+            fragment.showUIAllBinsDone();
+        }
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onRouteDone() {
+
     }
 
     /**

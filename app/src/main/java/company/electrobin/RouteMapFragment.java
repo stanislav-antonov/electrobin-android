@@ -62,7 +62,7 @@ public class RouteMapFragment extends Fragment {
         public RouteActivity.Route onGetRoute();
         public void onRouteBuildingStart();
         public void onRouteBuildingReady();
-        public void onRoutePointClick(int idx);
+        public void onRoutePointClick(int id);
     }
 
     /**
@@ -254,11 +254,11 @@ public class RouteMapFragment extends Fragment {
          *
          */
         @JavascriptInterface
-        public void onRoutePointClick(final int idx) {
+        public void onRoutePointClick(final int id) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onRoutePointClick(idx);
+                    mListener.onRoutePointClick(id);
                 }
             });
         }

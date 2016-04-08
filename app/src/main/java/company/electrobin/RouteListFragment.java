@@ -111,13 +111,13 @@ public class RouteListFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         switch (mLayoutDisplayed) {
             case LAYOUT_DISPLAYED_ROUTE_WAITING:
-                showRouteWaiting();
+                showUIRouteWaiting();
                 break;
             case LAYOUT_DISPLAYED_ROUTE_LIST:
                 showUIRouteList();
                 break;
             default:
-                showRouteWaiting();
+                showUIRouteWaiting();
                 break;
         }
     }
@@ -159,14 +159,14 @@ public class RouteListFragment extends Fragment {
      *
      * @param layout
      */
-    public void setDisplayedLayout(int layout) {
+    public void setLayoutDisplayed(int layout) {
         mLayoutDisplayed = layout;
     }
 
     /**
      *
      */
-    public void showRouteWaiting() {
+    public void showUIRouteWaiting() {
         switchRouteWaitingLayout();
 
         ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_1)).setText(mI10n.l("route_waiting_1"));

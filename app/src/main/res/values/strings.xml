@@ -30,9 +30,13 @@
     <string name="route_date">Your route at %s</string>
     <string name="route_updated">Your route was updated</string>
     <string name="to_route_list">To route list</string>
-    <string name="to_next_route_point">To next route point</string>
+    <string name="next_route_point">To next route point</string>
+    <string name="finish_route">Finish route</string>
 
-    <string name="have_arrived_the_route_point">You have arrived the route point</string>
+    <string name="have_arrived_route_point">You have arrived the route point</string>
+
+    <string name="have_got_all_bins">You have got all bins on the route</string>
+    <string name="please_move_to_the_base">Please move to the base and push the "Finish route" button on arrived</string>
 
     <string name="connection_status">Connection status: %s</string>
     <string name="connection_status_connected">connected</string>
