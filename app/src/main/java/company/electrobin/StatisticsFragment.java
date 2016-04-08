@@ -27,7 +27,7 @@ public class StatisticsFragment extends Fragment {
     public final static String FRAGMENT_TAG = "fragment_statistics";
 
     public interface OnFragmentInteractionListener {
-
+        public void onGetNewRoute();
     }
 
     public static StatisticsFragment newInstance() {
@@ -78,7 +78,7 @@ public class StatisticsFragment extends Fragment {
         btnNewRoute.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                mListener.onGetNewRoute();
             }
         });
     }

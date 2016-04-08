@@ -664,9 +664,8 @@ public class RouteActivity extends AppCompatActivity implements
         mFragmentManager = getSupportFragmentManager();
         mFragmentManager.addOnBackStackChangedListener(this);
 
-        switchToFragment(RouteListFragment.class);
-
         shouldDisplayHomeUp();
+        switchToFragment(RouteListFragment.class);
     }
 
     /**
@@ -893,6 +892,15 @@ public class RouteActivity extends AppCompatActivity implements
     @Override
     public void onRouteDone() {
         switchToFragment(StatisticsFragment.class);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onGetNewRoute() {
+        RouteListFragment fragment = (RouteListFragment)switchToFragment(RouteListFragment.class);
+        fragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_WAITING);
     }
 
     /**
