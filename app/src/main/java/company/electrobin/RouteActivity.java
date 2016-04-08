@@ -7,6 +7,10 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
+import android.location.GpsStatus;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -16,6 +20,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
@@ -60,7 +65,8 @@ public class RouteActivity extends AppCompatActivity implements
     private RelativeLayout mRlRouteUpdated;
 
     private FragmentManager mFragmentManager;
-    private Route mCurrentRoute;
+    private Route mRoute;
+    private UserLocation mUserLocation;
 
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
 
@@ -383,6 +389,168 @@ public class RouteActivity extends AppCompatActivity implements
         }
     }
 
+
+    public class UserLocation {
+
+        private LocationManager mLocationManager;
+        private UserLocationListener mLocationListener;
+
+        private boolean mIsRunning;
+
+        private static final long LOCATION_UPDATES_MIN_TIME_INTERVAL = 1000L;
+        private static final long LOCATION_UPDATES_MIN_DISTANCE = 0L;
+
+        public static final String BUNDLE_KEY_LOCATION = "location";
+        public static final String BROADCAST_INTENT = "USER_LOCATION_CHANGED";
+
+        /**
+         *
+         */
+        private class UserLocationListener implements LocationListener {
+
+            private Location mCurrentLocation;
+            private static final int LOCATION_EXPIRES_TIME_INTERVAL = 1000 * 60 * 2;
+
+            @Override
+            public synchronized void onLocationChanged(Location location) {
+                // Check the new location fix
+                if (isBetterLocation(location, mCurrentLocation)) {
+                    mCurrentLocation = location;
+                }
+
+                broadcastLocation();
+            }
+
+            private void broadcastLocation() {
+                Intent intent = new Intent(BROADCAST_INTENT);
+                intent.putExtra(BUNDLE_KEY_LOCATION, mCurrentLocation);
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+            @Override
+            public void onProviderEnabled(String provider) {}
+
+            @Override
+            public void onProviderDisabled(String provider) {}
+
+            /** Determines whether one Location reading is better than the current Location fix
+             * @param location  The new Location that you want to evaluate
+             * @param currentBestLocation  The current Location fix, to which you want to compare the new one
+             */
+            protected boolean isBetterLocation(Location location, Location currentBestLocation) {
+                if (currentBestLocation == null)
+                    // A new location is always better than no location
+                    return true;
+
+                // Check whether the new location fix is newer or older
+                long timeDelta = location.getTime() - currentBestLocation.getTime();
+                boolean isSignificantlyNewer = timeDelta > LOCATION_EXPIRES_TIME_INTERVAL;
+                boolean isSignificantlyOlder = timeDelta < -LOCATION_EXPIRES_TIME_INTERVAL;
+                boolean isNewer = timeDelta > 0;
+
+                // If it's been more than two minutes since the current location, use the new location
+                // because the user has likely moved
+                if (isSignificantlyNewer) {
+                    return true;
+                    // If the new location is more than two minutes older, it must be worse
+                }
+                else if (isSignificantlyOlder) {
+                    return false;
+                }
+
+                // Check whether the new location fix is more or less accurate
+                int accuracyDelta = (int)(location.getAccuracy() - currentBestLocation.getAccuracy());
+                boolean isLessAccurate = accuracyDelta > 0;
+                boolean isMoreAccurate = accuracyDelta < 0;
+                boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+
+                // Check if the old and new location are from the same provider
+                boolean isFromSameProvider = isSameProvider(location.getProvider(),
+                        currentBestLocation.getProvider());
+
+                // Determine location quality using a combination of timeliness and accuracy
+                if (isMoreAccurate) {
+                    return true;
+                }
+                else if (isNewer && !isLessAccurate) {
+                    return true;
+                }
+                else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            /**
+             *
+             * @param provider1
+             * @param provider2
+             * @return
+             */
+            private boolean isSameProvider(String provider1, String provider2) {
+                if (provider1 == null)
+                    return provider2 == null;
+
+                return provider1.equals(provider2);
+            }
+        }
+
+        /**
+         *
+         */
+        private class GpsStatusListener implements GpsStatus.Listener {
+            @Override
+            public void onGpsStatusChanged(int event) {
+                if (event == GpsStatus.GPS_EVENT_FIRST_FIX) {
+                    // Got first fix since GPS starting
+                }
+            }
+        }
+
+        public UserLocation() {
+            mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            mLocationManager.addGpsStatusListener(new GpsStatusListener());
+        }
+
+        public void startLocationUpdates() {
+            if (mIsRunning) {
+                Log.i(LOG_TAG, "Location already running");
+                return;
+            }
+
+            mLocationListener = new UserLocationListener();
+
+            try {
+                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                        LOCATION_UPDATES_MIN_TIME_INTERVAL, LOCATION_UPDATES_MIN_DISTANCE, mLocationListener);
+            } catch(IllegalArgumentException e) {
+                Log.e(LOG_TAG, "Network provider error: " + e.getMessage());
+                return;
+            }
+
+            try {
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                        LOCATION_UPDATES_MIN_TIME_INTERVAL, LOCATION_UPDATES_MIN_DISTANCE, mLocationListener);
+            } catch (IllegalArgumentException e) {
+                Log.e(LOG_TAG, "GPS provider error: " + e.getMessage());
+                return;
+            }
+
+            mIsRunning = true;
+        }
+
+        public void stopLocationUpdates() {
+            if (mLocationListener != null)
+                mLocationManager.removeUpdates(mLocationListener);
+
+            mIsRunning = false;
+        }
+    }
+
     private TCPClientService mService;
     private boolean mBound = false;
 
@@ -407,7 +575,7 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     private void setCurrentRoute(Route route) {
-        mCurrentRoute = route;
+        mRoute = route;
     }
 
     /**
@@ -415,7 +583,15 @@ public class RouteActivity extends AppCompatActivity implements
      * @return
      */
     public Route getCurrentRoute() {
-        return mCurrentRoute;
+        return mRoute;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public UserLocation getUserLocation() {
+        return mUserLocation;
     }
 
     /**
@@ -475,6 +651,8 @@ public class RouteActivity extends AppCompatActivity implements
         mApp = (ElectrobinApplication)getApplicationContext();
         mUser = mApp.getUser();
         mI10n = mApp.getI10n();
+
+        mUserLocation = new UserLocation();
 
         setupCustomActionBar();
 

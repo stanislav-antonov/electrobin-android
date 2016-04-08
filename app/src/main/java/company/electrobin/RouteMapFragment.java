@@ -2,13 +2,15 @@ package company.electrobin;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,7 +45,7 @@ public class RouteMapFragment extends Fragment {
     private MapLoadBreaker mMapLoadBreaker;
     private RouteViewer mRouteViewer;
 
-    private int mMapCurrentState;
+    private int mMapState;
 
     private OnFragmentInteractionListener mListener;
     private Handler mHandler = new Handler();
@@ -54,6 +56,19 @@ public class RouteMapFragment extends Fragment {
     private final static int MAP_STATE_INITIAL = 0;
     private final static int MAP_STATE_LOADING = 1;
     private final static int MAP_STATE_READY = 2;
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+
+            if (bundle == null) return;
+            Location location = bundle.getParcelable(RouteActivity.UserLocation.BUNDLE_KEY_LOCATION);
+
+            if (location == null) return;
+            mRouteViewer.notifyGotUserLocation(location);
+        }
+    };
 
     /**
      *
@@ -68,115 +83,13 @@ public class RouteMapFragment extends Fragment {
     /**
      *
      */
-    private class UserLocationListener implements LocationListener {
-
-        private Location mCurrentLocation;
-        private static final int LOCATION_EXPIRES_TIME_INTERVAL = 1000 * 60 * 2;
-
-        @Override
-        public synchronized void onLocationChanged(Location location) {
-            // Check the new location fix
-            if (isBetterLocation(location, mCurrentLocation))
-                mCurrentLocation = location;
-
-            mRouteViewer.notifyGotUserLocation(mCurrentLocation);
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-        @Override
-        public void onProviderEnabled(String provider) {}
-
-        @Override
-        public void onProviderDisabled(String provider) {}
-
-        /** Determines whether one Location reading is better than the current Location fix
-         * @param location  The new Location that you want to evaluate
-         * @param currentBestLocation  The current Location fix, to which you want to compare the new one
-         */
-        protected boolean isBetterLocation(Location location, Location currentBestLocation) {
-            if (currentBestLocation == null)
-                // A new location is always better than no location
-                return true;
-
-            // Check whether the new location fix is newer or older
-            long timeDelta = location.getTime() - currentBestLocation.getTime();
-            boolean isSignificantlyNewer = timeDelta > LOCATION_EXPIRES_TIME_INTERVAL;
-            boolean isSignificantlyOlder = timeDelta < -LOCATION_EXPIRES_TIME_INTERVAL;
-            boolean isNewer = timeDelta > 0;
-
-            // If it's been more than two minutes since the current location, use the new location
-            // because the user has likely moved
-            if (isSignificantlyNewer) {
-                return true;
-                // If the new location is more than two minutes older, it must be worse
-            }
-            else if (isSignificantlyOlder) {
-                return false;
-            }
-
-            // Check whether the new location fix is more or less accurate
-            int accuracyDelta = (int)(location.getAccuracy() - currentBestLocation.getAccuracy());
-            boolean isLessAccurate = accuracyDelta > 0;
-            boolean isMoreAccurate = accuracyDelta < 0;
-            boolean isSignificantlyLessAccurate = accuracyDelta > 200;
-
-            // Check if the old and new location are from the same provider
-            boolean isFromSameProvider = isSameProvider(location.getProvider(),
-                    currentBestLocation.getProvider());
-
-            // Determine location quality using a combination of timeliness and accuracy
-            if (isMoreAccurate) {
-                return true;
-            }
-            else if (isNewer && !isLessAccurate) {
-                return true;
-            }
-            else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
-                return true;
-            }
-
-            return false;
-        }
-
-        /**
-         *
-         * @param provider1
-         * @param provider2
-         * @return
-         */
-        private boolean isSameProvider(String provider1, String provider2) {
-            if (provider1 == null)
-                return provider2 == null;
-
-            return provider1.equals(provider2);
-        }
-    }
-
-    /**
-     *
-     */
     private class MapWebViewClient extends WebViewClient {
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            LocationManager locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-            UserLocationListener locationListener = new UserLocationListener();
-
-            try {
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000L, 0F, locationListener);
-            }
-            catch(IllegalArgumentException e) {
-                Log.e(LOG_TAG, "Network provider error: " + e.getMessage());
-            }
-
-            try {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 0F, locationListener);
-            }
-            catch (IllegalArgumentException e) {
-                Log.e(LOG_TAG, "GPS provider error: " + e.getMessage());
-            }
+            // TODO: Maybe a bad design?
+            RouteActivity routeActivity = (RouteActivity)getActivity();
+            routeActivity.getUserLocation().startLocationUpdates();
         }
 
         @Override
@@ -208,7 +121,7 @@ public class RouteMapFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mMapCurrentState = MAP_STATE_READY;
+                    mMapState = MAP_STATE_READY;
                     mMapLoadBreaker.cancel();
 
                     mHandler.post(new Runnable() {
@@ -293,7 +206,7 @@ public class RouteMapFragment extends Fragment {
         public void run() {
             // Break the map loading
             mWvMap.stopLoading();
-            mMapCurrentState = MAP_STATE_INITIAL;
+            mMapState = MAP_STATE_INITIAL;
 
             mRlLoading.setVisibility(View.GONE);
             mRlLoadRetry.setVisibility(View.VISIBLE);
@@ -505,7 +418,7 @@ public class RouteMapFragment extends Fragment {
      * @param savedInstanceState
      */
     @Override
-    public void onActivityCreated (Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         if (mWvMap == null) {
@@ -533,6 +446,17 @@ public class RouteMapFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver,
+                new IntentFilter(RouteActivity.UserLocation.BROADCAST_INTENT));
     }
 
     /**
@@ -548,7 +472,7 @@ public class RouteMapFragment extends Fragment {
      *
      */
     private void loadMap() throws Exception {
-        if (mMapCurrentState == MAP_STATE_LOADING) return;
+        if (mMapState == MAP_STATE_LOADING) return;
 
         try {
             InputStream is = getActivity().getAssets().open("map.html");
@@ -570,7 +494,7 @@ public class RouteMapFragment extends Fragment {
             throw new Exception(e.getMessage());
         }
 
-        mMapCurrentState = MAP_STATE_LOADING;
+        mMapState = MAP_STATE_LOADING;
         mRlLoading.setVisibility(View.VISIBLE);
         mMapLoadBreaker.watch();
     }
