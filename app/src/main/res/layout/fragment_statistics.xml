@@ -70,7 +70,7 @@
                     android:text="10 - 20"
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -78,7 +78,7 @@
                     android:text=""
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -86,7 +86,7 @@
                     android:text=""
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -99,7 +99,7 @@
                     android:text="30 - 40"
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -107,7 +107,7 @@
                     android:text=""
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -115,7 +115,7 @@
                     android:text=""
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -128,7 +128,7 @@
                     android:text="40 - 70"
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -136,7 +136,7 @@
                     android:text=""
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -144,7 +144,7 @@
                     android:text=""
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -157,7 +157,7 @@
                     android:text="70 - 100"
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -165,7 +165,7 @@
                     android:text=""
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
@@ -173,7 +173,7 @@
                     android:text=""
                     android:padding="10dp"
                     android:gravity="center_horizontal"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:textColor="#ff607677"
                     android:background="@drawable/table_cell_shape"
                     />
