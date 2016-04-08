@@ -50,6 +50,7 @@ public class RouteActivity extends AppCompatActivity implements
         RouteMapFragment.OnFragmentInteractionListener,
         UserProfileFragment.OnFragmentInteractionListener,
         BinCardFragment.OnFragmentInteractionListener,
+        StatisticsFragment.OnFragmentInteractionListener,
         FragmentManager.OnBackStackChangedListener {
 
     private User mUser;
@@ -713,7 +714,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteDone() {
-
+        switchToFragment(StatisticsFragment.class);
     }
 
     /**

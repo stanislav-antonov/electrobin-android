@@ -38,6 +38,11 @@
     <string name="have_got_all_bins">You have got all bins on the route</string>
     <string name="please_move_to_the_base">Please move to the base and push the "Finish route" button on arrived</string>
 
+    <string name="statistics">Statistics</string>
+    <string name="run">Run: %s km</string>
+
+    <string name="get_route">Get route</string>
+
     <string name="connection_status">Connection status: %s</string>
     <string name="connection_status_connected">connected</string>
     <string name="connection_status_disconnected">disconnected</string>

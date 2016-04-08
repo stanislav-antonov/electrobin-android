@@ -9,7 +9,6 @@
         android:id="@+id/bin_card_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
         >
         <LinearLayout
             android:id="@+id/header_layout"
@@ -118,6 +117,7 @@
         android:orientation="vertical"
         android:layout_gravity="center_vertical"
         android:gravity="center_horizontal"
+        android:visibility="gone"
         >
         <TextView
             android:id="@id/header_text"
