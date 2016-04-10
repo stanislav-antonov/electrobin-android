@@ -638,8 +638,10 @@ public class RouteActivity extends AppCompatActivity implements
         }
 
         Fragment toFragment = mFragmentManager.findFragmentByTag(toFragmentTag);
-        if (toFragment != null)
+        if (toFragment != null) {
             fragmentTransaction.remove(toFragment);
+            mFragmentManager.popBackStack();
+        }
 
         try {
             Method newInstanceMethod = fragmentClass.getMethod("newInstance", null);
@@ -901,6 +903,11 @@ public class RouteActivity extends AppCompatActivity implements
             switchToFragment(RouteMapFragment.class, false);
         } else {
             fragment.showUIAllBinsDone();
+
+            // Some dirty workaround
+            final ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null)
+                actionBar.setDisplayHomeAsUpEnabled(false);
         }
     }
 
