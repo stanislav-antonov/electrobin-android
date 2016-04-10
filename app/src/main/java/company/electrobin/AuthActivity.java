@@ -72,7 +72,7 @@ public class AuthActivity extends AppCompatActivity {
             mRlLoading.setVisibility(View.GONE);
             mRlMain.setVisibility(View.VISIBLE);
 
-            String strMessage = mI10n.l("error_common");
+            String strMessage = mI10n.l("no_internet_connection");
             if (error == UserAuthListener.ERROR_INVALID_AUTH_CREDENTIALS) {
                 strMessage = mI10n.l("username_or_password_wrong");
                 mEtPassword.getText().clear();

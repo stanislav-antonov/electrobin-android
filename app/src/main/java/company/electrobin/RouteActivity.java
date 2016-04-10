@@ -78,6 +78,7 @@ public class RouteActivity extends AppCompatActivity implements
         private Date mDate;
         private List<Point> mWayPointList;
         private Point mStartPoint;
+        private float mRun;
 
         private final static String JSON_ROUTE_ID_KEY = "id";
         private final static String JSON_ROUTE_DATE_KEY = "created";
@@ -211,6 +212,7 @@ public class RouteActivity extends AppCompatActivity implements
             mDate = new Date(in.readLong());
             in.readList(mWayPointList, Point.class.getClassLoader());
             mStartPoint = in.readParcelable(Point.class.getClassLoader());
+            mRun = in.readFloat();
         }
 
         public int describeContents() {
@@ -222,6 +224,7 @@ public class RouteActivity extends AppCompatActivity implements
             out.writeLong(mDate.getTime());
             out.writeList(mWayPointList);
             out.writeParcelable(mStartPoint, flags);
+            out.writeFloat(mRun);
         }
 
         public static final Parcelable.Creator<Route> CREATOR
@@ -234,6 +237,12 @@ public class RouteActivity extends AppCompatActivity implements
                 return new Route[size];
             }
         };
+
+        public float getRun() { return mRun; }
+
+        public int getRunFormatted() {
+            return Math.round(getRun() / 1000F);
+        }
 
         public Date getDate() { return mDate; }
 
@@ -331,6 +340,10 @@ public class RouteActivity extends AppCompatActivity implements
         }
 
         public Integer getId() { return mId; }
+
+        public void addRun(float run) {
+            mRun += run;
+        }
     }
 
     /**
@@ -415,8 +428,10 @@ public class RouteActivity extends AppCompatActivity implements
             public synchronized void onLocationChanged(Location location) {
                 // Check the new location fix
                 if (isBetterLocation(location, mCurrentLocation)) {
-                    if (mCurrentLocation != null)
+                    if (mCurrentLocation != null) {
                         location.setBearing(mCurrentLocation.bearingTo(location));
+                        mRoute.addRun(mCurrentLocation.distanceTo(location));
+                    }
 
                     mCurrentLocation = location;
                 }
@@ -894,6 +909,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteDone() {
+        mUserLocation.stopLocationUpdates();
         switchToFragment(StatisticsFragment.class, false);
     }
 
@@ -912,6 +928,8 @@ public class RouteActivity extends AppCompatActivity implements
     @Override
     public void onRouteStart() {
         switchToFragment(RouteMapFragment.class, false);
+
+        mUserLocation.startLocationUpdates();
 
         // TODO: Not totally correct to make this call here..
         final Route route = getCurrentRoute();

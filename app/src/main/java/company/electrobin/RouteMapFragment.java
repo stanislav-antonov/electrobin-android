@@ -89,9 +89,7 @@ public class RouteMapFragment extends Fragment {
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            // TODO: Maybe a bad design?
-            RouteActivity routeActivity = (RouteActivity)getActivity();
-            routeActivity.getUserLocation().startLocationUpdates();
+
         }
 
         @Override

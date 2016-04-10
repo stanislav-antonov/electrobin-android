@@ -28,6 +28,7 @@ public class StatisticsFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         public void onGetNewRoute();
+        public RouteActivity.Route onGetRoute();
     }
 
     public static StatisticsFragment newInstance() {
@@ -71,7 +72,10 @@ public class StatisticsFragment extends Fragment {
 
     public void showUI() {
         ((TextView)mRlCommon.findViewById(R.id.header_text)).setText(mI10n.l("statistics"));
-        ((TextView)mRlCommon.findViewById(R.id.run_text)).setText(String.format(mI10n.l("run"), 123));
+
+        final RouteActivity.Route route = mListener.onGetRoute();
+        if (route != null)
+            ((TextView) mRlCommon.findViewById(R.id.run_text)).setText(String.format(mI10n.l("run"), route.getRunFormatted()));
 
         btnNewRoute = (Button)mRlCommon.findViewById(R.id.new_route_button);
         btnNewRoute.setText(mI10n.l("get_route"));
