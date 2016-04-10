@@ -140,4 +140,9 @@ public class AuthActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onBackPressed() {
+        // Do nothing
+    }
 }

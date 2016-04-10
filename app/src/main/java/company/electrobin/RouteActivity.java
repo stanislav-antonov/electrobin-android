@@ -415,6 +415,9 @@ public class RouteActivity extends AppCompatActivity implements
             public synchronized void onLocationChanged(Location location) {
                 // Check the new location fix
                 if (isBetterLocation(location, mCurrentLocation)) {
+                    if (mCurrentLocation != null)
+                        location.setBearing(mCurrentLocation.bearingTo(location));
+
                     mCurrentLocation = location;
                 }
 
@@ -599,7 +602,7 @@ public class RouteActivity extends AppCompatActivity implements
      * @param fragmentClass
      * @return
      */
-    private Fragment switchToFragment(Class fragmentClass) {
+    private Fragment switchToFragment(Class fragmentClass, boolean toBackStack) {
         final FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
 
         // Hide all fragments
@@ -633,7 +636,7 @@ public class RouteActivity extends AppCompatActivity implements
 
         fragmentTransaction.add(R.id.fragment_container, toFragment, toFragmentTag);
 
-        fragmentTransaction.addToBackStack(null);
+        if (toBackStack) fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
 
         return toFragment;
@@ -665,7 +668,7 @@ public class RouteActivity extends AppCompatActivity implements
         mFragmentManager.addOnBackStackChangedListener(this);
 
         shouldDisplayHomeUp();
-        switchToFragment(RouteListFragment.class);
+        switchToFragment(RouteListFragment.class, false);
     }
 
     /**
@@ -774,7 +777,7 @@ public class RouteActivity extends AppCompatActivity implements
                         public void onClick(View v) {
                             fadeOut.start();
 
-                            RouteListFragment fragment = (RouteListFragment)switchToFragment(RouteListFragment.class);
+                            RouteListFragment fragment = (RouteListFragment)switchToFragment(RouteListFragment.class, false);
                             fragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
                         }
                     });
@@ -816,7 +819,7 @@ public class RouteActivity extends AppCompatActivity implements
         btnActionBarUserProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switchToFragment(UserProfileFragment.class);
+                switchToFragment(UserProfileFragment.class, true);
             }
         });
     }
@@ -861,7 +864,7 @@ public class RouteActivity extends AppCompatActivity implements
         final Route.Point point = getCurrentRoute().getWayPointByUniqueId(uniqueId);
         if (point == null) return;
 
-        final BinCardFragment binCardFragment = (BinCardFragment)switchToFragment(BinCardFragment.class);
+        final BinCardFragment binCardFragment = (BinCardFragment)switchToFragment(BinCardFragment.class, true);
         binCardFragment.setRoutePoint(point);
     }
 
@@ -880,7 +883,7 @@ public class RouteActivity extends AppCompatActivity implements
         }
 
         if (route.hasUnvisitedWayPoints()) {
-            switchToFragment(RouteMapFragment.class);
+            switchToFragment(RouteMapFragment.class, false);
         } else {
             fragment.showUIAllBinsDone();
         }
@@ -891,7 +894,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteDone() {
-        switchToFragment(StatisticsFragment.class);
+        switchToFragment(StatisticsFragment.class, false);
     }
 
     /**
@@ -899,7 +902,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onGetNewRoute() {
-        RouteListFragment fragment = (RouteListFragment)switchToFragment(RouteListFragment.class);
+        RouteListFragment fragment = (RouteListFragment)switchToFragment(RouteListFragment.class, false);
         fragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_WAITING);
     }
 
@@ -908,7 +911,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteStart() {
-        switchToFragment(RouteMapFragment.class);
+        switchToFragment(RouteMapFragment.class, false);
 
         // TODO: Not totally correct to make this call here..
         final Route route = getCurrentRoute();
@@ -942,5 +945,10 @@ public class RouteActivity extends AppCompatActivity implements
     public boolean onSupportNavigateUp() {
         getSupportFragmentManager().popBackStack();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Do nothing
     }
 }

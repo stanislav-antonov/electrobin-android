@@ -11,6 +11,18 @@
             android:id="@+id/map"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginBottom="40dp"
+            />
+        <TextView
+            android:id="@+id/bearing_text"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:padding="10dp"
+            android:layout_alignParentBottom="true"
+            android:background="#98000000"
+            android:textSize="14sp"
+            android:textColor="#FFFFFFFF"
+            android:gravity="center"
             />
     </RelativeLayout>
     <RelativeLayout

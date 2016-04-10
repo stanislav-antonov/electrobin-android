@@ -67,6 +67,8 @@ public class RouteMapFragment extends Fragment {
 
             if (location == null) return;
             mRouteViewer.notifyGotUserLocation(location);
+
+            mTvBearing.setText(String.format("Bearing: %s", location.getBearing()));
         }
     };
 
@@ -271,6 +273,8 @@ public class RouteMapFragment extends Fragment {
         public void notifyGotUserLocation(Location location) {
             mCurrentLocation = location;
 
+            drawUserLocation();
+
             if (mGotFirstLocation) return;
             mListener.onGetRoute().setStartPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
             mGotFirstLocation = true;
@@ -343,6 +347,8 @@ public class RouteMapFragment extends Fragment {
         mRouteViewer = new RouteViewer();
     }
 
+    private TextView mTvBearing;
+
     /**
      *
      * @param inflater
@@ -368,6 +374,8 @@ public class RouteMapFragment extends Fragment {
         mRlRouteBuilding.setVisibility(View.GONE);
 
         ((TextView) mRlRouteBuilding.findViewById(R.id.route_building_text)).setText(mI10n.l("route_building"));
+
+        mTvBearing = (TextView)view.findViewById(R.id.bearing_text);
 
         return view;
     }

@@ -73,4 +73,9 @@ public class MainActivity extends Activity implements UserProfileLoadListener, I
     public void onI10nInitializeError(int error) {
         mPendingEventDoneHandler.sendEmptyMessage(10);
     }
+
+    @Override
+    public void onBackPressed() {
+        // Do nothing
+    }
 }
