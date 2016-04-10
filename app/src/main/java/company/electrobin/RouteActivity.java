@@ -6,6 +6,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.ServiceConnection;
 import android.location.GpsStatus;
 import android.location.Location;
@@ -21,9 +22,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +34,7 @@ import android.view.ViewGroup;
 
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -63,6 +67,7 @@ public class RouteActivity extends AppCompatActivity implements
     private ElectrobinApplication mApp;
 
     private RelativeLayout mRlRouteUpdated;
+    public Button btnActionBarUserProfile;
 
     private FragmentManager mFragmentManager;
     private Route mRoute;
@@ -771,44 +776,19 @@ public class RouteActivity extends AppCompatActivity implements
             as.start();
         }
         else {
-            btnRouteList.setVisibility(View.VISIBLE);
-            btnClose.setVisibility(View.VISIBLE);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(mI10n.l("route_updated"));
+            // builder.setMessage(mI10n.l("route_updated"));
+            builder.setCancelable(false);
 
-            btnRouteList.setText(mI10n.l("to_route_list"));
-
-            fadeIn.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    mRlRouteUpdated.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    btnClose.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) { fadeOut.start(); }
-                    });
-
-                    btnRouteList.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            fadeOut.start();
-
-                            RouteListFragment fragment = (RouteListFragment)switchToFragment(RouteListFragment.class, false);
-                            fragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
-                        }
-                    });
+            builder.setPositiveButton(mI10n.l("to_route_list"), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    RouteListFragment fragment = (RouteListFragment) switchToFragment(RouteListFragment.class, false);
+                    fragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
                 }
             });
 
-            fadeOut.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mRlRouteUpdated.setVisibility(View.GONE);
-                }
-            });
-
-            fadeIn.start();
+            builder.show();
         }
     }
 
@@ -831,7 +811,7 @@ public class RouteActivity extends AppCompatActivity implements
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setCustomView(actionBarLayout);
 
-        final Button btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
+        btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
         btnActionBarUserProfile.setText(String.format("%s %s", uProfile.mFirstName, uProfile.mLastName));
         btnActionBarUserProfile.setOnClickListener(new View.OnClickListener() {
             @Override

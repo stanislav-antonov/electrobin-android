@@ -2,10 +2,14 @@ package company.electrobin;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,6 +120,37 @@ public class UserProfileFragment extends Fragment {
                 startActivity(new Intent(getActivity(), AuthActivity.class));
             }
         });
+
+        final RouteActivity routeActivity = (RouteActivity)getActivity();
+        if (routeActivity != null)
+            routeActivity.btnActionBarUserProfile.setVisibility(View.GONE);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        final RouteActivity routeActivity = (RouteActivity)getActivity();
+        if (routeActivity != null)
+            routeActivity.btnActionBarUserProfile.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
