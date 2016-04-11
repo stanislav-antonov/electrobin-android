@@ -1,101 +1,152 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
     android:background="#fff4f4d3"
+    android:fillViewport="true"
     >
-    <RelativeLayout
-        android:id="@+id/bin_card_layout"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         >
-        <LinearLayout
-            android:id="@+id/header_layout"
-            android:layout_height="wrap_content"
+        <RelativeLayout
+            android:id="@+id/bin_card_layout"
             android:layout_width="match_parent"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical"
-            android:layout_marginTop="30dp"
-            android:gravity="center_horizontal"
+            android:layout_height="match_parent"
             >
-            <TextView
-                android:id="@+id/header_text"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/header_layout"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textColor="#ff394445"
-                android:gravity="center_horizontal"
-                />
-            <TextView
-                android:id="@+id/address_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="#ff607677"
-                android:gravity="center_horizontal"
-                />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_below="@+id/header_layout"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_centerHorizontal="true"
-            android:orientation="vertical"
-            android:layout_marginTop="30dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="30dp"
-            android:background="#ffdadfb6"
-            >
-            <TextView
-                android:id="@+id/bin_status_label_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textColor="#ff394445"
-                />
-            <RadioGroup
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
                 android:orientation="vertical"
+                android:layout_marginTop="30dp"
+                android:gravity="center_horizontal"
                 >
-                <RadioButton android:id="@+id/bin_unloaded_ok_radio"
+                <TextView
+                    android:id="@+id/header_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="#ff394445"
+                    android:gravity="center_horizontal"
+                    />
+                <TextView
+                    android:id="@+id/address_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="#ff607677"
+                    android:gravity="center_horizontal"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_below="@+id/header_layout"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_centerHorizontal="true"
+                android:orientation="vertical"
+                android:layout_marginTop="30dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="30dp"
+                android:background="#ffdadfb6"
+                >
+                <TextView
+                    android:id="@+id/bin_status_label_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="#ff394445"
+                    />
+                <RadioGroup
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="#ff607677"
-                    android:textSize="16sp"
-                    />
-                <RadioButton android:id="@+id/bin_unloaded_error_radio"
-                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    >
+                    <RadioButton android:id="@+id/bin_unloaded_ok_radio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ff607677"
+                        android:textSize="16sp"
+                        />
+                    <RadioButton android:id="@+id/bin_unloaded_error_radio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ff607677"
+                        android:textSize="16sp"
+                        />
+                </RadioGroup>
+                <TextView
+                    android:id="@+id/bin_comment_label_text"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="#ff394445"
+                    android:layout_marginTop="20dp"
+                    />
+                <EditText
+                    android:id="@+id/bin_comment_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:inputType="textMultiLine"
+                    android:gravity="top"
+                    android:background="#FFFFFFFF"
                     android:textColor="#ff607677"
+                    android:padding="5dp"
+                    android:layout_marginTop="10dp"
                     android:textSize="16sp"
                     />
-            </RadioGroup>
+                <Button
+                    android:id="@+id/route_point_done_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:textSize="20sp"
+                    android:textColor="#FFFFFFFF"
+                    android:textAllCaps="false"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:background="@drawable/custom_round_button_1"
+                    style="?android:attr/borderlessButtonStyle"
+                    />
+            </LinearLayout>
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/all_bins_done_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_horizontal"
+            android:visibility="gone"
+            >
             <TextView
-                android:id="@+id/bin_comment_label_text"
+                android:id="@id/header_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
                 android:textColor="#ff394445"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="30dp"
+                android:gravity="center_horizontal"
                 />
-            <EditText
-                android:id="@+id/bin_comment_input"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:inputType="textMultiLine"
-                android:gravity="top"
-                android:background="#FFFFFFFF"
-                android:textColor="#ff607677"
-                android:padding="5dp"
-                android:layout_marginTop="10dp"
+            <!-- android:text="You have got all bins on the route" -->
+            <TextView
+                android:id="@+id/description_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:textSize="16sp"
+                android:textColor="#ff607677"
+                android:layout_marginTop="20dp"
+                android:gravity="center_horizontal"
                 />
+            <!-- android:text="Please move to the base and push the Finish route button on arrived" -->
             <Button
-                android:id="@+id/route_point_done_button"
+                android:id="@+id/route_done_button"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -109,49 +160,5 @@
                 style="?android:attr/borderlessButtonStyle"
                 />
         </LinearLayout>
-    </RelativeLayout>
-    <LinearLayout
-        android:id="@+id/all_bins_done_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center_vertical"
-        android:gravity="center_horizontal"
-        android:visibility="gone"
-        >
-        <TextView
-            android:id="@id/header_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textColor="#ff394445"
-            android:layout_marginTop="30dp"
-            android:gravity="center_horizontal"
-            />
-        <!-- android:text="You have got all bins on the route" -->
-        <TextView
-            android:id="@+id/description_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#ff607677"
-            android:layout_marginTop="20dp"
-            android:gravity="center_horizontal"
-            />
-        <!-- android:text="Please move to the base and push the Finish route button on arrived" -->
-        <Button
-            android:id="@+id/route_done_button"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
-            android:textSize="20sp"
-            android:textColor="#FFFFFFFF"
-            android:textAllCaps="false"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:background="@drawable/custom_round_button_1"
-            style="?android:attr/borderlessButtonStyle"
-            />
-    </LinearLayout>
-</FrameLayout>
+    </FrameLayout>
+</ScrollView>

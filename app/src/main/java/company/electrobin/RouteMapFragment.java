@@ -316,8 +316,8 @@ public class RouteMapFragment extends Fragment {
          *
          */
         public void drawUserLocation() {
-            mWvMap.loadUrl(String.format("javascript:updatePosition(%1$s, %2$s)",
-                    mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()));
+            mWvMap.loadUrl(String.format("javascript:updatePosition(%1$s, %2$s, %3$s)",
+                    mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), mCurrentLocation.getBearing()));
         }
     }
 

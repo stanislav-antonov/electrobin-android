@@ -9,41 +9,49 @@
         <script type="text/javascript">
             var myMap;
             var placemark;
+            var locationArrow;
 
             ymaps.ready(function () {
                 var initCoords = [55.53638053374438,37.529385721565184];
                 myMap = new ymaps.Map('map', {
                     center: initCoords,
-                    zoom: 16
+                    zoom: 16,
+                    geoObjectOverlayFactory: 'default#interactiveGraphics'
                 });
 
                 Android.onMapReady();
             });
 
-            function updatePosition(lat, long) {
+            function updatePosition(lat, long, bearing) {
                 var coords = [lat, long];
-
-                myMap.panTo([
-                    coords
-                ]).then(
+                myMap.panTo([coords]).then(
                     function () {
-                        // Success
-                        if (!placemark) {
-                            placemark = new ymaps.Placemark(coords, {}, {
-                                iconColor: 'red'
-                            });
+                        if (!locationArrow) {
+                            locationArrow = new ymaps.Placemark(
+                                coords, {}, {
+                                    iconLayout: 'default#image',
+                                    iconShadow: false,
+                                    iconImageHref: 'http://185.118.64.121:8081/static/img/location_arrow.png',
+                                    iconImageSize: [32, 32],
+                                    iconImageOffset: [0, 0],
+                                    iconOffset: [0, 0],
+                                }
+                            );
 
-                            myMap.geoObjects.add(placemark);
+                            myMap.geoObjects.add(locationArrow);
                         }
                         else {
-                            placemark.geometry.setCoordinates(coords);
+                            locationArrow.geometry.setCoordinates(coords);
                         }
-                    },
 
-                    function (err) {
-                        // Error
+                        locationArrow.getOverlay().then(function (value) {
+                            var $ico = $(value.getIconElement());
+                            $ico.css('transform', 'rotate(' + bearing + 'deg)');
+                        }, function (err) {
+                            console.log('Ошибка: ' + err);
+                        });
                     },
-
+                    function (err) {},
                     this
                 );
             }
@@ -74,9 +82,10 @@
                         // var points = route.getViaPoints();
                         var points = route.getWayPoints();
 
+                        var startPoint = null;
                         if (hasStartPoint) {
-                            var locationPoint = points.get(0);
-                            points.remove(locationPoint);
+                            startPoint = points.get(0);
+                            points.remove(startPoint);
                         }
 
                         points.each(function (point, i) {
@@ -94,8 +103,8 @@
                             });
                         });
 
-                        if (hasStartPoint) {
-                            var startPointPlacemark = new ymaps.Placemark(locationPoint.geometry.getCoordinates(), {}, {
+                        if (hasStartPoint && startPoint != null) {
+                            var startPointPlacemark = new ymaps.Placemark(startPoint.geometry.getCoordinates(), {}, {
                                 hasBalloon: false,
                                 iconColor: "0066ff99"
                             });

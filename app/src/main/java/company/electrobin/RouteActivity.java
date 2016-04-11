@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.ServiceConnection;
@@ -32,6 +33,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -751,13 +753,7 @@ public class RouteActivity extends AppCompatActivity implements
         final ObjectAnimator fadeOut = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.95f, 0.0f);
         fadeOut.setDuration(1000);
 
-        final Button btnRouteList = (Button)mRlRouteUpdated.findViewById(R.id.route_list_button);
-        final ImageButton btnClose = (ImageButton)mRlRouteUpdated.findViewById(R.id.close_button);
-
         if (isOnRouteList) {
-            btnRouteList.setVisibility(View.GONE);
-            btnClose.setVisibility(View.GONE);
-
             final AnimatorSet as = new AnimatorSet();
             as.play(fadeOut).after(fadeIn).after(2000L);
 
@@ -776,19 +772,26 @@ public class RouteActivity extends AppCompatActivity implements
             as.start();
         }
         else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(mI10n.l("route_updated"));
-            // builder.setMessage(mI10n.l("route_updated"));
-            builder.setCancelable(false);
+            final Dialog dialog = new Dialog(this);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setCancelable(false);
+            dialog.setContentView(R.layout.layout_custom_dialog);
 
-            builder.setPositiveButton(mI10n.l("to_route_list"), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
+            final TextView tvMessage = (TextView) dialog.findViewById(R.id.message_text);
+            tvMessage.setText(mI10n.l("route_updated"));
+
+            final Button btnOk = (Button) dialog.findViewById(R.id.ok_button);
+            btnOk.setText(mI10n.l("to_route_list"));
+            btnOk.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
                     RouteListFragment fragment = (RouteListFragment) switchToFragment(RouteListFragment.class, false);
                     fragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
                 }
             });
 
-            builder.show();
+            dialog.show();
         }
     }
 

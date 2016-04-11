@@ -25,6 +25,7 @@
             android:textSize="16sp"
             android:textColor="#FFFFFFFF"
             />
+<!--
         <Button
             android:id="@+id/route_list_button"
             android:layout_below="@+id/route_updated_text"
@@ -39,14 +40,6 @@
             android:paddingRight="15dp"
             android:layout_marginTop="15dp"
             />
-        <ImageButton
-            android:id="@+id/close_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ic_action_close"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            />
+-->
     </RelativeLayout>
 </RelativeLayout>
