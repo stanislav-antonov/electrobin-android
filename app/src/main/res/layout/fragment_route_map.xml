@@ -14,7 +14,7 @@
             android:layout_marginBottom="40dp"
             />
         <TextView
-            android:id="@+id/bearing_text"
+            android:id="@+id/debug_run_text"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:padding="10dp"

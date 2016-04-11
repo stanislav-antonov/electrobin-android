@@ -68,7 +68,8 @@ public class RouteMapFragment extends Fragment {
             if (location == null) return;
             mRouteViewer.notifyGotUserLocation(location);
 
-            mTvBearing.setText(String.format("Bearing: %s", location.getBearing()));
+            final RouteActivity routeActivity = (RouteActivity)getActivity();
+            mTvDebugRun.setText(String.format("Пробег: %s км", routeActivity.getCurrentRoute().getRunFormatted()));
         }
     };
 
@@ -345,7 +346,7 @@ public class RouteMapFragment extends Fragment {
         mRouteViewer = new RouteViewer();
     }
 
-    private TextView mTvBearing;
+    private TextView mTvDebugRun;
 
     /**
      *
@@ -373,7 +374,7 @@ public class RouteMapFragment extends Fragment {
 
         ((TextView) mRlRouteBuilding.findViewById(R.id.route_building_text)).setText(mI10n.l("route_building"));
 
-        mTvBearing = (TextView)view.findViewById(R.id.bearing_text);
+        mTvDebugRun = (TextView)view.findViewById(R.id.debug_run_text);
 
         return view;
     }
