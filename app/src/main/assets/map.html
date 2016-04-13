@@ -68,6 +68,9 @@
 
 
             function snapToRoute(point) {
+                if (!point) return;
+                if (!routePoints) return [point[0], point[1]];
+
                 var minDistance = null;
                 var distance = null;
                 var rpFound;
@@ -92,6 +95,7 @@
 
             function updatePosition(lat, long, bearing) {
                 var pointSnapped = snapToRoute([lat, long]);
+                console.log('point snapped: ' + pointSnapped);
                 myMap.panTo([pointSnapped]).then(
                     function () {
                         if (!locationArrow) {
