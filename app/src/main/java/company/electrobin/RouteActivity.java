@@ -418,7 +418,7 @@ public class RouteActivity extends AppCompatActivity implements
         private boolean mIsRunning;
 
         private static final long LOCATION_UPDATES_MIN_TIME_INTERVAL = 1000L;
-        private static final long LOCATION_UPDATES_MIN_DISTANCE = 0L;
+        private static final long LOCATION_UPDATES_MIN_DISTANCE = 10L;
 
         public static final String BUNDLE_KEY_LOCATION = "location";
         public static final String BROADCAST_INTENT = "USER_LOCATION_CHANGED";
@@ -881,6 +881,10 @@ public class RouteActivity extends AppCompatActivity implements
             Log.e(LOG_TAG, e.getMessage());
             return;
         }
+
+        // TODO: Create a separate method instead of the mess below
+        mUserLocation.stopLocationUpdates();
+        mUserLocation.startLocationUpdates();
 
         if (route.hasUnvisitedWayPoints()) {
             switchToFragment(RouteMapFragment.class, false);

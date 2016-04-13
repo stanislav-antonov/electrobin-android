@@ -460,6 +460,14 @@ public class RouteMapFragment extends Fragment {
      *
      */
     @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    /**
+     *
+     */
+    @Override
     public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver,
