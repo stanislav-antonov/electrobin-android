@@ -923,6 +923,7 @@ public class RouteActivity extends AppCompatActivity implements
     public void onRouteStart() {
         switchToFragment(RouteMapFragment.class, false);
 
+        mUserLocation.stopLocationUpdates();
         mUserLocation.startLocationUpdates();
 
         // TODO: Not totally correct to make this call here..

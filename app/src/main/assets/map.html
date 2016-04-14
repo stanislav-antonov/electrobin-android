@@ -188,6 +188,8 @@
                         myMap.geoObjects.add(route);
                         routePoints = routeToPoints(route);
 
+                        console.log('route building done');
+
                         Android.onRouteBuildingReady();
                     },
                     function (error) {
