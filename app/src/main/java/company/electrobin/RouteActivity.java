@@ -452,7 +452,7 @@ public class RouteActivity extends AppCompatActivity implements
                     mCurrentLocation = location;
                 }
 
-                // broadcastLocation();
+                broadcastLocation();
             }
 
             private void broadcastLocation() {
@@ -1020,9 +1020,7 @@ public class RouteActivity extends AppCompatActivity implements
                 route.getId(), route.getDateFormatted(Route.FORMAT_DATE_ORIGINAL));
         mService.sendData(strJSON);
 
-
-
-
+/*
         // DEBUG
         final double[][] points = new double[][]{
             new double[] {48.78711893483084D, 44.58428493508788D},
@@ -1072,6 +1070,7 @@ public class RouteActivity extends AppCompatActivity implements
                 hdl.postDelayed(this, 1000);
             }
         }, 30000);
+*/
     }
 
     /**

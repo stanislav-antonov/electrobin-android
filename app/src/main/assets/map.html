@@ -123,12 +123,14 @@
                         if (!locationArrow) {
                             locationArrow = new ymaps.Placemark(
                                 pointSnapped, {}, {
-                                    iconLayout: 'default#image',
-                                    iconShadow: false,
-                                    iconImageHref: 'http://185.118.64.121:8081/static/img/location_arrow.png',
-                                    iconImageSize: [32, 32],
-                                    iconImageOffset: [0, 0],
-                                    iconOffset: [0, 0],
+                                    // iconLayout: 'default#image',
+                                    // iconShadow: false,
+                                    // iconImageHref: 'http://185.118.64.121:8081/static/img/location_arrow.png',
+                                    // iconImageSize: [32, 32],
+                                    // iconImageOffset: [0, 0],
+                                    // iconOffset: [0, 0],
+                                    preset: "islands#dotCircleIcon",
+                                    iconColor: '#ff0000'
                                 }
                             );
 
