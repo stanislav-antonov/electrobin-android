@@ -12,6 +12,7 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -451,7 +452,7 @@ public class RouteActivity extends AppCompatActivity implements
                     mCurrentLocation = location;
                 }
 
-                broadcastLocation();
+                // broadcastLocation();
             }
 
             private void broadcastLocation() {
@@ -1018,6 +1019,59 @@ public class RouteActivity extends AppCompatActivity implements
         final String strJSON = String.format("{\"action\":\"start_route\", \"route_id\":\"%s\", \"created\":\"%s\"}",
                 route.getId(), route.getDateFormatted(Route.FORMAT_DATE_ORIGINAL));
         mService.sendData(strJSON);
+
+
+
+
+        // DEBUG
+        final double[][] points = new double[][]{
+            new double[] {48.78711893483084D, 44.58428493508788D},
+            new double[] {48.786860049919795D,44.58510698723347D},
+            new double[] {48.78658001376621D,44.585552233929945D},
+            new double[]{48.78616172898921D,44.58580972599536D},
+                new double[]{48.7857717993439D,44.58526791977437D},
+                new double[]{48.78538186665112D,44.584774393315634D},
+                new double[]{48.78504864902613D,44.584200400586425D},
+                new double[]{48.784527548917254D,44.583486932988485D},
+                new double[]{48.78387882485031D,44.583004135365805D},
+                new double[]{48.78344988244707D,44.581995624776205D},
+                new double[]{48.782719608385136D,44.580922741170234D},
+                new double[]{48.78218626480075D,44.58017604555454D},
+                new double[]{48.78176439807483D,44.57954304422704D},
+                new double[]{48.78145843722825D,44.57922817802503D},
+                new double[]{48.78181294949494D,44.57859517669751D},
+                new double[]{48.782107192763505D,44.578096285820756D},
+                new double[]{48.782585777506256D,44.57732380962447D},
+                new double[]{48.78297218702337D,44.576696172714975D},
+                {48.783606742949445D,44.575875416756425D},
+                {48.78474139096214D,44.576477885303035D},
+                {48.785748132978455D,44.577861905154705D},
+                {48.78666269086283D,44.5793907642932D}
+        };
+
+        final Handler hdl = new Handler();
+        hdl.postDelayed(new Runnable() {
+            private int i = 0;
+
+            @Override
+            public void run() {
+
+                if (i > points.length - 1) return;
+
+                double[] point = points[i++];
+
+                Location location = new Location("GPS");
+                location.setBearing(90);
+                location.setLatitude(point[0]);
+                location.setLongitude(point[1]);
+
+                Intent intent = new Intent("USER_LOCATION_CHANGED");
+                intent.putExtra("location", location);
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+
+                hdl.postDelayed(this, 1000);
+            }
+        }, 30000);
     }
 
     /**

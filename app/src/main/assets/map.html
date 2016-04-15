@@ -11,8 +11,10 @@
             var locationArrow;
             var coordSystem;
 
-            var snapDistanceThreshold = 0.0008;
+            var snapDistanceThreshold = 0.0017;
             var routePoints;
+
+            var prevPosition;
 
             ymaps.ready(function () {
                 var initCoords = [55.53638053374438,37.529385721565184];
@@ -50,7 +52,7 @@
                     }
                 }
 
-                var step = 3;
+                var step = 4;
                 var result = [];
                 for (var i = 0, l = points.length - 1; l; --l, ++i) {
                     var from = points[i],
@@ -69,7 +71,10 @@
 
             function snapToRoute(point) {
                 if (!point) return;
-                if (!routePoints) return [point[0], point[1]];
+                if (!routePoints) {
+                    console.log('no route points!');
+                    return [point[0], point[1]];
+                }
 
                 var minDistance = null;
                 var distance = null;
@@ -93,9 +98,26 @@
             }
 
 
+            function calcBearing(lat1, lon1, lat2, lon2) {
+                var latitude1 = lat1 * Math.PI / 180;
+                var latitude2 = lat2 * Math.PI / 180;
+                var longDiff = (lon2 - lon1) * Math.PI / 180;
+                var y = Math.sin(longDiff) * Math.cos(latitude2);
+                var x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
+
+                return (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360;
+            }
+
+
             function updatePosition(lat, long, bearing) {
                 var pointSnapped = snapToRoute([lat, long]);
-                console.log('point snapped: ' + pointSnapped);
+                var b = 0;
+                if (prevPosition) {
+                    b = calcBearing(prevPosition[0], prevPosition[1], pointSnapped[0], pointSnapped[1]);
+                }
+
+                prevPosition = pointSnapped;
+
                 myMap.panTo([pointSnapped]).then(
                     function () {
                         if (!locationArrow) {
@@ -118,7 +140,7 @@
 
                         locationArrow.getOverlay().then(function (value) {
                             var $ico = $(value.getIconElement());
-                            $ico.css('transform', 'rotate(' + bearing + 'deg)');
+                            $ico.css('transform', 'rotate(' + b + 'deg)');
                         }, function (err) {
                             console.log('Ошибка: ' + err);
                         });
