@@ -3,7 +3,7 @@
     <head>
         <title>Route</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
         <script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
         <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
         <script type="text/javascript">
@@ -11,7 +11,7 @@
             var locationArrow;
             var coordSystem;
 
-            var snapDistanceThreshold = 0.0004;
+            var snapDistanceThreshold = 0.0008;
             var routePoints;
 
             ymaps.ready(function () {
@@ -187,8 +187,6 @@
 
                         myMap.geoObjects.add(route);
                         routePoints = routeToPoints(route);
-
-                        console.log('route building done');
 
                         Android.onRouteBuildingReady();
                     },

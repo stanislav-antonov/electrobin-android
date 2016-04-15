@@ -53,9 +53,9 @@ public class RouteMapFragment extends Fragment {
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
     public final static String FRAGMENT_TAG = "fragment_route_map";
 
-    private final static int MAP_STATE_INITIAL = 0;
-    private final static int MAP_STATE_LOADING = 1;
-    private final static int MAP_STATE_READY = 2;
+    private final static int MAP_STATE_INITIAL = 1;
+    private final static int MAP_STATE_LOADING = 2;
+    private final static int MAP_STATE_READY = 3;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -125,13 +125,13 @@ public class RouteMapFragment extends Fragment {
                     mMapState = MAP_STATE_READY;
                     mMapLoadBreaker.cancel();
 
-                    mHandler.post(new Runnable() {
+                    mRouteViewer.notifyMapReady();
+                    mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             mRlLoading.setVisibility(View.GONE);
-                            mRouteViewer.notifyMapReady();
                         }
-                    });
+                    }, 7000);
                 }
             });
         }
@@ -400,20 +400,17 @@ public class RouteMapFragment extends Fragment {
      * @throws Exception
      */
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
-    private WebView prepareMapWebView() throws Exception {
+    private void prepareMapWebView() throws Exception {
         final View view = getView();
         if (view == null) throw new IllegalStateException("Root view is null");
 
-        final WebView wv;
         try {
-            wv = (WebView) view.findViewById(R.id.map);
+            mWvMap = (WebView) view.findViewById(R.id.map);
 
-            WebSettings webSettings = wv.getSettings();
+            WebSettings webSettings = mWvMap.getSettings();
             webSettings.setJavaScriptEnabled(true);
-            wv.addJavascriptInterface(new MapJavaScriptInterface(getActivity()), "Android");
-            wv.setWebViewClient(new MapWebViewClient());
-
-            return wv;
+            mWvMap.addJavascriptInterface(new MapJavaScriptInterface(getActivity()), "Android");
+            mWvMap.setWebViewClient(new MapWebViewClient());
         }
         catch(Exception e) {
             throw new Exception(e.getMessage());
@@ -428,13 +425,12 @@ public class RouteMapFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (mWvMap == null) {
-            try {
-                mWvMap = prepareMapWebView();
-                loadMap();
-            } catch (Exception e) {
-                Log.e(LOG_TAG, e.getMessage());
-            }
+        try {
+            mMapState = MAP_STATE_INITIAL;
+            prepareMapWebView();
+            loadMap();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.getMessage());
         }
     }
 
@@ -472,6 +468,10 @@ public class RouteMapFragment extends Fragment {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(RouteActivity.UserLocation.BROADCAST_INTENT));
+
+        final RouteActivity routeActivity = (RouteActivity)getActivity();
+        routeActivity.getUserLocation().stopLocationUpdates();
+        routeActivity.getUserLocation().startLocationUpdates();
     }
 
     /**

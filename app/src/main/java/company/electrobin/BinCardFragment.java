@@ -23,12 +23,7 @@ public class BinCardFragment extends Fragment {
     private I10n mI10n;
     private ElectrobinApplication mApp;
 
-    private RelativeLayout mRlBinCard;
-    private LinearLayout mLlAllBinsDone;
-
     private Button mBtnRoutePointDone;
-    private Button mBtnRouteDone;
-
     private RadioButton mRbBinUnloadedOk;
     private RadioButton mRbBinUnloadedError;
 
@@ -36,19 +31,13 @@ public class BinCardFragment extends Fragment {
 
     private RouteActivity.Route.Point mRoutePoint;
 
-    private int mLayoutDisplayed;
-
     private OnFragmentInteractionListener mListener;
-
-    public static final int LAYOUT_DISPLAYED_BIN_CARD = 1;
-    public static final int LAYOUT_DISPLAYED_ALL_BINS_DONE = 2;
 
     private final static String BUNDLE_KEY_ROUTE_POINT = "route_point";
     public final static String FRAGMENT_TAG = "fragment_bin_card";
 
     public interface OnFragmentInteractionListener {
-        public void onRoutePointDone(RouteActivity.Route.Point point, BinCardFragment fragment);
-        public void onRouteDone();
+        public void onRoutePointDone(RouteActivity.Route.Point point);
     }
 
     public static BinCardFragment newInstance() {
@@ -58,9 +47,9 @@ public class BinCardFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mRoutePoint = getArguments().getParcelable(BUNDLE_KEY_ROUTE_POINT);
-        }
+
+        if (savedInstanceState != null)
+            mRoutePoint = savedInstanceState.getParcelable(BUNDLE_KEY_ROUTE_POINT);
 
         mApp = (ElectrobinApplication)getActivity().getApplicationContext();
         mUser = mApp.getUser();
@@ -72,8 +61,28 @@ public class BinCardFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_bin_card, container, false);
 
-        mRlBinCard = (RelativeLayout)view.findViewById(R.id.bin_card_layout);
-        mLlAllBinsDone = (LinearLayout)view.findViewById(R.id.all_bins_done_layout);
+        mBtnRoutePointDone = (Button)view.findViewById(R.id.route_point_done_button);
+        mBtnRoutePointDone.setText(mI10n.l("next_route_point"));
+        mBtnRoutePointDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onRoutePointDone(mRoutePoint);
+            }
+        });
+
+        ((TextView)view.findViewById(R.id.bin_comment_label_text)).setText(mI10n.l("comment"));
+        ((TextView)view.findViewById(R.id.bin_status_label_text)).setText(mI10n.l("container_status"));
+
+        mRbBinUnloadedOk = (RadioButton)view.findViewById(R.id.bin_unloaded_ok_radio);
+        mRbBinUnloadedOk.setText(mI10n.l("container_status_unloaded_ok"));
+
+        mRbBinUnloadedError = (RadioButton)view.findViewById(R.id.bin_unloaded_error_radio);
+        mRbBinUnloadedError.setText(mI10n.l("container_status_unloaded_error"));
+
+        mTvRoutePointAddress = (TextView)view.findViewById(R.id.address_text);
+        mTvRoutePointAddress.setText(mRoutePoint.mAddress);
+
+        ((TextView)view.findViewById(R.id.header_text)).setText(mI10n.l("have_arrived_route_point"));
 
         return view;
     }
@@ -92,17 +101,6 @@ public class BinCardFragment extends Fragment {
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        switch (mLayoutDisplayed) {
-            case LAYOUT_DISPLAYED_BIN_CARD:
-                showUIBinCard();
-                break;
-            case LAYOUT_DISPLAYED_ALL_BINS_DONE:
-                showUIAllBinsDone();
-                break;
-            default:
-                showUIBinCard();
-                break;
-        }
     }
 
     @Override
@@ -115,56 +113,14 @@ public class BinCardFragment extends Fragment {
         mRoutePoint = point;
     }
 
-    public void setLayoutDisplayed(int layout) {
-        mLayoutDisplayed = layout;
-    }
-
-    public void showUIBinCard() {
-        mLlAllBinsDone.setVisibility(View.GONE);
-        mRlBinCard.setVisibility(View.VISIBLE);
-
-        mBtnRoutePointDone = (Button)mRlBinCard.findViewById(R.id.route_point_done_button);
-        mBtnRoutePointDone.setText(mI10n.l("next_route_point"));
-        mBtnRoutePointDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.onRoutePointDone(mRoutePoint, BinCardFragment.this);
-            }
-        });
-
-        ((TextView)mRlBinCard.findViewById(R.id.bin_comment_label_text)).setText(mI10n.l("comment"));
-        ((TextView)mRlBinCard.findViewById(R.id.bin_status_label_text)).setText(mI10n.l("container_status"));
-
-        mRbBinUnloadedOk = (RadioButton)mRlBinCard.findViewById(R.id.bin_unloaded_ok_radio);
-        mRbBinUnloadedOk.setText(mI10n.l("container_status_unloaded_ok"));
-
-        mRbBinUnloadedError = (RadioButton)mRlBinCard.findViewById(R.id.bin_unloaded_error_radio);
-        mRbBinUnloadedError.setText(mI10n.l("container_status_unloaded_error"));
-
-        mTvRoutePointAddress = (TextView)mRlBinCard.findViewById(R.id.address_text);
-        mTvRoutePointAddress.setText(mRoutePoint.mAddress);
-
-        ((TextView)mRlBinCard.findViewById(R.id.header_text)).setText(mI10n.l("have_arrived_route_point"));
-
-        mLayoutDisplayed = LAYOUT_DISPLAYED_BIN_CARD;
-    }
-
-    public void showUIAllBinsDone() {
-        mRlBinCard.setVisibility(View.GONE);
-        mLlAllBinsDone.setVisibility(View.VISIBLE);
-
-        ((TextView)mLlAllBinsDone.findViewById(R.id.header_text)).setText(mI10n.l("have_got_all_bins"));
-        ((TextView)mLlAllBinsDone.findViewById(R.id.description_text)).setText(mI10n.l("please_move_to_the_base"));
-
-        mBtnRouteDone = (Button)mLlAllBinsDone.findViewById(R.id.route_done_button);
-        mBtnRouteDone.setText(mI10n.l("finish_route"));
-        mBtnRouteDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.onRouteDone();
-            }
-        });
-
-        mLayoutDisplayed = LAYOUT_DISPLAYED_ALL_BINS_DONE;
+    /**
+     *
+     * @param bundle
+     */
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        if (mRoutePoint != null)
+            bundle.putParcelable(BUNDLE_KEY_ROUTE_POINT, mRoutePoint);
     }
 }

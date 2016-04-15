@@ -1,0 +1,45 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:background="#fff4f4d3"
+    >
+    <TextView
+        android:id="@+id/header_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="#ff394445"
+        android:layout_marginTop="30dp"
+        android:gravity="center_horizontal"
+        />
+    <!-- android:text="You have got all bins on the route" -->
+    <TextView
+        android:id="@+id/description_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#ff607677"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        />
+    <!-- android:text="Please move to the base and push the Finish route button on arrived" -->
+    <Button
+        android:id="@+id/route_done_button"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:textSize="20sp"
+        android:textColor="#FFFFFFFF"
+        android:textAllCaps="false"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:background="@drawable/custom_round_button_1"
+        style="?android:attr/borderlessButtonStyle"
+        />
+</LinearLayout>
+

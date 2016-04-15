@@ -7,7 +7,6 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.ServiceConnection;
 import android.location.GpsStatus;
 import android.location.Location;
@@ -23,11 +22,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,8 +32,6 @@ import android.view.ViewGroup;
 
 import android.view.Window;
 import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -53,6 +48,7 @@ import java.util.List;
 import company.electrobin.i10n.I10n;
 import company.electrobin.network.TCPClientListener;
 import company.electrobin.network.TCPClientService;
+import company.electrobin.user.AllBinsDoneFragment;
 import company.electrobin.user.User;
 import company.electrobin.user.User.UserProfile;
 
@@ -61,6 +57,7 @@ public class RouteActivity extends AppCompatActivity implements
         RouteMapFragment.OnFragmentInteractionListener,
         UserProfileFragment.OnFragmentInteractionListener,
         BinCardFragment.OnFragmentInteractionListener,
+        AllBinsDoneFragment.OnFragmentInteractionListener,
         StatisticsFragment.OnFragmentInteractionListener,
         FragmentManager.OnBackStackChangedListener {
 
@@ -75,7 +72,13 @@ public class RouteActivity extends AppCompatActivity implements
     private Route mRoute;
     private UserLocation mUserLocation;
 
+    private Dialog mRouteUpdatedDialog;
+    private boolean mRouteUpdatedPopupShowing = false;
+
+    private Fragment mCurrentFragment;
+
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
+    private static final String BUNDLE_KEY_ROUTE = "route";
 
     /**
      *
@@ -100,7 +103,7 @@ public class RouteActivity extends AppCompatActivity implements
         public final static String FORMAT_DATE_FORMATTED = "H:mm d.MM.yyyy";
 
         public static class Point implements Parcelable {
-            public Integer mId;
+            public int mId;
             public int mUniqueId;
             public String mAddress;
             public String mCity;
@@ -217,7 +220,10 @@ public class RouteActivity extends AppCompatActivity implements
         private Route(Parcel in) {
             mId = in.readInt();
             mDate = new Date(in.readLong());
+
+            mWayPointList = new ArrayList<Point>();
             in.readList(mWayPointList, Point.class.getClassLoader());
+
             mStartPoint = in.readParcelable(Point.class.getClassLoader());
             mRun = in.readFloat();
         }
@@ -409,7 +415,9 @@ public class RouteActivity extends AppCompatActivity implements
         }
     }
 
-
+    /**
+     *
+     */
     public class UserLocation {
 
         private LocationManager mLocationManager;
@@ -646,10 +654,46 @@ public class RouteActivity extends AppCompatActivity implements
 
         Fragment toFragment = mFragmentManager.findFragmentByTag(toFragmentTag);
         if (toFragment != null) {
-            fragmentTransaction.remove(toFragment);
             mFragmentManager.popBackStack();
+
+            if (toFragment.isDetached())
+                fragmentTransaction.attach(toFragment);
+
+            if (toFragment.isHidden())
+                fragmentTransaction.show(toFragment);
+        } else {
+            try {
+                Method newInstanceMethod = fragmentClass.getMethod("newInstance", null);
+                toFragment = (Fragment) newInstanceMethod.invoke(null, null);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+                return null;
+            }
+
+            fragmentTransaction.add(R.id.fragment_container, toFragment, toFragmentTag);
         }
 
+        if (toBackStack) fragmentTransaction.addToBackStack(toFragmentTag);
+        fragmentTransaction.commit();
+
+        return toFragment;
+    }
+
+    /**
+     *
+     * @param fragmentClass
+     * @return
+     */
+    private Fragment replaceToFragment(Class fragmentClass) {
+        String toFragmentTag;
+        try {
+            toFragmentTag = (String)fragmentClass.getDeclaredField("FRAGMENT_TAG").get(null);
+        } catch(Exception e) {
+            Log.e(LOG_TAG, e.getMessage());
+            return null;
+        }
+
+        Fragment toFragment;
         try {
             Method newInstanceMethod = fragmentClass.getMethod("newInstance", null);
             toFragment = (Fragment) newInstanceMethod.invoke(null, null);
@@ -658,10 +702,9 @@ public class RouteActivity extends AppCompatActivity implements
             return null;
         }
 
-        fragmentTransaction.add(R.id.fragment_container, toFragment, toFragmentTag);
-
-        if (toBackStack) fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commit();
+        mFragmentManager.popBackStack();
+        mCurrentFragment = toFragment;
 
         return toFragment;
     }
@@ -674,6 +717,9 @@ public class RouteActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
+
+        if (savedInstanceState != null)
+            mRoute = savedInstanceState.getParcelable(BUNDLE_KEY_ROUTE);
 
         mApp = (ElectrobinApplication)getApplicationContext();
         mUser = mApp.getUser();
@@ -692,7 +738,26 @@ public class RouteActivity extends AppCompatActivity implements
         mFragmentManager.addOnBackStackChangedListener(this);
 
         shouldDisplayHomeUp();
-        switchToFragment(RouteListFragment.class, false);
+
+        if (savedInstanceState != null) {
+            mCurrentFragment = mFragmentManager.getFragment(savedInstanceState, "currentFragment");
+            mFragmentManager.beginTransaction().replace(R.id.fragment_container, mCurrentFragment).commit();
+            mFragmentManager.popBackStack();
+        } else {
+            replaceToFragment(RouteListFragment.class);
+        }
+    }
+
+    /**
+     *
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        if (mRoute != null)
+            bundle.putParcelable(BUNDLE_KEY_ROUTE, mRoute);
+
+        mFragmentManager.putFragment(bundle, "currentFragment", mCurrentFragment);
     }
 
     /**
@@ -703,6 +768,14 @@ public class RouteActivity extends AppCompatActivity implements
         super.onStart();
         Intent intent = new Intent(this, TCPClientService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    /**
+     *
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     /**
@@ -747,53 +820,73 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     private void showRouteUpdatedNotification(boolean isOnRouteList) {
+        if (isOnRouteList)
+            showRouteUpdatedPopup();
+        else
+            showRouteUpdatedDialog();
+    }
+
+    /**
+     *
+     */
+    private void showRouteUpdatedPopup() {
+        if (mRouteUpdatedPopupShowing) return;
+
         final ObjectAnimator fadeIn = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.0f, 0.95f);
         fadeIn.setDuration(1000);
 
         final ObjectAnimator fadeOut = ObjectAnimator.ofFloat(mRlRouteUpdated, "alpha", 0.95f, 0.0f);
         fadeOut.setDuration(1000);
 
-        if (isOnRouteList) {
-            final AnimatorSet as = new AnimatorSet();
-            as.play(fadeOut).after(fadeIn).after(2000L);
+        final AnimatorSet as = new AnimatorSet();
+        as.play(fadeOut).after(fadeIn).after(2000L);
 
-            as.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    mRlRouteUpdated.setVisibility(View.VISIBLE);
-                }
+        as.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mRlRouteUpdated.setVisibility(View.VISIBLE);
+            }
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mRlRouteUpdated.setVisibility(View.GONE);
-                }
-            });
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mRlRouteUpdated.setVisibility(View.GONE);
+                mRouteUpdatedPopupShowing = false;
+            }
+        });
 
-            as.start();
-        }
-        else {
-            final Dialog dialog = new Dialog(this);
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setCancelable(false);
-            dialog.setContentView(R.layout.layout_custom_dialog);
-
-            final TextView tvMessage = (TextView) dialog.findViewById(R.id.message_text);
-            tvMessage.setText(mI10n.l("route_updated"));
-
-            final Button btnOk = (Button) dialog.findViewById(R.id.ok_button);
-            btnOk.setText(mI10n.l("to_route_list"));
-            btnOk.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
-                    RouteListFragment fragment = (RouteListFragment) switchToFragment(RouteListFragment.class, false);
-                    fragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
-                }
-            });
-
-            dialog.show();
-        }
+        as.start();
+        mRouteUpdatedPopupShowing = true;
     }
+
+    /**
+     *
+     */
+    private void showRouteUpdatedDialog() {
+        if (mRouteUpdatedDialog != null && mRouteUpdatedDialog.isShowing())
+            return;
+
+        mRouteUpdatedDialog = new Dialog(this);
+        mRouteUpdatedDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mRouteUpdatedDialog.setCancelable(false);
+        mRouteUpdatedDialog.setContentView(R.layout.layout_custom_dialog);
+
+        final TextView tvMessage = (TextView) mRouteUpdatedDialog.findViewById(R.id.message_text);
+        tvMessage.setText(mI10n.l("route_updated"));
+
+        final Button btnOk = (Button) mRouteUpdatedDialog.findViewById(R.id.ok_button);
+        btnOk.setText(mI10n.l("to_route_list"));
+        btnOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRouteUpdatedDialog.dismiss();
+
+                RouteListFragment routeListFragment = (RouteListFragment)replaceToFragment(RouteListFragment.class);
+                routeListFragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+            }
+        });
+
+        mRouteUpdatedDialog.show();
+   }
 
     /**
      *
@@ -872,7 +965,7 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     @Override
-    public void onRoutePointDone(Route.Point point, BinCardFragment fragment) {
+    public void onRoutePointDone(Route.Point point) {
         final Route route = getCurrentRoute();
 
         try {
@@ -882,19 +975,14 @@ public class RouteActivity extends AppCompatActivity implements
             return;
         }
 
-        // TODO: Create a separate method instead of the mess below
         mUserLocation.stopLocationUpdates();
         mUserLocation.startLocationUpdates();
 
         if (route.hasUnvisitedWayPoints()) {
-            switchToFragment(RouteMapFragment.class, false);
-        } else {
-            fragment.showUIAllBinsDone();
-
-            // Some dirty workaround
-            final ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null)
-                actionBar.setDisplayHomeAsUpEnabled(false);
+            replaceToFragment(RouteMapFragment.class);
+        }
+        else {
+            replaceToFragment(AllBinsDoneFragment.class);
         }
     }
 
@@ -904,7 +992,7 @@ public class RouteActivity extends AppCompatActivity implements
     @Override
     public void onRouteDone() {
         mUserLocation.stopLocationUpdates();
-        switchToFragment(StatisticsFragment.class, false);
+        replaceToFragment(StatisticsFragment.class);
     }
 
     /**
@@ -912,8 +1000,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onGetNewRoute() {
-        RouteListFragment fragment = (RouteListFragment)switchToFragment(RouteListFragment.class, false);
-        fragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_WAITING);
+        replaceToFragment(RouteListFragment.class);
     }
 
     /**
@@ -921,7 +1008,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteStart() {
-        switchToFragment(RouteMapFragment.class, false);
+        replaceToFragment(RouteMapFragment.class);
 
         mUserLocation.stopLocationUpdates();
         mUserLocation.startLocationUpdates();
@@ -947,7 +1034,7 @@ public class RouteActivity extends AppCompatActivity implements
     public void shouldDisplayHomeUp(){
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(getSupportFragmentManager().getBackStackEntryCount() > 0);
+            actionBar.setDisplayHomeAsUpEnabled(mFragmentManager.getBackStackEntryCount() > 0);
     }
 
     /**
@@ -956,10 +1043,17 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public boolean onSupportNavigateUp() {
-        getSupportFragmentManager().popBackStack();
+        mFragmentManager.popBackStack();
+        // FragmentManager.BackStackEntry backEntry = mFragmentManager.getBackStackEntryAt(mFragmentManager.getBackStackEntryCount() - 1);
+        // if (backEntry != null)
+        //   mCurrentFragment = mFragmentManager.findFragmentByTag(backEntry.getName());
+
         return true;
     }
 
+    /**
+     *
+     */
     @Override
     public void onBackPressed() {
         // Do nothing

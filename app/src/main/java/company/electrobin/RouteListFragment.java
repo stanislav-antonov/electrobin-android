@@ -109,6 +109,10 @@ public class RouteListFragment extends Fragment {
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            mLayoutDisplayed = savedInstanceState.getInt(BUNDLE_KEY_DISPLAY_LAYOUT);
+        }
+
         switch (mLayoutDisplayed) {
             case LAYOUT_DISPLAYED_ROUTE_WAITING:
                 showUIRouteWaiting();
@@ -205,5 +209,15 @@ public class RouteListFragment extends Fragment {
         });
 
         mLayoutDisplayed = LAYOUT_DISPLAYED_ROUTE_LIST;
+    }
+
+    /**
+     *
+     * @param bundle
+     */
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        bundle.putInt(BUNDLE_KEY_DISPLAY_LAYOUT, mLayoutDisplayed);
     }
 }
