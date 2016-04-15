@@ -14,6 +14,9 @@
             var snapDistanceThreshold = 0.0017;
             var routePoints;
 
+            var currentRouteData;
+            var currentRoute;
+
             var prevPosition;
 
             ymaps.ready(function () {
@@ -21,10 +24,19 @@
                 myMap = new ymaps.Map('map', {
                     center: initCoords,
                     zoom: 16,
-                    geoObjectOverlayFactory: 'default#interactiveGraphics'
+                    geoObjectOverlayFactory: 'default#interactiveGraphics',
+                    controls: ["zoomControl", "searchControl", "trafficControl"]
                 });
 
                 coordSystem = myMap.options.get('projection').getCoordSystem();
+
+                var trafficControlButton = myMap.controls.get("trafficControl");
+                trafficControlButton.events.add('select', function () {
+                        _displayRoute(true);
+                    }).add('deselect', function () {
+                        _displayRoute(false);
+                    }
+                );
 
                 Android.onMapReady();
             });
@@ -153,30 +165,41 @@
             }
 
 
-            function displayRoute(route) {
-                // var route = '{"start_point":{"longitude":44.5837853,"latitude":48.7869476},"way_points":[{"unique_id":1,"longitude":44.57456924862674,"latitude":48.785346371124746},{"unique_id":2,"longitude":44.58332181428101,"latitude":48.78560940518449}]}';
-                route = $.parseJSON(route);
+            function displayRoute(routeJSON) {
+                currentRouteData = $.parseJSON(routeJSON);
+                _displayRoute(false);
+            }
 
-                var points = [];
+
+            function _displayRoute(atj) {
+                if (!currentRouteData) {
+                    console.log('no route data!');
+                    return;
+                }
+
+                var wayPointsData = [];
                 var hasStartPoint = false;
 
-                if (route.hasOwnProperty("start_point")) {
-                    var startPoint = route.start_point;
-                    points.push({ type: "wayPoint", point: [ startPoint.latitude, startPoint.longitude ] });
+                if (currentRouteData.hasOwnProperty("start_point")) {
+                    var startPoint = currentRouteData.start_point;
+                    wayPointsData.push({ type: "wayPoint", point: [ startPoint.latitude, startPoint.longitude ] });
                     hasStartPoint = true;
                 }
 
-                var wayPoints = route.way_points;
+                var wayPoints = currentRouteData.way_points;
                 for (i = 0; i < wayPoints.length; i++) {
                     var wayPoint = wayPoints[i];
-                    points.push({ type: "wayPoint", point: [ wayPoint.latitude, wayPoint.longitude ] });
+                    wayPointsData.push({ type: "wayPoint", point: [ wayPoint.latitude, wayPoint.longitude ] });
+                }
+
+                if (currentRoute) {
+                    myMap.geoObjects.remove(currentRoute);
                 }
 
                 Android.onRouteBuildingStart();
 
-                ymaps.route(points, {avoidTrafficJams: true, mapStateAutoApply: true}).then(
-                    function (route) {
-                        // var points = route.getViaPoints();
+                ymaps.route(wayPointsData, {avoidTrafficJams: atj, mapStateAutoApply: true}).then(
+                    function(route) {
                         var points = route.getWayPoints();
 
                         var startPoint = null;
@@ -211,6 +234,7 @@
 
                         myMap.geoObjects.add(route);
                         routePoints = routeToPoints(route);
+                        currentRoute = route;
 
                         Android.onRouteBuildingReady();
                     },
