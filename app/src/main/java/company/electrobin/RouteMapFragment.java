@@ -163,7 +163,6 @@ public class RouteMapFragment extends Fragment {
             });
         }
 
-
         /**
          *
          */
@@ -173,6 +172,21 @@ public class RouteMapFragment extends Fragment {
                 @Override
                 public void run() {
                     mListener.onRoutePointClick(id);
+                }
+            });
+        }
+
+        /**
+         *
+         */
+        @JavascriptInterface
+        public void onRouteDeviation() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // Rebuild current route
+                    mRouteViewer.reset();
+                    mRouteViewer.notifyMapReady();
                 }
             });
         }
@@ -300,7 +314,7 @@ public class RouteMapFragment extends Fragment {
         /**
          *
          */
-        private void reset() {
+        public void reset() {
             mHasMapReady = false;
             mGotFirstLocation = false;
         }
@@ -308,7 +322,7 @@ public class RouteMapFragment extends Fragment {
         /**
          *
          */
-        private void drawRoute() {
+        public void drawRoute() {
             final RouteActivity.Route route = mListener.onGetRoute();
             mWvMap.loadUrl(String.format("javascript:displayRoute('%s')", route.asJSON()));
         }

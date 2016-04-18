@@ -12,6 +12,12 @@
             var coordSystem;
 
             var snapDistanceThreshold = 0.0017;
+            var routeDeviationThreshold = 5;
+            var routeDeviationCount = 0;
+            var routePointStep = 4;
+
+            var avoidTrafficJams;
+
             var routePoints;
 
             var currentRouteData;
@@ -32,8 +38,10 @@
 
                 var trafficControlButton = myMap.controls.get("trafficControl");
                 trafficControlButton.events.add('select', function () {
+                        avoidTrafficJams = true;
                         _displayRoute(true);
                     }).add('deselect', function () {
+                        avoidTrafficJams = false;
                         _displayRoute(false);
                     }
                 );
@@ -64,14 +72,13 @@
                     }
                 }
 
-                var step = 4;
                 var result = [];
                 for (var i = 0, l = points.length - 1; l; --l, ++i) {
                     var from = points[i],
                         to = points[i + 1],
                         diff = [to[0] - from[0], to[1] - from[1]];
 
-                    for (var j = 0, k = Math.round(coordSystem.distance(from, to)); j < k; j += step) {
+                    for (var j = 0, k = Math.round(coordSystem.distance(from, to)); j < k; j += routePointStep) {
                         var ratio = j / k;
                         result.push([from[0] + (diff[0] * ratio), from[1] + (diff[1] * ratio)]);
                     }
@@ -106,7 +113,18 @@
                     }
                 }
 
-                return minDistance < snapDistanceThreshold ? [rpFound[0], rpFound[1]] : [point[0], point[1]];
+                if (minDistance < snapDistanceThreshold) {
+                    return [rpFound[0], rpFound[1]];
+                } else {
+                    if (routeDeviationCount > routeDeviationThreshold) {
+                        routeDeviationCount = 0;
+                        Android.onRouteDeviation();
+                    }
+
+                    routeDeviationCount++;
+
+                    return [point[0], point[1]];
+                }
             }
 
 
@@ -135,14 +153,15 @@
                         if (!locationArrow) {
                             locationArrow = new ymaps.Placemark(
                                 pointSnapped, {}, {
-                                    // iconLayout: 'default#image',
-                                    // iconShadow: false,
-                                    // iconImageHref: 'http://185.118.64.121:8081/static/img/location_arrow.png',
-                                    // iconImageSize: [32, 32],
-                                    // iconImageOffset: [0, 0],
-                                    // iconOffset: [0, 0],
-                                    preset: "islands#dotCircleIcon",
-                                    iconColor: '#ff0000'
+                                    iconLayout: 'default#image',
+                                    iconShadow: false,
+                                    iconImageHref: 'http://185.118.64.121:8081/static/img/location_arrow.png',
+                                    iconImageSize: [24, 24],
+                                    iconImageOffset: [-12, -12],
+                                    iconOffset: [0, 0],
+
+                                    // preset: "islands#dotCircleIcon",
+                                    // iconColor: '#ff0000'
                                 }
                             );
 
@@ -167,11 +186,11 @@
 
             function displayRoute(routeJSON) {
                 currentRouteData = $.parseJSON(routeJSON);
-                _displayRoute(false);
+                _displayRoute();
             }
 
 
-            function _displayRoute(atj) {
+            function _displayRoute() {
                 if (!currentRouteData) {
                     console.log('no route data!');
                     return;
@@ -198,7 +217,7 @@
 
                 Android.onRouteBuildingStart();
 
-                ymaps.route(wayPointsData, {avoidTrafficJams: atj, mapStateAutoApply: true}).then(
+                ymaps.route(wayPointsData, {avoidTrafficJams: avoidTrafficJams, mapStateAutoApply: true}).then(
                     function(route) {
                         var points = route.getWayPoints();
 
@@ -224,12 +243,11 @@
                         });
 
                         if (hasStartPoint && startPoint != null) {
-                            var startPointPlacemark = new ymaps.Placemark(startPoint.geometry.getCoordinates(), {}, {
-                                hasBalloon: false,
-                                iconColor: "0066ff99"
-                            });
-
-                            points.add(startPointPlacemark, 0);
+                            // var startPointPlacemark = new ymaps.Placemark(startPoint.geometry.getCoordinates(), {}, {
+                            //    hasBalloon: false,
+                            //    iconColor: "0066ff99"
+                            // });
+                            // points.add(startPointPlacemark, 0);
                         }
 
                         myMap.geoObjects.add(route);
