@@ -262,7 +262,7 @@ public class RouteMapFragment extends Fragment {
     private class RouteViewer {
 
         private boolean mHasMapReady;
-        private boolean mGotFirstLocation;
+        private boolean mGotLocation;
 
         private Location mCurrentLocation;
 
@@ -273,10 +273,7 @@ public class RouteMapFragment extends Fragment {
             if (mHasMapReady) return;
             mHasMapReady = true;
 
-            if (!mGotFirstLocation)
-                mRlRouteBuilding.setVisibility(View.VISIBLE);
-
-            drawFirstRoute();
+            displayRouteTrigger();
         }
 
         /**
@@ -286,13 +283,13 @@ public class RouteMapFragment extends Fragment {
         public void notifyGotUserLocation(Location location) {
             mCurrentLocation = location;
 
-            drawUserLocation();
+            displayUserLocation();
 
-            if (mGotFirstLocation) return;
+            if (mGotLocation) return;
             mListener.onGetRoute().setStartPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-            mGotFirstLocation = true;
+            mGotLocation = true;
 
-            drawFirstRoute();
+            displayRouteTrigger();
         }
 
         /**
@@ -300,15 +297,7 @@ public class RouteMapFragment extends Fragment {
          */
         public void notifyRouteDisplayed() {
             mRlRouteBuilding.setVisibility(View.GONE);
-            drawUserLocation();
-        }
-
-        /**
-         *
-         */
-        private void drawFirstRoute() {
-            if (mGotFirstLocation && mHasMapReady)
-                drawRoute();
+            displayUserLocation();
         }
 
         /**
@@ -316,13 +305,24 @@ public class RouteMapFragment extends Fragment {
          */
         public void reset() {
             mHasMapReady = false;
-            mGotFirstLocation = false;
+            mGotLocation = false;
         }
 
         /**
          *
          */
-        public void drawRoute() {
+        private void displayRouteTrigger() {
+            if (mGotLocation && mHasMapReady) {
+                mRlRouteBuilding.setVisibility(View.VISIBLE);
+                displayRoute();
+            }
+        }
+
+        /**
+         *
+         */
+        private void displayRoute() {
+            if (!mHasMapReady) return;
             final RouteActivity.Route route = mListener.onGetRoute();
             mWvMap.loadUrl(String.format("javascript:displayRoute('%s')", route.asJSON()));
         }
@@ -330,7 +330,8 @@ public class RouteMapFragment extends Fragment {
         /**
          *
          */
-        public void drawUserLocation() {
+        private void displayUserLocation() {
+            if (!mHasMapReady || mCurrentLocation == null) return;
             mWvMap.loadUrl(String.format("javascript:updatePosition(%1$s, %2$s, %3$s)",
                     mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), mCurrentLocation.getBearing()));
         }
