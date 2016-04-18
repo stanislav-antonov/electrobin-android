@@ -273,6 +273,9 @@ public class RouteMapFragment extends Fragment {
             if (mHasMapReady) return;
             mHasMapReady = true;
 
+            // Show info screen only in the case if we got the map ready but still waiting for location
+            if (!mGotLocation) mRlRouteBuilding.setVisibility(View.VISIBLE);
+
             triggerDisplayRoute();
         }
 
@@ -312,10 +315,7 @@ public class RouteMapFragment extends Fragment {
          *
          */
         private void triggerDisplayRoute() {
-            if (mGotLocation && mHasMapReady) {
-                mRlRouteBuilding.setVisibility(View.VISIBLE);
-                displayRoute();
-            }
+            if (mGotLocation && mHasMapReady) displayRoute();
         }
 
         /**
