@@ -273,7 +273,7 @@ public class RouteMapFragment extends Fragment {
             if (mHasMapReady) return;
             mHasMapReady = true;
 
-            displayRouteTrigger();
+            triggerDisplayRoute();
         }
 
         /**
@@ -289,7 +289,7 @@ public class RouteMapFragment extends Fragment {
             mListener.onGetRoute().setStartPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
             mGotLocation = true;
 
-            displayRouteTrigger();
+            triggerDisplayRoute();
         }
 
         /**
@@ -311,7 +311,7 @@ public class RouteMapFragment extends Fragment {
         /**
          *
          */
-        private void displayRouteTrigger() {
+        private void triggerDisplayRoute() {
             if (mGotLocation && mHasMapReady) {
                 mRlRouteBuilding.setVisibility(View.VISIBLE);
                 displayRoute();
