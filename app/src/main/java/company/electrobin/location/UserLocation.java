@@ -238,11 +238,6 @@ public class UserLocation {
         try {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     GPS_LOCATION_UPDATES_MIN_TIME_INTERVAL, GPS_LOCATION_UPDATES_MIN_DISTANCE, mLocationListener);
-        } catch (IllegalArgumentException e) {
-            Log.e(LOG_TAG, "GPS provider error: " + e.getMessage());
-        }
-
-        try {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     GPS_STATUS_CHECKER_UPDATES_MIN_TIME_INTERVAL, GPS_STATUS_CHECKER_UPDATES_MIN_DISTANCE, mGpsStatusChecker);
         } catch (IllegalArgumentException e) {
