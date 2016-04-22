@@ -6,6 +6,7 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
@@ -85,7 +86,13 @@ public class UserLocation {
         }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            if (!LocationManager.GPS_PROVIDER.equals(provider)) return;
+            if (status == LocationProvider.AVAILABLE)
+                broadcastGpsStatus(true);
+            else
+                broadcastGpsStatus(false);
+        }
 
         @Override
         public void onProviderEnabled(String provider) {}
