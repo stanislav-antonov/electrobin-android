@@ -75,9 +75,11 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
 
     private final static String MESSAGE_BUNDLE_KEY_CONNECT_RESULT = "connect_result";
     private final static String MESSAGE_BUNDLE_KEY_RECEIVED_DATA = "received_data";
+    private final static String MESSAGE_BUNDLE_KEY_CONNECTION_CLOSED = "connection_closed";
 
     private final static int MESSAGE_TYPE_CONNECT_RESULT = 1;
     private final static int MESSAGE_TYPE_DATA_RECEIVED = 2;
+    private final static int MESSAGE_TYPE_CONNECTION_CLOSED = 3;
 
     private class AsyncConnector {
 
@@ -476,6 +478,9 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
                 case MESSAGE_TYPE_DATA_RECEIVED:
                     listener.onDataReceived(msg.getData().getString(MESSAGE_BUNDLE_KEY_RECEIVED_DATA));
                     break;
+                case MESSAGE_TYPE_CONNECTION_CLOSED:
+                    listener.onConnectionClosed();
+                    break;
             }
         }
     }
@@ -584,7 +589,17 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
      */
     @Override
     public void onConnectionClosed(int status) {
+        try {
+            Message msg = Message.obtain(mOnDataReceivedHandler, MESSAGE_TYPE_CONNECTION_CLOSED);
+            Bundle bundle = new Bundle();
+            bundle.putInt(MESSAGE_BUNDLE_KEY_CONNECTION_CLOSED, status);
+            msg.setData(bundle);
 
+            mOnDataReceivedHandler.sendMessage(msg);
+        }
+        catch (Exception e) {
+            Log.d(LOG_TAG, e.getMessage());
+        }
     }
 
     /**

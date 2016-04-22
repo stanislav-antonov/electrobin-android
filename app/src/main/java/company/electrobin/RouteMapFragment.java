@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import company.electrobin.i10n.I10n;
+import company.electrobin.location.UserLocation;
 import company.electrobin.user.User;
 
 public class RouteMapFragment extends Fragment {
@@ -63,7 +64,7 @@ public class RouteMapFragment extends Fragment {
             Bundle bundle = intent.getExtras();
 
             if (bundle == null) return;
-            Location location = bundle.getParcelable(RouteActivity.UserLocation.BUNDLE_KEY_LOCATION);
+            Location location = bundle.getParcelable(UserLocation.BUNDLE_KEY_CURRENT_LOCATION);
 
             if (location == null) return;
             mRouteViewer.notifyGotUserLocation(location);
@@ -482,7 +483,7 @@ public class RouteMapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver,
-                new IntentFilter(RouteActivity.UserLocation.BROADCAST_INTENT));
+                new IntentFilter(UserLocation.BROADCAST_INTENT_LOCATION_CHANGED));
 
         final RouteActivity routeActivity = (RouteActivity)getActivity();
         routeActivity.getUserLocation().stopLocationUpdates();

@@ -39,15 +39,26 @@
                 var trafficControlButton = myMap.controls.get("trafficControl");
                 trafficControlButton.events.add('select', function () {
                         avoidTrafficJams = true;
+                        updateStartPoint();
                         _displayRoute(true);
                     }).add('deselect', function () {
                         avoidTrafficJams = false;
+                        updateStartPoint();
                         _displayRoute(false);
                     }
                 );
 
                 Android.onMapReady();
             });
+
+
+            function updateStartPoint() {
+                if (prevPosition && currentRouteData && currentRouteData.hasOwnProperty("start_point")) {
+                    var startPoint = currentRouteData["start_point"];
+                    startPoint.latitude  = prevPosition[0];
+                    startPoint.longitude = prevPosition[1];
+                }
+            }
 
 
             function routeToPoints(route) {
@@ -89,7 +100,7 @@
 
 
             function snapToRoute(point) {
-                if (!point) return;
+                if (!point) return null;
                 if (!routePoints) {
                     console.log('no route points!');
                     return [point[0], point[1]];
@@ -114,7 +125,7 @@
                 }
 
                 if (minDistance < snapDistanceThreshold) {
-                    return [rpFound[0], rpFound[1]];
+                    return rpFound ? [rpFound[0], rpFound[1]] : null;
                 } else {
                     if (routeDeviationCount > routeDeviationThreshold) {
                         routeDeviationCount = 0;
@@ -141,6 +152,8 @@
 
             function updatePosition(lat, long, bearing) {
                 var pointSnapped = snapToRoute([lat, long]);
+                if (!pointSnapped) return;
+
                 var b = 0;
                 if (prevPosition) {
                     b = calcBearing(prevPosition[0], prevPosition[1], pointSnapped[0], pointSnapped[1]);
@@ -232,7 +245,6 @@
                             point.properties.set("unique_id", uniqueId);
                             point.properties.set("iconContent", uniqueId);
 
-                            // https://tech.yandex.ru/maps/doc/jsapi/2.0/ref/reference/GeoObject-docpage/
                             point.options.set({
                                 hasBalloon: false
                             });

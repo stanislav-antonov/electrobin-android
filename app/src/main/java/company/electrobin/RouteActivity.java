@@ -6,13 +6,12 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.location.GpsStatus;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -33,6 +32,7 @@ import android.view.ViewGroup;
 
 import android.view.Window;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -47,6 +47,7 @@ import java.util.Date;
 import java.util.List;
 
 import company.electrobin.i10n.I10n;
+import company.electrobin.location.UserLocation;
 import company.electrobin.network.TCPClientListener;
 import company.electrobin.network.TCPClientService;
 import company.electrobin.user.AllBinsDoneFragment;
@@ -67,6 +68,7 @@ public class RouteActivity extends AppCompatActivity implements
     private ElectrobinApplication mApp;
 
     private RelativeLayout mRlRouteUpdated;
+    private LinearLayout mLlBottomNotification;
     public Button btnActionBarUserProfile;
 
     private FragmentManager mFragmentManager;
@@ -80,6 +82,9 @@ public class RouteActivity extends AppCompatActivity implements
 
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
     private static final String BUNDLE_KEY_ROUTE = "route";
+
+    private final static int BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION = 1;
+    private final static int BOTTOM_NOTIFICATION_NO_GPS = 2;
 
     /**
      *
@@ -374,6 +379,11 @@ public class RouteActivity extends AppCompatActivity implements
         @Override
         public void onConnectResult(int result) {
             Log.d(LOG_TAG, "Connect result: " + result);
+            if (result == TCPClientListener.CONNECT_RESULT_OK) {
+                toggleBottomNotification(BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION, View.GONE);
+            } else {
+                toggleBottomNotification(BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION, View.VISIBLE);
+            }
         }
 
         @Override
@@ -414,174 +424,10 @@ public class RouteActivity extends AppCompatActivity implements
                 Log.d(LOG_TAG, e.getMessage());
             }
         }
-    }
 
-    /**
-     *
-     */
-    public class UserLocation {
-
-        private LocationManager mLocationManager;
-        private UserLocationListener mLocationListener;
-
-        private boolean mIsRunning;
-
-        private static final long LOCATION_UPDATES_MIN_TIME_INTERVAL = 1000L;
-        private static final long LOCATION_UPDATES_MIN_DISTANCE = 10L;
-
-        public static final String BUNDLE_KEY_LOCATION = "location";
-        public static final String BROADCAST_INTENT = "USER_LOCATION_CHANGED";
-
-        /**
-         *
-         */
-        private class UserLocationListener implements LocationListener {
-
-            private Location mCurrentLocation;
-            private static final int LOCATION_EXPIRES_TIME_INTERVAL = 1000 * 60 * 2;
-
-            @Override
-            public synchronized void onLocationChanged(Location location) {
-                // Check the new location fix
-                if (isBetterLocation(location, mCurrentLocation)) {
-                    if (mCurrentLocation != null) {
-                        location.setBearing(mCurrentLocation.bearingTo(location));
-                        mRoute.addRun(mCurrentLocation.distanceTo(location));
-                    }
-
-                    mCurrentLocation = location;
-                }
-
-                broadcastLocation();
-            }
-
-            private void broadcastLocation() {
-                Intent intent = new Intent(BROADCAST_INTENT);
-                intent.putExtra(BUNDLE_KEY_LOCATION, mCurrentLocation);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-            @Override
-            public void onProviderEnabled(String provider) {}
-
-            @Override
-            public void onProviderDisabled(String provider) {}
-
-            /** Determines whether one Location reading is better than the current Location fix
-             * @param location  The new Location that you want to evaluate
-             * @param currentBestLocation  The current Location fix, to which you want to compare the new one
-             */
-            protected boolean isBetterLocation(Location location, Location currentBestLocation) {
-                if (currentBestLocation == null)
-                    // A new location is always better than no location
-                    return true;
-
-                // Check whether the new location fix is newer or older
-                long timeDelta = location.getTime() - currentBestLocation.getTime();
-                boolean isSignificantlyNewer = timeDelta > LOCATION_EXPIRES_TIME_INTERVAL;
-                boolean isSignificantlyOlder = timeDelta < -LOCATION_EXPIRES_TIME_INTERVAL;
-                boolean isNewer = timeDelta > 0;
-
-                // If it's been more than two minutes since the current location, use the new location
-                // because the user has likely moved
-                if (isSignificantlyNewer) {
-                    return true;
-                    // If the new location is more than two minutes older, it must be worse
-                }
-                else if (isSignificantlyOlder) {
-                    return false;
-                }
-
-                // Check whether the new location fix is more or less accurate
-                int accuracyDelta = (int)(location.getAccuracy() - currentBestLocation.getAccuracy());
-                boolean isLessAccurate = accuracyDelta > 0;
-                boolean isMoreAccurate = accuracyDelta < 0;
-                boolean isSignificantlyLessAccurate = accuracyDelta > 200;
-
-                // Check if the old and new location are from the same provider
-                boolean isFromSameProvider = isSameProvider(location.getProvider(),
-                        currentBestLocation.getProvider());
-
-                // Determine location quality using a combination of timeliness and accuracy
-                if (isMoreAccurate) {
-                    return true;
-                }
-                else if (isNewer && !isLessAccurate) {
-                    return true;
-                }
-                else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
-                    return true;
-                }
-
-                return false;
-            }
-
-            /**
-             *
-             * @param provider1
-             * @param provider2
-             * @return
-             */
-            private boolean isSameProvider(String provider1, String provider2) {
-                if (provider1 == null)
-                    return provider2 == null;
-
-                return provider1.equals(provider2);
-            }
-        }
-
-        /**
-         *
-         */
-        private class GpsStatusListener implements GpsStatus.Listener {
-            @Override
-            public void onGpsStatusChanged(int event) {
-                if (event == GpsStatus.GPS_EVENT_FIRST_FIX) {
-                    // Got first fix since GPS starting
-                }
-            }
-        }
-
-        public UserLocation() {
-            mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-            mLocationManager.addGpsStatusListener(new GpsStatusListener());
-        }
-
-        public void startLocationUpdates() {
-            if (mIsRunning) {
-                Log.i(LOG_TAG, "Location already running");
-                return;
-            }
-
-            mLocationListener = new UserLocationListener();
-
-            try {
-                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                        LOCATION_UPDATES_MIN_TIME_INTERVAL, LOCATION_UPDATES_MIN_DISTANCE, mLocationListener);
-            } catch(IllegalArgumentException e) {
-                Log.e(LOG_TAG, "Network provider error: " + e.getMessage());
-                return;
-            }
-
-            try {
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        LOCATION_UPDATES_MIN_TIME_INTERVAL, LOCATION_UPDATES_MIN_DISTANCE, mLocationListener);
-            } catch (IllegalArgumentException e) {
-                Log.e(LOG_TAG, "GPS provider error: " + e.getMessage());
-                return;
-            }
-
-            mIsRunning = true;
-        }
-
-        public void stopLocationUpdates() {
-            if (mLocationListener != null)
-                mLocationManager.removeUpdates(mLocationListener);
-
-            mIsRunning = false;
+        @Override
+        public void onConnectionClosed() {
+            toggleBottomNotification(BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION, View.VISIBLE);
         }
     }
 
@@ -602,6 +448,38 @@ public class RouteActivity extends AppCompatActivity implements
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
+        }
+    };
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch(intent.getAction()) {
+                case UserLocation.BROADCAST_INTENT_LOCATION_CHANGED: {
+                    final Bundle bundle = intent.getExtras();
+                    if (bundle == null) return;
+
+                    final Location currentLocation = bundle.getParcelable(UserLocation.BUNDLE_KEY_CURRENT_LOCATION);
+                    final Location prevLocation = bundle.getParcelable(UserLocation.BUNDLE_KEY_PREV_LOCATION);
+
+                    if (currentLocation != null && prevLocation != null
+                            && currentLocation.getProvider().equals(LocationManager.GPS_PROVIDER)
+                            && prevLocation.getProvider().equals(LocationManager.GPS_PROVIDER))
+                    {
+                        mRoute.addRun(currentLocation.distanceTo(prevLocation));
+                    }
+
+                    break;
+                }
+
+                case UserLocation.BROADCAST_INTENT_GPS_STATUS: {
+                    final Bundle bundle = intent.getExtras();
+                    if (bundle == null) return;
+                    toggleBottomNotification(BOTTOM_NOTIFICATION_NO_GPS, bundle.getBoolean(UserLocation.BUNDLE_KEY_IS_GPS_AVAILABLE) ? View.GONE : View.VISIBLE);
+
+                    break;
+                }
+            }
         }
     };
 
@@ -726,12 +604,14 @@ public class RouteActivity extends AppCompatActivity implements
         mUser = mApp.getUser();
         mI10n = mApp.getI10n();
 
-        mUserLocation = new UserLocation();
+        mUserLocation = new UserLocation(this);
 
         setupCustomActionBar();
 
         mRlRouteUpdated = (RelativeLayout)findViewById(R.id.route_updated_layout);
         mRlRouteUpdated.setVisibility(View.GONE);
+
+        mLlBottomNotification = (LinearLayout)findViewById(R.id.bottom_notification_layout);
 
         ((TextView)mRlRouteUpdated.findViewById(R.id.route_updated_text)).setText(mI10n.l("route_updated"));
 
@@ -747,6 +627,27 @@ public class RouteActivity extends AppCompatActivity implements
         } else {
             replaceToFragment(RouteListFragment.class);
         }
+    }
+
+    /**
+     *
+     */
+    private void toggleBottomNotification(int what, int visibility) {
+        final TextView tvWhat;
+        switch(what) {
+            case BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION:
+                tvWhat = (TextView)mLlBottomNotification.findViewById(R.id.no_internet_connection_text);
+                tvWhat.setText(mI10n.l("no_internet_connection"));
+                break;
+            case BOTTOM_NOTIFICATION_NO_GPS:
+                tvWhat = (TextView)mLlBottomNotification.findViewById(R.id.no_gps_text);
+                tvWhat.setText(mI10n.l("no_gps"));
+                break;
+            default:
+                return;
+        }
+
+        tvWhat.setVisibility(visibility);
     }
 
     /**
@@ -775,8 +676,23 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+    }
+
+    /**
+     *
+     */
+    @Override
     protected void onResume() {
         super.onResume();
+
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(UserLocation.BROADCAST_INTENT_LOCATION_CHANGED);
+        intentFilter.addAction(UserLocation.BROADCAST_INTENT_GPS_STATUS);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     /**
@@ -1019,58 +935,6 @@ public class RouteActivity extends AppCompatActivity implements
         final String strJSON = String.format("{\"action\":\"start_route\", \"route_id\":\"%s\", \"created\":\"%s\"}",
                 route.getId(), route.getDateFormatted(Route.FORMAT_DATE_ORIGINAL));
         mService.sendData(strJSON);
-
-/*
-        // DEBUG
-        final double[][] points = new double[][]{
-            new double[] {48.78711893483084D, 44.58428493508788D},
-            new double[] {48.786860049919795D,44.58510698723347D},
-            new double[] {48.78658001376621D,44.585552233929945D},
-            new double[]{48.78616172898921D,44.58580972599536D},
-                new double[]{48.7857717993439D,44.58526791977437D},
-                new double[]{48.78538186665112D,44.584774393315634D},
-                new double[]{48.78504864902613D,44.584200400586425D},
-                new double[]{48.784527548917254D,44.583486932988485D},
-                new double[]{48.78387882485031D,44.583004135365805D},
-                new double[]{48.78344988244707D,44.581995624776205D},
-                new double[]{48.782719608385136D,44.580922741170234D},
-                new double[]{48.78218626480075D,44.58017604555454D},
-                new double[]{48.78176439807483D,44.57954304422704D},
-                new double[]{48.78145843722825D,44.57922817802503D},
-                new double[]{48.78181294949494D,44.57859517669751D},
-                new double[]{48.782107192763505D,44.578096285820756D},
-                new double[]{48.782585777506256D,44.57732380962447D},
-                new double[]{48.78297218702337D,44.576696172714975D},
-                {48.783606742949445D,44.575875416756425D},
-                {48.78474139096214D,44.576477885303035D},
-                {48.785748132978455D,44.577861905154705D},
-                {48.78666269086283D,44.5793907642932D}
-        };
-
-        final Handler hdl = new Handler();
-        hdl.postDelayed(new Runnable() {
-            private int i = 0;
-
-            @Override
-            public void run() {
-
-                if (i > points.length - 1) return;
-
-                double[] point = points[i++];
-
-                Location location = new Location("GPS");
-                location.setBearing(90);
-                location.setLatitude(point[0]);
-                location.setLongitude(point[1]);
-
-                Intent intent = new Intent("USER_LOCATION_CHANGED");
-                intent.putExtra("location", location);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-
-                hdl.postDelayed(this, 1000);
-            }
-        }, 30000);
-*/
     }
 
     /**

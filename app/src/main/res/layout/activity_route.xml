@@ -7,7 +7,39 @@
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/bottom_notification_layout"
         />
+    <LinearLayout
+        android:id="@+id/bottom_notification_layout"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:background="#ff394445"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:id="@+id/no_internet_connection_text"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:textSize="12sp"
+            android:textColor="#FFFFFFFF"
+            android:visibility="gone"
+            android:padding="15dp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            />
+        <TextView
+            android:id="@+id/no_gps_text"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:textSize="12sp"
+            android:textColor="#FFFFFFFF"
+            android:visibility="gone"
+            android:padding="15dp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            />
+    </LinearLayout>
     <RelativeLayout
         android:id="@+id/route_updated_layout"
         android:layout_height="wrap_content"
@@ -25,21 +57,5 @@
             android:textSize="16sp"
             android:textColor="#FFFFFFFF"
             />
-<!--
-        <Button
-            android:id="@+id/route_list_button"
-            android:layout_below="@+id/route_updated_text"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:minHeight="40dp"
-            android:textSize="14sp"
-            android:textColor="#FFFFFFFF"
-            android:textAllCaps="false"
-            android:background="@drawable/custom_round_button_1"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:layout_marginTop="15dp"
-            />
--->
     </RelativeLayout>
 </RelativeLayout>

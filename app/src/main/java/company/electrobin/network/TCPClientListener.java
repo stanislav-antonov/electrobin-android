@@ -9,4 +9,5 @@ public interface TCPClientListener {
     void onConnectResult(int result);
     String onAuthToken();
     void onDataReceived(String data);
+    void onConnectionClosed();
 }
