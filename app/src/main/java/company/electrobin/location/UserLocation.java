@@ -21,7 +21,7 @@ public class UserLocation {
     private UserLocationListener mLocationListener;
     private GpsStatusChecker mGpsStatusChecker;
 
-    private boolean mIsRunning;
+    private volatile boolean mIsRunning;
     private Context mContext;
 
     private static final long GPS_LOCATION_UPDATES_MIN_TIME_INTERVAL = 1000L;
@@ -48,40 +48,37 @@ public class UserLocation {
      */
     private class GpsStatusChecker implements LocationListener {
 
-        private volatile Handler mHandler = new Handler();
-        private volatile Runnable mRunnable;
+        private Handler mHandler;
+        private Runnable mRunnable;
 
-        private static final int TIME_INTERVAL = 15000;
+        private static final long TIME_INTERVAL = 30000L;
 
         public GpsStatusChecker() {
-            startTimer();
-        }
-
-        private void startTimer() {
-            if (mRunnable != null) {
-                mHandler.removeCallbacks(mRunnable);
-                mRunnable = null;
-            }
-
+            mHandler = new Handler();
             mRunnable = new Runnable() {
                 @Override
                 public void run() {
                     broadcastGpsStatus(false);
-                    mHandler.postDelayed(this, TIME_INTERVAL);
+                    restartTimer();
                 }
             };
 
+            restartTimer();
+        }
+
+        private synchronized void restartTimer() {
+            mHandler.removeCallbacks(mRunnable);
             mHandler.postDelayed(mRunnable, TIME_INTERVAL);
         }
 
         @Override
         public synchronized void onLocationChanged(Location location) {
             if (!location.getProvider().equals(LocationManager.GPS_PROVIDER)) return;
-            startTimer();
+            restartTimer();
             broadcastGpsStatus(true);
         }
 
-        private void broadcastGpsStatus(boolean isGpsAvailable) {
+        private synchronized void broadcastGpsStatus(boolean isGpsAvailable) {
             Intent intent = new Intent(BROADCAST_INTENT_GPS_STATUS);
             intent.putExtra(BUNDLE_KEY_IS_GPS_AVAILABLE, isGpsAvailable);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -210,17 +207,19 @@ public class UserLocation {
 
     public UserLocation(Context context) {
         mContext = context;
+
+        mLocationListener = new UserLocationListener();
+        mGpsStatusChecker = new GpsStatusChecker();
+
         mLocationManager = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
         mLocationManager.addGpsStatusListener(new GpsStatusListener());
     }
 
-    public void startLocationUpdates() {
+    public synchronized void startLocationUpdates() {
         if (mIsRunning) {
             Log.i(LOG_TAG, "Location already running");
             return;
         }
-
-        mLocationListener = new UserLocationListener();
 
         try {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
@@ -236,8 +235,6 @@ public class UserLocation {
             Log.e(LOG_TAG, "GPS provider error: " + e.getMessage());
         }
 
-        mGpsStatusChecker = new GpsStatusChecker();
-
         try {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     GPS_STATUS_CHECKER_UPDATES_MIN_TIME_INTERVAL, GPS_STATUS_CHECKER_UPDATES_MIN_DISTANCE, mGpsStatusChecker);
@@ -248,7 +245,7 @@ public class UserLocation {
         mIsRunning = true;
     }
 
-    public void stopLocationUpdates() {
+    public synchronized void stopLocationUpdates() {
         if (mLocationListener != null)
             mLocationManager.removeUpdates(mLocationListener);
 
