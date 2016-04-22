@@ -52,7 +52,7 @@ public class UserLocation {
         private Handler mHandler;
         private Runnable mRunnable;
 
-        private static final long TIME_INTERVAL = 30000L;
+        private static final long TIME_INTERVAL = 20000L;
 
         public GpsStatusChecker() {
             mHandler = new Handler();
