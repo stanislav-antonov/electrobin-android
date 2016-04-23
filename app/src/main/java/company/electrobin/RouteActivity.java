@@ -826,6 +826,7 @@ public class RouteActivity extends AppCompatActivity implements
 
         btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
         btnActionBarUserProfile.setText(String.format("%s %s", uProfile.mFirstName, uProfile.mLastName));
+        btnActionBarUserProfile.setVisibility(View.VISIBLE);
         btnActionBarUserProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

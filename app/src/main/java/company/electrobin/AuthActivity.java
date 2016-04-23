@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import company.electrobin.i10n.I10n;
@@ -112,6 +113,8 @@ public class AuthActivity extends AppCompatActivity {
         mApp = (ElectrobinApplication)getApplicationContext();
         mUser = mApp.getUser();
         mI10n = mApp.getI10n();
+
+        ((TextView)findViewById(R.id.header_text)).setText(mI10n.l("authorization"));
 
         mEtUsername = (EditText)findViewById(R.id.username_input);
         mEtPassword = (EditText)findViewById(R.id.password_input);

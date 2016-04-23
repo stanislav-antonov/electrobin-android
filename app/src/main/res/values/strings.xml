@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Electrobin</string>
+    <string name="app_name">Binology</string>
 
     <string name="action_settings">Settings</string>
     <string name="action_logout">Logout</string>
@@ -57,6 +57,8 @@
 
     <string name="error_common">System error</string>
     <string name="error_map_load">Network problem during loading the map</string>
+
+    <string name="authorization">Authorization</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

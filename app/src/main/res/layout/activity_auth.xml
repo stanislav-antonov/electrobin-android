@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#fff4f4d3"
+    android:background="@drawable/background"
     android:gravity="center"
     >
     <RelativeLayout
@@ -16,51 +16,86 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
             >
-            <!-- Logo
-            <ImageView
+            <TextView
+                android:id="@+id/header_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="Logo"
+                android:textSize="28sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-thin"
+                android:layout_gravity="center"
                 />
-            -->
-            <EditText
-                android:id="@+id/username_input"
-                android:gravity="center_horizontal"
-                android:layout_width="match_parent"
+            <RelativeLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textColor="#FF444444"
-                android:textColorHint="#FF999999"
-                android:padding="10dp"
-                android:singleLine="true"
-                android:background="#FFFFFFFF"
-                />
-            <EditText
-                android:id="@+id/password_input"
-                android:gravity="center_horizontal"
-                android:layout_width="match_parent"
+                android:layout_marginTop="50dp"
+                >
+                <EditText
+                    android:id="@+id/username_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="#ffffffff"
+                    android:textColorHint="#96ffffff"
+                    android:paddingLeft="60dp"
+                    android:paddingTop="13dp"
+                    android:paddingBottom="13dp"
+                    android:paddingRight="20dp"
+                    android:singleLine="true"
+                    android:background="#FF78caeb"
+                    />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_username"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textColor="#FF444444"
-                android:textColorHint="#FF999999"
-                android:padding="10dp"
-                android:singleLine="true"
-                android:background="#FFFFFFFF"
-                android:layout_marginTop="20dp"
-                android:inputType="textPassword"
-                />
+                android:layout_marginTop="10dp"
+                >
+                <EditText
+                    android:id="@+id/password_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="#ffffffff"
+                    android:textColorHint="#96ffffff"
+                    android:paddingLeft="60dp"
+                    android:paddingTop="13dp"
+                    android:paddingBottom="13dp"
+                    android:paddingRight="20dp"
+                    android:singleLine="true"
+                    android:background="#FF78caeb"
+                    android:inputType="textPassword"
+                    />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_password"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    />
+            </RelativeLayout>
             <Button
                 android:id="@+id/signin_button"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="60dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
                 android:textColor="#FFFFFFFF"
                 android:textAllCaps="false"
-                android:background="@drawable/custom_round_button_1"
+                android:background="@android:color/transparent"
                 style="?android:attr/borderlessButtonStyle"
                 />
         </LinearLayout>

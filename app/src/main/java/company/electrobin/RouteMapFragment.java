@@ -501,6 +501,24 @@ public class RouteMapFragment extends Fragment {
 
     /**
      *
+     * @param isVisibleToUser
+     */
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+    }
+
+    /**
+     *
+     * @param hidden
+     */
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+    }
+
+    /**
+     *
      */
     private void loadMap() throws Exception {
         if (mMapState == MAP_STATE_LOADING) return;

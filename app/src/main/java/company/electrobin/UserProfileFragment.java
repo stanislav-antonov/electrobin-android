@@ -153,9 +153,30 @@ public class UserProfileFragment extends Fragment {
         super.onResume();
     }
 
+    /**
+     *
+     */
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    /**
+     *
+     * @param isVisibleToUser
+     */
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+    }
+
+    /**
+     *
+     * @param hidden
+     */
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
     }
 }
