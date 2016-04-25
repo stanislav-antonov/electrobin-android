@@ -21,7 +21,7 @@
     <string name="container_status_unloaded_ok">Unloaded</string>
     <string name="container_status_unloaded_error">Error</string>
 
-    <string name="route_waiting_1">Waiting for the route&#8239;</string>
+    <string name="route_waiting_1">waiting for the route</string>
     <string name="route_waiting_2">The route will be displayed on this screen</string>
 
     <string name="route_building">Building the route&#8239;</string>

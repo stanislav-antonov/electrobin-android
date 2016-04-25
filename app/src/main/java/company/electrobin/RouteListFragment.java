@@ -1,7 +1,18 @@
 package company.electrobin;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.InsetDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -9,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -24,7 +36,7 @@ public class RouteListFragment extends Fragment {
     private I10n mI10n;
     private ElectrobinApplication mApp;
 
-    private RelativeLayout mRlRouteWaiting;
+    private LinearLayout mLlRouteWaiting;
     private RelativeLayout mRlRouteList;
 
     private int mLayoutDisplayed;
@@ -100,7 +112,7 @@ public class RouteListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_route_list, container, false);
 
-        mRlRouteWaiting = (RelativeLayout)view.findViewById(R.id.route_waiting_layout);
+        mLlRouteWaiting = (LinearLayout)view.findViewById(R.id.route_waiting_layout);
         mRlRouteList = (RelativeLayout)view.findViewById(R.id.route_list_layout);
 
         return view;
@@ -147,7 +159,7 @@ public class RouteListFragment extends Fragment {
      *
      */
     private void switchRouteWaitingLayout() {
-        mRlRouteWaiting.setVisibility(View.VISIBLE);
+        mLlRouteWaiting.setVisibility(View.VISIBLE);
         mRlRouteList.setVisibility(View.GONE);
     }
 
@@ -156,7 +168,7 @@ public class RouteListFragment extends Fragment {
      */
     private void switchRouteListLayout() {
         mRlRouteList.setVisibility(View.VISIBLE);
-        mRlRouteWaiting.setVisibility(View.GONE);
+        mLlRouteWaiting.setVisibility(View.GONE);
     }
 
     /**
@@ -173,8 +185,50 @@ public class RouteListFragment extends Fragment {
     public void showUIRouteWaiting() {
         switchRouteWaitingLayout();
 
-        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_1)).setText(mI10n.l("route_waiting_1"));
-        ((TextView)mRlRouteWaiting.findViewById(R.id.route_waiting_text_2)).setText(mI10n.l("route_waiting_2"));
+        ((TextView)mLlRouteWaiting.findViewById(R.id.route_waiting_text_1)).setText(mI10n.l("route_waiting_1"));
+
+        View circle1 = mLlRouteWaiting.findViewById(R.id.circle_1);
+        final GradientDrawable gd1 = new GradientDrawable();
+        gd1.setShape(GradientDrawable.OVAL);
+        circle1.setBackground(gd1);
+
+        View circle2 = mLlRouteWaiting.findViewById(R.id.circle_2);
+        final GradientDrawable gd2 = new GradientDrawable();
+        gd2.setShape(GradientDrawable.OVAL);
+        circle2.setBackground(gd2);
+
+        View circle3 = mLlRouteWaiting.findViewById(R.id.circle_3);
+        final GradientDrawable gd3 = new GradientDrawable();
+        gd3.setShape(GradientDrawable.OVAL);
+        circle3.setBackground(gd3);
+
+        final String color1 = "#9cd1e6";
+        final String color2 = "#0089bf";
+
+        AnimatorSet as = new AnimatorSet();
+        as.playSequentially(colorChanger(gd1, color1, color2, 200),
+                colorChanger(gd1, color2, color1, 500),
+                colorChanger(gd2, color1, color2, 200),
+                colorChanger(gd2, color2, color1, 500),
+                colorChanger(gd3, color1, color2, 200),
+                colorChanger(gd3, color2, color1, 500)
+        );
+
+        as.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                gd1.setColor(Color.parseColor(color1));
+                gd2.setColor(Color.parseColor(color1));
+                gd3.setColor(Color.parseColor(color1));
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                animation.start();
+            }
+        });
+
+        as.start();
 
         mLayoutDisplayed = LAYOUT_DISPLAYED_ROUTE_WAITING;
     }
@@ -219,5 +273,26 @@ public class RouteListFragment extends Fragment {
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
         bundle.putInt(BUNDLE_KEY_DISPLAY_LAYOUT, mLayoutDisplayed);
+    }
+
+    /**
+     *
+     * @param gd
+     * @param from
+     * @param to
+     * @return
+     */
+    private static ValueAnimator colorChanger(final GradientDrawable gd, String from, String to, int duration) {
+        ValueAnimator va = ObjectAnimator.ofObject(new ArgbEvaluator(),
+                Color.parseColor(from), Color.parseColor(to));
+        va.setDuration(duration);
+        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                gd.setColor((Integer) animation.getAnimatedValue());
+            }
+        });
+
+        return va;
     }
 }
