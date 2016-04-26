@@ -8,22 +8,32 @@
         android:id="@+id/route_list_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#fff4f4d3"
+        android:background="@drawable/background"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         >
+        <ExpandableListView
+            android:id="@+id/route_point_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/route_start_button"
+            android:layout_marginTop="30dp"
+            android:layout_alignParentTop="true"
+            />
+<!--
         <TextView
             android:id="@+id/route_date_text"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:textSize="20sp"
-            android:textColor="#ff394445"
+            android:textColor="#ffffff"
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
             android:layout_alignParentTop="true"
             android:layout_marginTop="30dp"
             />
-        <ListView
+        <ExpandableListView
             android:id="@+id/route_point_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -32,6 +42,7 @@
             android:layout_above="@+id/route_start_button"
             android:layout_marginTop="30dp"
             />
+-->
         <Button
             android:id="@+id/route_start_button"
             android:layout_height="wrap_content"
@@ -40,12 +51,11 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="30dp"
+            android:padding="20dp"
             android:textSize="20sp"
             android:textColor="#FFFFFFFF"
             android:textAllCaps="false"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:background="@drawable/custom_round_button_1"
+            android:background="@android:color/transparent"
             style="?android:attr/borderlessButtonStyle"
             />
     </RelativeLayout>
@@ -72,7 +82,6 @@
                 android:textColor="#ff0096d0"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_horizontal"
-                android:text="ожидание маршрута"
                 android:layout_marginTop="35dp"
                 />
             <LinearLayout

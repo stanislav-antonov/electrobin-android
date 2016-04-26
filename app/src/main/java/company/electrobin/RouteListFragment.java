@@ -19,12 +19,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import company.electrobin.i10n.I10n;
@@ -54,6 +60,148 @@ public class RouteListFragment extends Fragment {
         public RouteActivity.Route onGetRoute();
         public void onRouteStart();
     }
+
+    private class RouteListAdapter1 extends BaseExpandableListAdapter {
+
+        private final List<PointGroup> mItemList;
+        private final LayoutInflater inflater;
+
+        private class PointGroup {
+            public final String mCity;
+            private List<RouteActivity.Route.Point> mChildItemList;
+
+            public PointGroup(String city) {
+                mCity = city;
+                mChildItemList = new ArrayList<RouteActivity.Route.Point>();
+            }
+
+            public List<RouteActivity.Route.Point> getChildItemList() {
+                return mChildItemList;
+            }
+        }
+
+        private class ViewHolder {
+            private TextView mTvText;
+        }
+
+        public RouteListAdapter1(Context context, List<RouteActivity.Route.Point> itemList) {
+            inflater = LayoutInflater.from(context);
+            mItemList = new ArrayList<>();
+            HashMap<String, PointGroup> groups = new HashMap<>();
+            for (RouteActivity.Route.Point p : itemList) {
+                if (groups.containsKey(p.mCity)) {
+                    groups.get(p.mCity).getChildItemList().add(p);
+                } else {
+                    PointGroup group = new PointGroup(p.mCity);
+                    group.getChildItemList().add(p);
+                    groups.put(p.mCity, group);
+                    mItemList.add(group);
+                }
+            }
+
+            Collections.sort(mItemList, new Comparator<PointGroup>() {
+                @Override
+                public int compare(PointGroup lhs, PointGroup rhs) {
+                    return lhs.mCity.compareToIgnoreCase(rhs.mCity);
+                }
+            });
+        }
+
+        @Override
+        public RouteActivity.Route.Point getChild(int groupPosition, int childPosition) {
+            return mItemList.get(groupPosition).getChildItemList().get(childPosition);
+        }
+
+        @Override
+        public long getChildId(int groupPosition, int childPosition) {
+            return childPosition;
+        }
+
+        @Override
+        public int getChildrenCount(int groupPosition) {
+            return mItemList.get(groupPosition).getChildItemList().size();
+        }
+
+        @Override
+        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView,
+                                 final ViewGroup parent) {
+            ViewHolder viewHolder;
+
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.layout_route_list_item, parent, false);
+
+                viewHolder = new ViewHolder();
+                viewHolder.mTvText = (TextView)convertView.findViewById(R.id.address_text);
+
+                convertView.setTag(viewHolder);
+            }
+            else {
+                viewHolder = (ViewHolder)convertView.getTag();
+            }
+
+            final RouteActivity.Route.Point item = getChild(groupPosition, childPosition);
+            if (item != null)
+                viewHolder.mTvText.setText(item.mAddress);
+
+            return convertView;
+        }
+
+        @Override
+        public PointGroup getGroup(int groupPosition) {
+            return mItemList.get(groupPosition);
+        }
+
+        @Override
+        public int getGroupCount() {
+            return mItemList.size();
+        }
+
+        @Override
+        public long getGroupId(final int groupPosition) {
+            return groupPosition;
+        }
+
+        @Override
+        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.layout_route_list_group_item, null);
+
+                viewHolder = new ViewHolder();
+                viewHolder.mTvText = (TextView)convertView.findViewById(R.id.city_text);
+
+                convertView.setTag(viewHolder);
+            }
+            else {
+                viewHolder = (ViewHolder)convertView.getTag();
+            }
+
+            final PointGroup item = getGroup(groupPosition);
+            viewHolder.mTvText.setText(item.mCity);
+
+            ((ExpandableListView)parent).expandGroup(groupPosition);
+
+            return convertView;
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        @Override
+        public boolean isChildSelectable(int groupPosition, int childPosition) {
+            return true;
+        }
+
+    }
+
+
+
+
+
+
 
     private static class RouteListAdapter extends ArrayAdapter<RouteActivity.Route.Point> {
 
@@ -239,22 +387,27 @@ public class RouteListFragment extends Fragment {
     public void showUIRouteList() {
         switchRouteListLayout();
 
+        final RouteActivity.Route route = mListener.onGetRoute();
+
+        // final TextView tvRouteDate = (TextView)mRlRouteList.findViewById(R.id.route_date_text);
+        // tvRouteDate.setVisibility(View.GONE);
+        // tvRouteDate.setVisibility(View.VISIBLE);
+        // tvRouteDate.setText(String.format(mI10n.l("route_date"), route.getDateFormatted(RouteActivity.Route.FORMAT_DATE_FORMATTED)));
+
+        final ExpandableListView elvRoutePoints = (ExpandableListView)mRlRouteList.findViewById(R.id.route_point_list);
+        elvRoutePoints.setVisibility(View.VISIBLE);
+        elvRoutePoints.setGroupIndicator(null);
+        elvRoutePoints.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                return true;
+            }
+        });
+
+        elvRoutePoints.setAdapter(new RouteListAdapter1(getActivity(), route.getWayPointList()));
+
         final Button btnRouteStart = (Button)mRlRouteList.findViewById(R.id.route_start_button);
         btnRouteStart.setText(mI10n.l("route_start"));
-
-        final TextView tvRouteDate = (TextView)mRlRouteList.findViewById(R.id.route_date_text);
-        tvRouteDate.setVisibility(View.GONE);
-
-        final ListView lvRoutePoints = (ListView)mRlRouteList.findViewById(R.id.route_point_list);
-        lvRoutePoints.setVisibility(View.GONE);
-
-        RouteActivity.Route route = mListener.onGetRoute();
-        tvRouteDate.setVisibility(View.VISIBLE);
-        tvRouteDate.setText(String.format(mI10n.l("route_date"), route.getDateFormatted(RouteActivity.Route.FORMAT_DATE_FORMATTED)));
-
-        lvRoutePoints.setVisibility(View.VISIBLE);
-        lvRoutePoints.setAdapter(new RouteListAdapter(getActivity(), route.getWayPointList()));
-
         btnRouteStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
