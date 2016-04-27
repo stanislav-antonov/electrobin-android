@@ -25,15 +25,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -52,7 +51,6 @@ import company.electrobin.i10n.I10n;
 import company.electrobin.location.UserLocation;
 import company.electrobin.network.TCPClientListener;
 import company.electrobin.network.TCPClientService;
-import company.electrobin.user.AllBinsDoneFragment;
 import company.electrobin.user.User;
 import company.electrobin.user.User.UserProfile;
 
@@ -71,7 +69,8 @@ public class RouteActivity extends AppCompatActivity implements
 
     private RelativeLayout mRlRouteUpdated;
     private LinearLayout mLlBottomNotification;
-    public Button btnActionBarUserProfile;
+    public ImageButton mBtnActionBarUserProfile;
+    public TextView mTvActionBarTitle;
 
     private FragmentManager mFragmentManager;
     private Route mRoute;
@@ -716,8 +715,8 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_route, menu);
-        return true;
+        // getMenuInflater().inflate(R.menu.menu_route, menu);
+        return false;
     }
 
     /**
@@ -784,13 +783,16 @@ public class RouteActivity extends AppCompatActivity implements
         if (mRouteUpdatedDialog != null && mRouteUpdatedDialog.isShowing())
             return;
 
-        mRouteUpdatedDialog = new Dialog(this, R.style.MyDialog);
+        mRouteUpdatedDialog = new Dialog(this, R.style.CustomDialog);
         mRouteUpdatedDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mRouteUpdatedDialog.setCancelable(false);
         mRouteUpdatedDialog.setContentView(R.layout.layout_custom_dialog);
 
-        final TextView tvMessage = (TextView) mRouteUpdatedDialog.findViewById(R.id.message_text);
-        tvMessage.setText(mI10n.l("route_updated"));
+        final TextView tvMessage1 = (TextView) mRouteUpdatedDialog.findViewById(R.id.message_text_1);
+        tvMessage1.setText(mI10n.l("attention"));
+
+        final TextView tvMessage2 = (TextView) mRouteUpdatedDialog.findViewById(R.id.message_text_2);
+        tvMessage2.setText(mI10n.l("route_updated"));
 
         final Button btnOk = (Button) mRouteUpdatedDialog.findViewById(R.id.ok_button);
         btnOk.setText(mI10n.l("to_route_list"));
@@ -826,10 +828,17 @@ public class RouteActivity extends AppCompatActivity implements
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setCustomView(actionBarLayout);
 
-        btnActionBarUserProfile = (Button)findViewById(R.id.action_bar_user_profile_button);
-        btnActionBarUserProfile.setText(String.format("%s %s", uProfile.mFirstName, uProfile.mLastName));
-        btnActionBarUserProfile.setVisibility(View.VISIBLE);
-        btnActionBarUserProfile.setOnClickListener(new View.OnClickListener() {
+        // Set the color
+        // actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.actionbar_background)));
+
+        // Remove the shadow
+        actionBar.setElevation(0);
+
+        mTvActionBarTitle = (TextView)findViewById(R.id.action_bar_title_text);
+
+        mBtnActionBarUserProfile = (ImageButton)findViewById(R.id.action_bar_user_profile_button);
+        mBtnActionBarUserProfile.setVisibility(View.VISIBLE);
+        mBtnActionBarUserProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switchToFragment(UserProfileFragment.class, true);
@@ -841,8 +850,16 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     @Override
-    public boolean onGetIsConnected() {
+    public boolean onGetInternetConnectionStatus() {
         return mBound && mService.isConnected();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public boolean onGetGPSStatus() {
+        return mUserLocation.isGPSEnabled();
     }
 
     /**

@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:background="#98000000"
+        android:background="@color/dialog_background"
         >
         <TextView
             android:id="@+id/route_building_text"
@@ -38,15 +38,16 @@
             android:layout_width="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center"
-            android:textSize="20sp"
+            android:textSize="24sp"
             android:textColor="#ffffffff"
+            android:fontFamily="sans-serif-light"
             />
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/load_retry_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#fff4f4d3"
+        android:background="@drawable/background"
         android:visibility="gone"
         android:gravity="center"
         >
@@ -54,8 +55,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
             >
             <TextView
                 android:id="@+id/error_map_load_text"
@@ -63,21 +64,22 @@
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center"
-                android:textSize="16sp"
-                android:textColor="#ff394445"
+                android:textSize="24sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-light"
                 />
             <Button
                 android:id="@+id/load_retry_button"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textSize="20sp"
+                android:textSize="22sp"
+                android:textStyle="bold"
                 android:textColor="#FFFFFFFF"
                 android:textAllCaps="false"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
+                android:padding="20dp"
                 android:layout_marginTop="30dp"
-                android:background="@drawable/custom_round_button_1"
+                android:background="@android:color/transparent"
                 style="?android:attr/borderlessButtonStyle"
                 />
         </LinearLayout>
@@ -88,7 +90,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:background="#fff4f4d3"
+        android:background="@drawable/background"
         >
         <ProgressBar
             android:layout_width="wrap_content"

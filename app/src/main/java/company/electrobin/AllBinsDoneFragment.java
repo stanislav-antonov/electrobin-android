@@ -1,7 +1,6 @@
-package company.electrobin.user;
+package company.electrobin;
 
 import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,9 +9,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import company.electrobin.ElectrobinApplication;
-import company.electrobin.R;
 import company.electrobin.i10n.I10n;
+import company.electrobin.user.User;
 
 
 public class AllBinsDoneFragment extends Fragment {
@@ -31,10 +29,18 @@ public class AllBinsDoneFragment extends Fragment {
         public void onRouteDone();
     }
 
+    /**
+     *
+     * @return
+     */
     public static AllBinsDoneFragment newInstance() {
         return new AllBinsDoneFragment();
     }
 
+    /**
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,13 +50,21 @@ public class AllBinsDoneFragment extends Fragment {
         mI10n = mApp.getI10n();
     }
 
+    /**
+     *
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_all_bins_done, container, false);
 
-        ((TextView)view.findViewById(R.id.header_text)).setText(mI10n.l("have_got_all_bins"));
-        ((TextView)view.findViewById(R.id.description_text)).setText(mI10n.l("please_move_to_the_base"));
+        ((TextView)view.findViewById(R.id.header_text)).setText(mI10n.l("move_to_the_base_1"));
+        ((TextView)view.findViewById(R.id.description_text_1)).setText(mI10n.l("have_got_all_bins"));
+        ((TextView)view.findViewById(R.id.description_text_2)).setText(mI10n.l("move_to_the_base_2"));
 
         mBtnRouteDone = (Button)view.findViewById(R.id.route_done_button);
         mBtnRouteDone.setText(mI10n.l("finish_route"));
@@ -58,6 +72,10 @@ public class AllBinsDoneFragment extends Fragment {
         return view;
     }
 
+    /**
+     *
+     * @param activity
+     */
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -69,6 +87,10 @@ public class AllBinsDoneFragment extends Fragment {
         }
     }
 
+    /**
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -80,9 +102,35 @@ public class AllBinsDoneFragment extends Fragment {
         });
     }
 
+    /**
+     *
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        final RouteActivity routeActivity = (RouteActivity)getActivity();
+        routeActivity.mTvActionBarTitle.setText("Завершение маршрута");
+    }
+
+    /**
+     *
+     */
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    /**
+     *
+     * @param hidden
+     */
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            final RouteActivity routeActivity = (RouteActivity) getActivity();
+            routeActivity.mTvActionBarTitle.setText("Завершение маршрута");
+        }
     }
 }

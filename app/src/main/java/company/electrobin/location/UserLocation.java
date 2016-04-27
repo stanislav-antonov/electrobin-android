@@ -256,4 +256,8 @@ public class UserLocation {
 
         mIsRunning = false;
     }
+
+    public boolean isGPSEnabled() {
+        return mLocationManager != null && mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
 }

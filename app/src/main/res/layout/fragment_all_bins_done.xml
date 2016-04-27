@@ -1,45 +1,67 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
-    android:background="#fff4f4d3"
+    android:background="@drawable/background"
+    android:paddingLeft="30dp"
+    android:paddingRight="30dp"
     >
-    <TextView
-        android:id="@+id/header_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textColor="#ff394445"
-        android:layout_marginTop="30dp"
-        android:gravity="center_horizontal"
-        />
-    <!-- android:text="You have got all bins on the route" -->
-    <TextView
-        android:id="@+id/description_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="#ff607677"
-        android:layout_marginTop="20dp"
-        android:gravity="center_horizontal"
-        />
-    <!-- android:text="Please move to the base and push the Finish route button on arrived" -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_above="@+id/route_done_button"
+        >
+        <TextView
+            android:id="@+id/header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="#ffffff"
+            android:layout_marginTop="30dp"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal"
+            />
+        <!-- android:text="You have got all bins on the route" -->
+        <TextView
+            android:id="@+id/description_text_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="#ffffff"
+            android:layout_marginTop="40dp"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal"
+            />
+        <TextView
+            android:id="@+id/description_text_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="#ffffff"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal"
+            />
+        <!-- android:text="Please move to the base and push the Finish route button on arrived" -->
+    </LinearLayout>
     <Button
         android:id="@+id/route_done_button"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
-        android:textSize="20sp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:textSize="22sp"
         android:textColor="#FFFFFFFF"
+        android:textStyle="bold"
         android:textAllCaps="false"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:background="@drawable/custom_round_button_1"
+        android:padding="20dp"
+        android:background="@android:color/transparent"
         style="?android:attr/borderlessButtonStyle"
         />
-</LinearLayout>
-
+</RelativeLayout>

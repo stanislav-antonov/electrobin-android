@@ -2,19 +2,13 @@ package company.electrobin;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import company.electrobin.i10n.I10n;
@@ -30,12 +24,14 @@ public class UserProfileFragment extends Fragment {
 
     private Handler mHandler = new Handler();
 
-    private TextView mTvConnectionStatus;
+    private TextView mTvInternetConnectionStatus;
+    private TextView mTvGPSStatus;
 
     public final static String FRAGMENT_TAG = "fragment_user_profile";
 
     public interface OnFragmentInteractionListener {
-        public boolean onGetIsConnected();
+        public boolean onGetInternetConnectionStatus();
+        public boolean onGetGPSStatus();
     }
 
     /**
@@ -65,7 +61,8 @@ public class UserProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
-        mTvConnectionStatus = (TextView)view.findViewById(R.id.connection_status_text);
+        mTvInternetConnectionStatus = (TextView)view.findViewById(R.id.internet_connection_status_text);
+        mTvGPSStatus = (TextView)view.findViewById(R.id.gps_status_text);
 
         return view;
     }
@@ -85,14 +82,26 @@ public class UserProfileFragment extends Fragment {
      *
      * @param isConnected
      */
-    public void showIsConnected(final boolean isConnected) {
+    public void showInternetConnectionStatus(final boolean isConnected) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                String strConnectionStatus = mI10n.l("connection_status");
-                strConnectionStatus = String.format(strConnectionStatus, isConnected
-                        ? mI10n.l("connection_status_connected") : mI10n.l("connection_status_disconnected"));
-                mTvConnectionStatus.setText(strConnectionStatus);
+                String strStatus = isConnected ? mI10n.l("online") : mI10n.l("offline");
+                mTvInternetConnectionStatus.setText(strStatus);
+            }
+        });
+    }
+
+    /**
+     *
+     * @param isEnabled
+     */
+    public void showGPSStatus(final boolean isEnabled) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                String strStatus = isEnabled ? mI10n.l("enabled") : mI10n.l("disabled");
+                mTvGPSStatus.setText(strStatus);
             }
         });
     }
@@ -100,16 +109,21 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        showIsConnected(mListener.onGetIsConnected());
+
+        showInternetConnectionStatus(mListener.onGetInternetConnectionStatus());
+        showGPSStatus(mListener.onGetGPSStatus());
 
         View view = getView();
         if (view == null) return;
 
         User.UserProfile profile = mUser.getProfile();
         if (profile != null) {
-            String strUserName = String.format(mI10n.l("driver_is"), String.format("%s %s", mUser.getProfile().mFirstName, mUser.getProfile().mLastName));
+            String strUserName = String.format("%s %s", mUser.getProfile().mFirstName, mUser.getProfile().mLastName);
             ((TextView)view.findViewById(R.id.user_name_text)).setText(strUserName);
         }
+
+        ((TextView)view.findViewById(R.id.internet_connection_text)).setText(mI10n.l("internet_connection"));
+        ((TextView)view.findViewById(R.id.gps_text)).setText(mI10n.l("gps"));
 
         final Button btnLogOut = (Button)view.findViewById(R.id.logout_button);
         btnLogOut.setText(mI10n.l("action_logout"));
@@ -123,7 +137,7 @@ public class UserProfileFragment extends Fragment {
 
         final RouteActivity routeActivity = (RouteActivity)getActivity();
         if (routeActivity != null)
-            routeActivity.btnActionBarUserProfile.setVisibility(View.GONE);
+            routeActivity.mBtnActionBarUserProfile.setVisibility(View.GONE);
     }
 
     /**
@@ -142,7 +156,7 @@ public class UserProfileFragment extends Fragment {
         super.onStop();
         final RouteActivity routeActivity = (RouteActivity)getActivity();
         if (routeActivity != null)
-            routeActivity.btnActionBarUserProfile.setVisibility(View.VISIBLE);
+            routeActivity.mBtnActionBarUserProfile.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -151,6 +165,8 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        final RouteActivity routeActivity = (RouteActivity)getActivity();
+        routeActivity.mTvActionBarTitle.setText("Профиль");
     }
 
     /**
@@ -178,5 +194,9 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
+        if (!hidden) {
+            final RouteActivity routeActivity = (RouteActivity) getActivity();
+            routeActivity.mTvActionBarTitle.setText("Профиль");
+        }
     }
 }

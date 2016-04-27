@@ -488,6 +488,8 @@ public class RouteMapFragment extends Fragment {
         final RouteActivity routeActivity = (RouteActivity)getActivity();
         routeActivity.getUserLocation().stopLocationUpdates();
         routeActivity.getUserLocation().startLocationUpdates();
+
+        routeActivity.mTvActionBarTitle.setText("Движение по маршруту");
     }
 
     /**
@@ -515,6 +517,10 @@ public class RouteMapFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
+        if (!hidden) {
+            final RouteActivity routeActivity = (RouteActivity) getActivity();
+            routeActivity.mTvActionBarTitle.setText("Движение по маршруту");
+        }
     }
 
     /**

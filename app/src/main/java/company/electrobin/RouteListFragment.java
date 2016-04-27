@@ -9,21 +9,16 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.InsetDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -61,7 +56,7 @@ public class RouteListFragment extends Fragment {
         public void onRouteStart();
     }
 
-    private class RouteListAdapter1 extends BaseExpandableListAdapter {
+    private class RouteListAdapter extends BaseExpandableListAdapter {
 
         private final List<PointGroup> mItemList;
         private final LayoutInflater inflater;
@@ -84,7 +79,7 @@ public class RouteListFragment extends Fragment {
             private TextView mTvText;
         }
 
-        public RouteListAdapter1(Context context, List<RouteActivity.Route.Point> itemList) {
+        public RouteListAdapter(Context context, List<RouteActivity.Route.Point> itemList) {
             inflater = LayoutInflater.from(context);
             mItemList = new ArrayList<>();
             HashMap<String, PointGroup> groups = new HashMap<>();
@@ -197,48 +192,6 @@ public class RouteListFragment extends Fragment {
 
     }
 
-
-
-
-
-
-
-    private static class RouteListAdapter extends ArrayAdapter<RouteActivity.Route.Point> {
-
-        private static class ViewHolder {
-            private TextView mTvAddress;
-        }
-
-        public RouteListAdapter(Context context, List<RouteActivity.Route.Point> items) {
-            super(context, R.layout.layout_route_list_item, items);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-
-            ViewHolder viewHolder;
-
-            if (convertView == null) {
-                convertView = LayoutInflater.from(getContext())
-                        .inflate(R.layout.layout_route_list_item, parent, false);
-
-                viewHolder = new ViewHolder();
-                viewHolder.mTvAddress = (TextView)convertView.findViewById(R.id.address_text);
-
-                convertView.setTag(viewHolder);
-            }
-            else {
-                viewHolder = (ViewHolder)convertView.getTag();
-            }
-
-            RouteActivity.Route.Point item = getItem(position);
-            if (item != null)
-                viewHolder.mTvAddress.setText(item.mAddress);
-
-            return convertView;
-        }
-    }
-
     public static RouteListFragment newInstance() {
         return new RouteListFragment();
     }
@@ -297,6 +250,19 @@ public class RouteListFragment extends Fragment {
         }
     }
 
+    /**
+     *
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        final RouteActivity routeActivity = (RouteActivity)getActivity();
+        routeActivity.mTvActionBarTitle.setText("Маршрут следования");
+    }
+
+    /*;
+
+     */
     @Override
     public void onDetach() {
         super.onDetach();
@@ -404,7 +370,7 @@ public class RouteListFragment extends Fragment {
             }
         });
 
-        elvRoutePoints.setAdapter(new RouteListAdapter1(getActivity(), route.getWayPointList()));
+        elvRoutePoints.setAdapter(new RouteListAdapter(getActivity(), route.getWayPointList()));
 
         final Button btnRouteStart = (Button)mRlRouteList.findViewById(R.id.route_start_button);
         btnRouteStart.setText(mI10n.l("route_start"));
@@ -447,5 +413,18 @@ public class RouteListFragment extends Fragment {
         });
 
         return va;
+    }
+
+    /**
+     *
+     * @param hidden
+     */
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            final RouteActivity routeActivity = (RouteActivity) getActivity();
+            routeActivity.mTvActionBarTitle.setText("Маршрут следования");
+        }
     }
 }

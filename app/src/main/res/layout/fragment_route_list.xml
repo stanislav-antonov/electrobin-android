@@ -18,7 +18,7 @@
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
             android:layout_above="@+id/route_start_button"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:layout_alignParentTop="true"
             />
 <!--
@@ -52,9 +52,10 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="30dp"
             android:padding="20dp"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textColor="#FFFFFFFF"
             android:textAllCaps="false"
+            android:textStyle="bold"
             android:background="@android:color/transparent"
             style="?android:attr/borderlessButtonStyle"
             />
