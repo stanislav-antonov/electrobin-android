@@ -813,9 +813,6 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     private void setupCustomActionBar() {
-        final UserProfile uProfile = mUser.getProfile();
-        if (uProfile == null) return;
-
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar == null) return;
 
@@ -994,5 +991,13 @@ public class RouteActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         // Do nothing
+    }
+
+    /**
+     *
+     * @param title
+     */
+    public void setActionBarTitle(String title) {
+        if (mTvActionBarTitle != null) mTvActionBarTitle.setText(title);
     }
 }

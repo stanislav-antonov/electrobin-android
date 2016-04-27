@@ -100,6 +100,7 @@ public class AllBinsDoneFragment extends Fragment {
                 mListener.onRouteDone();
             }
         });
+        setActionBarTitle();
     }
 
     /**
@@ -108,8 +109,7 @@ public class AllBinsDoneFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        final RouteActivity routeActivity = (RouteActivity)getActivity();
-        routeActivity.mTvActionBarTitle.setText("Завершение маршрута");
+        setActionBarTitle();
     }
 
     /**
@@ -128,9 +128,14 @@ public class AllBinsDoneFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (!hidden) {
-            final RouteActivity routeActivity = (RouteActivity) getActivity();
-            routeActivity.mTvActionBarTitle.setText("Завершение маршрута");
-        }
+        if (!hidden && !isRemoving()) setActionBarTitle();
+    }
+
+    /**
+     *
+     */
+    private void setActionBarTitle() {
+        final RouteActivity routeActivity = (RouteActivity) getActivity();
+        if (routeActivity != null) routeActivity.setActionBarTitle("Завершение маршрута");
     }
 }

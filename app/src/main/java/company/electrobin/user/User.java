@@ -180,6 +180,14 @@ public class User {
      * @return
      */
     public UserProfile getProfile() {
+        if (mProfile == null) {
+            try {
+                setProfile(retrieveProfile());
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+            }
+        }
+
         return mProfile;
     }
 

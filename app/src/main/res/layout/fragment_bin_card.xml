@@ -2,7 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fff4f4d3"
+    android:background="@drawable/background"
     android:fillViewport="true"
     >
     <RelativeLayout
@@ -24,8 +24,9 @@
                 android:id="@+id/header_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textColor="#ff394445"
+                android:textSize="24sp"
+                android:textColor="#ffffff"
+                android:fontFamily="sans-serif-light"
                 android:gravity="center_horizontal"
                 />
             <TextView
@@ -33,8 +34,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:textColor="#ff607677"
+                android:textColor="#ffffff"
                 android:gravity="center_horizontal"
+                android:layout_marginTop="10dp"
                 />
         </LinearLayout>
         <LinearLayout
@@ -43,19 +45,19 @@
             android:layout_width="match_parent"
             android:layout_centerHorizontal="true"
             android:orientation="vertical"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingTop="20dp"
             android:paddingBottom="30dp"
-            android:background="#ffdadfb6"
             >
             <TextView
                 android:id="@+id/bin_status_label_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textColor="#ff394445"
+                android:textSize="24sp"
+                android:textColor="#ffffff"
+                android:fontFamily="sans-serif-light"
                 />
             <RadioGroup
                 android:layout_width="match_parent"
@@ -65,13 +67,13 @@
                 <RadioButton android:id="@+id/bin_unloaded_ok_radio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="#ff607677"
+                    android:textColor="#ffffff"
                     android:textSize="16sp"
                     />
                 <RadioButton android:id="@+id/bin_unloaded_error_radio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="#ff607677"
+                    android:textColor="#ffffff"
                     android:textSize="16sp"
                     />
             </RadioGroup>
@@ -79,9 +81,10 @@
                 android:id="@+id/bin_comment_label_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textColor="#ff394445"
+                android:textSize="24sp"
+                android:textColor="#ffffff"
                 android:layout_marginTop="20dp"
+                android:fontFamily="sans-serif-light"
                 />
             <EditText
                 android:id="@+id/bin_comment_input"
@@ -101,12 +104,12 @@
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="30dp"
-                android:textSize="20sp"
+                android:textSize="22sp"
+                android:textStyle="bold"
                 android:textColor="#FFFFFFFF"
                 android:textAllCaps="false"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:background="@drawable/custom_round_button_1"
+                android:padding="20dp"
+                android:background="@android:color/transparent"
                 style="?android:attr/borderlessButtonStyle"
                 />
         </LinearLayout>

@@ -237,6 +237,8 @@ public class RouteListFragment extends Fragment {
                 showUIRouteWaiting();
                 break;
         }
+
+        setActionBarTitle();
     }
 
     @Override
@@ -256,8 +258,7 @@ public class RouteListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        final RouteActivity routeActivity = (RouteActivity)getActivity();
-        routeActivity.mTvActionBarTitle.setText("Маршрут следования");
+        setActionBarTitle();
     }
 
     /*;
@@ -422,9 +423,14 @@ public class RouteListFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (!hidden) {
-            final RouteActivity routeActivity = (RouteActivity) getActivity();
-            routeActivity.mTvActionBarTitle.setText("Маршрут следования");
-        }
+        if (!hidden && !isRemoving()) setActionBarTitle();
+    }
+
+    /**
+     *
+     */
+    private void setActionBarTitle() {
+        final RouteActivity routeActivity = (RouteActivity) getActivity();
+        if (routeActivity != null) routeActivity.setActionBarTitle(mI10n.l("route_list"));
     }
 }

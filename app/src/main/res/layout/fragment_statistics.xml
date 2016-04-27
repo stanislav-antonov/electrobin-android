@@ -2,7 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fff4f4d3"
+    android:background="@drawable/background"
     android:fillViewport="true"
     >
         <LinearLayout
@@ -13,16 +13,6 @@
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             >
-            <TextView
-                android:id="@+id/header_text"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:textSize="20sp"
-                android:textColor="#ff394445"
-                android:gravity="center_horizontal"
-                android:layout_marginTop="30dp"
-                android:layout_gravity="center_horizontal"
-                />
             <TableLayout
                 android:id="@+id/table"
                 android:layout_width="match_parent"
@@ -35,28 +25,31 @@
                     android:layout_height="wrap_content"
                     >
                     <TextView
-                        android:text="Fill"
+                        android:text="Заполняемость"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="20sp"
-                        android:textColor="#ff394445"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="16sp"
+                        android:textColor="#ffffff"
+                        android:background="@android:color/transparent"
+                        android:fontFamily="sans-serif-light"
                         />
                     <TextView
-                        android:text="Count"
+                        android:text="Кол-во"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="20sp"
-                        android:textColor="#ff394445"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="16sp"
+                        android:textColor="#ffffff"
+                        android:background="@android:color/transparent"
+                        android:fontFamily="sans-serif-light"
                         />
                     <TextView
-                        android:text="V"
+                        android:text="Объем"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="20sp"
-                        android:textColor="#ff394445"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="16sp"
+                        android:textColor="#ffffff"
+                        android:background="@android:color/transparent"
+                        android:fontFamily="sans-serif-light"
                         />
                 </TableRow>
                 <TableRow
@@ -64,28 +57,31 @@
                     android:layout_height="wrap_content"
                     >
                     <TextView
-                        android:text="10 - 20"
+                        android:text="1 - 50"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:background="@android:color/transparent"
+                        android:fontFamily="sans-serif-light"
                         />
                     <TextView
                         android:text=""
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:background="@android:color/transparent"
+                        android:fontFamily="sans-serif-light"
                         />
                     <TextView
                         android:text=""
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                 </TableRow>
                 <TableRow
@@ -93,28 +89,31 @@
                     android:layout_height="wrap_content"
                     >
                     <TextView
-                        android:text="30 - 40"
+                        android:text="50 - 75"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                     <TextView
                         android:text=""
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                     <TextView
                         android:text=""
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                 </TableRow>
                 <TableRow
@@ -122,28 +121,31 @@
                     android:layout_height="wrap_content"
                     >
                     <TextView
-                        android:text="40 - 70"
+                        android:text="75 - 90"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                     <TextView
                         android:text=""
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                     <TextView
                         android:text=""
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                 </TableRow>
                 <TableRow
@@ -151,28 +153,31 @@
                     android:layout_height="wrap_content"
                     >
                     <TextView
-                        android:text="70 - 100"
+                        android:text="90 - 100"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                     <TextView
                         android:text=""
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                     <TextView
                         android:text=""
                         android:padding="10dp"
                         android:gravity="center_horizontal"
-                        android:textSize="16sp"
-                        android:textColor="#ff607677"
-                        android:background="@drawable/table_cell_shape"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
                         />
                 </TableRow>
             </TableLayout>
@@ -180,8 +185,9 @@
                 android:id="@+id/run_text"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:textSize="20sp"
-                android:textColor="#ff394445"
+                android:textSize="16sp"
+                android:textColor="#ffffff"
+                android:fontFamily="sans-serif-light"
                 android:gravity="center_horizontal"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="30dp"
@@ -193,12 +199,12 @@
                 android:layout_width="wrap_content"
                 android:layout_marginTop="30dp"
                 android:layout_marginBottom="30dp"
-                android:textSize="20sp"
+                android:padding="20dp"
                 android:textColor="#FFFFFFFF"
                 android:textAllCaps="false"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:background="@drawable/custom_round_button_1"
+                android:textStyle="bold"
+                android:textSize="22sp"
+                android:background="@android:color/transparent"
                 style="?android:attr/borderlessButtonStyle"
                 />
         </LinearLayout>

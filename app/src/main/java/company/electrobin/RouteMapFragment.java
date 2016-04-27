@@ -68,9 +68,6 @@ public class RouteMapFragment extends Fragment {
 
             if (location == null) return;
             mRouteViewer.notifyGotUserLocation(location);
-
-            final RouteActivity routeActivity = (RouteActivity)getActivity();
-            mTvDebugRun.setText(String.format("Пробег: %s км", routeActivity.getCurrentRoute().getRunFormatted()));
         }
     };
 
@@ -362,8 +359,6 @@ public class RouteMapFragment extends Fragment {
         mRouteViewer = new RouteViewer();
     }
 
-    private TextView mTvDebugRun;
-
     /**
      *
      * @param inflater
@@ -389,8 +384,6 @@ public class RouteMapFragment extends Fragment {
         mRlRouteBuilding.setVisibility(View.GONE);
 
         ((TextView) mRlRouteBuilding.findViewById(R.id.route_building_text)).setText(mI10n.l("route_building"));
-
-        mTvDebugRun = (TextView)view.findViewById(R.id.debug_run_text);
 
         return view;
     }
@@ -448,6 +441,8 @@ public class RouteMapFragment extends Fragment {
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
         }
+
+        setActionBarTitle();
     }
 
     /**
@@ -489,7 +484,7 @@ public class RouteMapFragment extends Fragment {
         routeActivity.getUserLocation().stopLocationUpdates();
         routeActivity.getUserLocation().startLocationUpdates();
 
-        routeActivity.mTvActionBarTitle.setText("Движение по маршруту");
+        setActionBarTitle();
     }
 
     /**
@@ -517,10 +512,15 @@ public class RouteMapFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (!hidden) {
-            final RouteActivity routeActivity = (RouteActivity) getActivity();
-            routeActivity.mTvActionBarTitle.setText("Движение по маршруту");
-        }
+        if (!hidden && !isRemoving()) setActionBarTitle();
+    }
+
+    /**
+     *
+     */
+    private void setActionBarTitle() {
+        final RouteActivity routeActivity = (RouteActivity) getActivity();
+        if (routeActivity != null) routeActivity.setActionBarTitle(mI10n.l("movement_on_route"));
     }
 
     /**

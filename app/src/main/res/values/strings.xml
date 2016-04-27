@@ -17,6 +17,12 @@
 
     <string name="comment">Comment</string>
 
+    <string name="route_list">Route list</string>
+    <string name="movement_on_route">Movement on route</string>
+    <string name="container">Container</string>
+    <string name="profile">Profile</string>
+    <string name="statistics">Statistics</string>
+
     <string name="container_status">Container status</string>
     <string name="container_status_unloaded_ok">Unloaded</string>
     <string name="container_status_unloaded_error">Error</string>
@@ -39,7 +45,6 @@
     <string name="move_to_the_base_1">Move to the base</string>
     <string name="move_to_the_base_2">Please move to the base and push the "Finish route" button on arrived.</string>
 
-    <string name="statistics">Statistics</string>
     <string name="run">Run: %s km</string>
 
     <string name="get_route">Get route</string>
@@ -55,8 +60,6 @@
     <string name="no_internet_connection">No internet connection</string>
     <string name="no_gps">No gps</string>
 
-    <string name="driver_is">Driver: %s</string>
-
     <string name="title_activity_auth">Authentication</string>
     <string name="title_activity_route">Route</string>
 
@@ -65,7 +68,4 @@
 
     <string name="authorization">Authorization</string>
     <string name="attention">Attention!</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

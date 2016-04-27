@@ -101,6 +101,7 @@ public class BinCardFragment extends Fragment {
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        setActionBarTitle();
     }
 
     /**
@@ -125,6 +126,7 @@ public class BinCardFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        setActionBarTitle();
     }
 
     /**
@@ -152,6 +154,7 @@ public class BinCardFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
+        if (!hidden && !isRemoving()) setActionBarTitle();
     }
 
     /**
@@ -171,5 +174,13 @@ public class BinCardFragment extends Fragment {
         super.onSaveInstanceState(bundle);
         if (mRoutePoint != null)
             bundle.putParcelable(BUNDLE_KEY_ROUTE_POINT, mRoutePoint);
+    }
+
+    /**
+     *
+     */
+    private void setActionBarTitle() {
+        final RouteActivity routeActivity = (RouteActivity) getActivity();
+        if (routeActivity != null) routeActivity.setActionBarTitle(mI10n.l("container"));
     }
 }

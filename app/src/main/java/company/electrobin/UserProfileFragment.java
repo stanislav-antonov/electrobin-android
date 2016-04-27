@@ -138,6 +138,8 @@ public class UserProfileFragment extends Fragment {
         final RouteActivity routeActivity = (RouteActivity)getActivity();
         if (routeActivity != null)
             routeActivity.mBtnActionBarUserProfile.setVisibility(View.GONE);
+
+        setActionBarTitle();
     }
 
     /**
@@ -165,8 +167,7 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        final RouteActivity routeActivity = (RouteActivity)getActivity();
-        routeActivity.mTvActionBarTitle.setText("Профиль");
+        setActionBarTitle();
     }
 
     /**
@@ -194,9 +195,14 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (!hidden) {
-            final RouteActivity routeActivity = (RouteActivity) getActivity();
-            routeActivity.mTvActionBarTitle.setText("Профиль");
-        }
+        if (!hidden && !isRemoving()) setActionBarTitle();
+    }
+
+    /**
+     *
+     */
+    private void setActionBarTitle() {
+        final RouteActivity routeActivity = (RouteActivity) getActivity();
+        if (routeActivity != null) routeActivity.setActionBarTitle(mI10n.l("profile"));
     }
 }

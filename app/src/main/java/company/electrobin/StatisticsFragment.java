@@ -68,11 +68,10 @@ public class StatisticsFragment extends Fragment {
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         showUI();
+        setActionBarTitle();
     }
 
     public void showUI() {
-        ((TextView) mLlCommon.findViewById(R.id.header_text)).setText(mI10n.l("statistics"));
-
         final RouteActivity.Route route = mListener.onGetRoute();
         if (route != null)
             ((TextView) mLlCommon.findViewById(R.id.run_text)).setText(String.format(mI10n.l("run"), route.getRunFormatted()));
@@ -88,8 +87,25 @@ public class StatisticsFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        setActionBarTitle();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden && !isRemoving()) setActionBarTitle();
+    }
+
+    private void setActionBarTitle() {
+        final RouteActivity routeActivity = (RouteActivity) getActivity();
+        if (routeActivity != null) routeActivity.setActionBarTitle(mI10n.l("statistics"));
     }
 }
