@@ -4,7 +4,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:gravity="center"
-        android:background="#FFFFFFFF"
+        android:background="#00a0d4"
         android:padding="30dp"
         android:orientation="vertical"
         >
@@ -12,8 +12,8 @@
             android:id="@+id/message_text"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:textSize="20sp"
-            android:textColor="#ff394445"
+            android:textSize="24sp"
+            android:textColor="#ffffff"
             />
         <Button
             android:id="@+id/ok_button"
@@ -22,9 +22,9 @@
             android:textSize="20sp"
             android:textColor="#FFFFFFFF"
             android:textAllCaps="false"
-            android:background="@drawable/custom_round_button_1"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:layout_marginTop="15dp"
+            android:padding="20dp"
+            android:layout_marginTop="40dp"
+            android:background="@android:color/transparent"
+            style="?android:attr/borderlessButtonStyle"
             />
     </LinearLayout>
