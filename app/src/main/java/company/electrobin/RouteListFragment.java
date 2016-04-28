@@ -37,7 +37,7 @@ public class RouteListFragment extends Fragment {
     private I10n mI10n;
     private ElectrobinApplication mApp;
 
-    private LinearLayout mLlRouteWaiting;
+    private RelativeLayout mRlRouteWaiting;
     private RelativeLayout mRlRouteList;
 
     private int mLayoutDisplayed;
@@ -213,7 +213,7 @@ public class RouteListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_route_list, container, false);
 
-        mLlRouteWaiting = (LinearLayout)view.findViewById(R.id.route_waiting_layout);
+        mRlRouteWaiting = (RelativeLayout)view.findViewById(R.id.route_waiting_layout);
         mRlRouteList = (RelativeLayout)view.findViewById(R.id.route_list_layout);
 
         return view;
@@ -274,7 +274,7 @@ public class RouteListFragment extends Fragment {
      *
      */
     private void switchRouteWaitingLayout() {
-        mLlRouteWaiting.setVisibility(View.VISIBLE);
+        mRlRouteWaiting.setVisibility(View.VISIBLE);
         mRlRouteList.setVisibility(View.GONE);
     }
 
@@ -283,7 +283,7 @@ public class RouteListFragment extends Fragment {
      */
     private void switchRouteListLayout() {
         mRlRouteList.setVisibility(View.VISIBLE);
-        mLlRouteWaiting.setVisibility(View.GONE);
+        mRlRouteWaiting.setVisibility(View.GONE);
     }
 
     /**
@@ -297,22 +297,18 @@ public class RouteListFragment extends Fragment {
     /**
      *
      */
-    public void showUIRouteWaiting() {
-        switchRouteWaitingLayout();
-
-        ((TextView)mLlRouteWaiting.findViewById(R.id.route_waiting_text_1)).setText(mI10n.l("route_waiting_1"));
-
-        View circle1 = mLlRouteWaiting.findViewById(R.id.circle_1);
+    private void animateDots() {
+        View circle1 = mRlRouteWaiting.findViewById(R.id.circle_1);
         final GradientDrawable gd1 = new GradientDrawable();
         gd1.setShape(GradientDrawable.OVAL);
         circle1.setBackground(gd1);
 
-        View circle2 = mLlRouteWaiting.findViewById(R.id.circle_2);
+        View circle2 = mRlRouteWaiting.findViewById(R.id.circle_2);
         final GradientDrawable gd2 = new GradientDrawable();
         gd2.setShape(GradientDrawable.OVAL);
         circle2.setBackground(gd2);
 
-        View circle3 = mLlRouteWaiting.findViewById(R.id.circle_3);
+        View circle3 = mRlRouteWaiting.findViewById(R.id.circle_3);
         final GradientDrawable gd3 = new GradientDrawable();
         gd3.setShape(GradientDrawable.OVAL);
         circle3.setBackground(gd3);
@@ -344,6 +340,59 @@ public class RouteListFragment extends Fragment {
         });
 
         as.start();
+    }
+
+    /**
+     *
+     */
+    private void animateCircles() {
+        final View circle1 = mRlRouteWaiting.findViewById(R.id.circle_5);
+        final View circle2 = mRlRouteWaiting.findViewById(R.id.circle_6);
+
+        final AnimatorSet as1 = new AnimatorSet();
+        final AnimatorSet as2 = new AnimatorSet();
+
+        as2.playTogether(alphaChanger(circle1, 0.7F, 0.1F, 500),
+                alphaChanger(circle2, 0.7F, 0F, 500)
+        );
+
+        as2.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                as1.start();
+            }
+        });
+
+        as1.playTogether(alphaChanger(circle1, 0.1F, 0.7F, 800),
+                alphaChanger(circle2, 0F, 0.7F, 1500)
+        );
+
+        as1.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                circle1.setAlpha(0.1F);
+                circle2.setAlpha(0F);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                as2.start();
+            }
+        });
+
+        as1.start();
+    }
+
+    /**
+     *
+     */
+    public void showUIRouteWaiting() {
+        switchRouteWaitingLayout();
+
+        ((TextView) mRlRouteWaiting.findViewById(R.id.route_waiting_text_1)).setText(mI10n.l("route_waiting_1"));
+
+        animateDots();
+        animateCircles();
 
         mLayoutDisplayed = LAYOUT_DISPLAYED_ROUTE_WAITING;
     }
@@ -410,6 +459,25 @@ public class RouteListFragment extends Fragment {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 gd.setColor((Integer) animation.getAnimatedValue());
+            }
+        });
+
+        return va;
+    }
+
+    /**
+     *
+     * @param from
+     * @param to
+     * @return
+     */
+    private static ValueAnimator alphaChanger(final View view, float from, float to, int duration) {
+        ValueAnimator va = ObjectAnimator.ofFloat(from, to);
+        va.setDuration(duration);
+        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                view.setAlpha((Float)animation.getAnimatedValue());
             }
         });
 

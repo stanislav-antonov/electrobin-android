@@ -1,5 +1,6 @@
 package company.electrobin;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +19,7 @@ import company.electrobin.user.User;
 import company.electrobin.user.UserAuthListener;
 import company.electrobin.user.UserProfileLoadListener;
 
-public class AuthActivity extends AppCompatActivity {
+public class AuthActivity extends Activity {
 
     private ElectrobinApplication mApp;
     private User mUser;

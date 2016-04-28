@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -824,6 +825,10 @@ public class RouteActivity extends AppCompatActivity implements
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setCustomView(actionBarLayout);
+
+        // Remove margins
+        // Toolbar parent = (Toolbar)actionBarLayout.getParent();
+        // parent.setContentInsetsAbsolute(0, 0);
 
         // Set the color
         // actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.actionbar_background)));
