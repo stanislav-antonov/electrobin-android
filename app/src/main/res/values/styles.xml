@@ -18,7 +18,7 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
     </style>
     <style name="CustomActionBarStyle" parent="Widget.AppCompat.Light.ActionBar">
-        <item name="android:background">@color/actionbar_background</item>
-        <item name="background">@color/actionbar_background</item>
+        <item name="android:background">@drawable/background_actionbar</item>
+        <item name="background">@drawable/background_actionbar</item>
     </style>
 </resources>

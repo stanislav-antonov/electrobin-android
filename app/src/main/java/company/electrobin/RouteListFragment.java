@@ -12,6 +12,9 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -173,6 +176,10 @@ public class RouteListFragment extends Fragment {
             }
 
             final PointGroup item = getGroup(groupPosition);
+
+            // SpannableString content = new SpannableString(item.mCity);
+            // content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+            // viewHolder.mTvText.setText(content);
             viewHolder.mTvText.setText(item.mCity);
 
             ((ExpandableListView)parent).expandGroup(groupPosition);

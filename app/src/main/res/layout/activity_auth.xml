@@ -6,18 +6,11 @@
     android:background="@drawable/background"
     android:gravity="center"
     >
-    <RelativeLayout
-        android:id="@+id/main_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        >
         <LinearLayout
+            android:id="@+id/main_layout"
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="230dp"
             android:layout_height="wrap_content"
-            android:paddingLeft="40dp"
-            android:paddingRight="40dp"
             >
             <TextView
                 android:id="@+id/header_text"
@@ -90,19 +83,22 @@
             <Button
                 android:id="@+id/signin_button"
                 android:layout_marginTop="60dp"
-                android:padding="20dp"
-                android:layout_width="wrap_content"
+                android:layout_gravity="center_horizontal"
+
+                android:minWidth="230dp"
+                android:minHeight="55dp"
                 android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:padding="15dp"
                 android:textSize="22sp"
-                android:textStyle="bold"
                 android:textColor="#FFFFFFFF"
                 android:textAllCaps="false"
-                android:layout_gravity="center_horizontal"
-                android:background="@android:color/transparent"
+                android:fontFamily="sans-serif-light"
+                android:background="@drawable/custom_round_button_2"
                 style="?android:attr/borderlessButtonStyle"
                 />
         </LinearLayout>
-    </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/loading_layout"
         android:visibility="gone"

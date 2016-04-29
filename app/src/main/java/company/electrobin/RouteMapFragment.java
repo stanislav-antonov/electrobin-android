@@ -558,6 +558,6 @@ public class RouteMapFragment extends Fragment {
 
 /*
 
-{"action":"new_route","created":"2014-12-28T19:50:40.964531Z","id":"21","points":[{"id":1, "address":"Точка 1","city":"Volgograd", "latitude":48.78695587684197, "longitude":44.5848106480548},{"id":2, "address":"Точка 2","city":"Volgograd", "latitude":48.78471909280853, "longitude":44.5840006209323},{"id":3, "address":"Точка 3","city":"Volgograd", "latitude":48.7838399489699, "longitude":44.57514933118315},{"id":4, "address":"Точка 4","city":"Volgograd", "latitude":48.78505940239381, "longitude":44.57653871545288},{"id":5, "address":"Точка 5","city":"Volgograd", "latitude":48.78792712743049, "longitude":44.580755148024274},{"id":6, "address":"Точка 6","city":"Volgograd", "latitude":48.78707639801557, "longitude":44.58305111894102}]}
+{"action":"new_route","created":"2014-12-28T19:50:40.964531Z","id":"21","points":[{"id":1, "address":"Точка 1","city":"Moscow", "latitude":48.78695587684197, "longitude":44.5848106480548},{"id":2, "address":"Точка 2","city":"Volgograd", "latitude":48.78471909280853, "longitude":44.5840006209323},{"id":3, "address":"Точка 3","city":"Volgograd", "latitude":48.7838399489699, "longitude":44.57514933118315},{"id":4, "address":"Точка 4","city":"Volgograd", "latitude":48.78505940239381, "longitude":44.57653871545288},{"id":5, "address":"Точка 5","city":"Volgograd", "latitude":48.78792712743049, "longitude":44.580755148024274},{"id":6, "address":"Лениниский проспект, стр. 2, корп. 1","city":"Moscow", "latitude":48.78707639801557, "longitude":44.58305111894102}]}
 
 */

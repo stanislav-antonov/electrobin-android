@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,7 +31,7 @@ public class AuthActivity extends Activity {
     private Button mSignInBtn;
 
     private RelativeLayout mRlLoading;
-    private RelativeLayout mRlMain;
+    private LinearLayout mLlMain;
 
     private final static String LOG_TAG = AuthActivity.class.getSimpleName();
 
@@ -55,7 +56,7 @@ public class AuthActivity extends Activity {
             mEtPassword.setEnabled(false);
 
             mRlLoading.setVisibility(View.VISIBLE);
-            mRlMain.setVisibility(View.GONE);
+            mLlMain.setVisibility(View.GONE);
 
             mUser.auth(username, password, SignInActionHandler.this);
         }
@@ -72,7 +73,7 @@ public class AuthActivity extends Activity {
             mEtPassword.setEnabled(true);
 
             mRlLoading.setVisibility(View.GONE);
-            mRlMain.setVisibility(View.VISIBLE);
+            mLlMain.setVisibility(View.VISIBLE);
 
             String strMessage = mI10n.l("no_internet_connection");
             if (error == UserAuthListener.ERROR_INVALID_AUTH_CREDENTIALS) {
@@ -98,7 +99,7 @@ public class AuthActivity extends Activity {
             mEtPassword.setEnabled(true);
 
             mRlLoading.setVisibility(View.GONE);
-            mRlMain.setVisibility(View.VISIBLE);
+            mLlMain.setVisibility(View.VISIBLE);
 
             mUser.logOut();
 
@@ -124,8 +125,8 @@ public class AuthActivity extends Activity {
         mRlLoading = (RelativeLayout)findViewById(R.id.loading_layout);
         mRlLoading.setVisibility(View.GONE);
 
-        mRlMain = (RelativeLayout)findViewById(R.id.main_layout);
-        mRlMain.setVisibility(View.VISIBLE);
+        mLlMain = (LinearLayout)findViewById(R.id.main_layout);
+        mLlMain.setVisibility(View.VISIBLE);
 
         mEtUsername.setHint(mI10n.l("username"));
         mEtPassword.setHint(mI10n.l("password"));
