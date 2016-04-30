@@ -20,5 +20,7 @@
     <style name="CustomActionBarStyle" parent="Widget.AppCompat.Light.ActionBar">
         <item name="android:background">@drawable/background_actionbar</item>
         <item name="background">@drawable/background_actionbar</item>
+        <item name="android:homeAsUpIndicator">@drawable/back_arrow</item>
+        <item name="homeAsUpIndicator">@drawable/back_arrow</item>
     </style>
 </resources>

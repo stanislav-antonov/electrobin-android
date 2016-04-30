@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,7 +52,6 @@ import company.electrobin.location.UserLocation;
 import company.electrobin.network.TCPClientListener;
 import company.electrobin.network.TCPClientService;
 import company.electrobin.user.User;
-import company.electrobin.user.User.UserProfile;
 
 public class RouteActivity extends AppCompatActivity implements
         RouteListFragment.OnFragmentInteractionListener,
@@ -78,6 +76,8 @@ public class RouteActivity extends AppCompatActivity implements
     private UserLocation mUserLocation;
 
     private Dialog mRouteUpdatedDialog;
+    private Dialog mRouteInterruptDialog;
+
     private boolean mRouteUpdatedPopupShowing = false;
 
     private Fragment mCurrentFragment;
@@ -85,8 +85,8 @@ public class RouteActivity extends AppCompatActivity implements
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
     private static final String BUNDLE_KEY_ROUTE = "route";
 
-    private final static int BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION = 1;
-    private final static int BOTTOM_NOTIFICATION_NO_GPS = 2;
+    public final static int BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION = 1;
+    public final static int BOTTOM_NOTIFICATION_NO_GPS = 2;
 
     /**
      *
@@ -634,7 +634,7 @@ public class RouteActivity extends AppCompatActivity implements
     /**
      *
      */
-    private void toggleBottomNotification(int what, int visibility) {
+    public void toggleBottomNotification(int what, int visibility) {
         final TextView tvWhat;
         switch(what) {
             case BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION:
@@ -787,7 +787,7 @@ public class RouteActivity extends AppCompatActivity implements
         mRouteUpdatedDialog = new Dialog(this, R.style.CustomDialog);
         mRouteUpdatedDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mRouteUpdatedDialog.setCancelable(false);
-        mRouteUpdatedDialog.setContentView(R.layout.layout_custom_dialog);
+        mRouteUpdatedDialog.setContentView(R.layout.layout_custom_dialog_1);
 
         final TextView tvMessage1 = (TextView) mRouteUpdatedDialog.findViewById(R.id.message_text_1);
         tvMessage1.setText(mI10n.l("attention"));
@@ -808,6 +808,45 @@ public class RouteActivity extends AppCompatActivity implements
         });
 
         mRouteUpdatedDialog.show();
+    }
+
+    /**
+     *
+     */
+    private void showRouteInterruptDialog() {
+        if (mRouteInterruptDialog != null && mRouteInterruptDialog.isShowing())
+            return;
+
+        mRouteInterruptDialog = new Dialog(this, R.style.CustomDialog);
+        mRouteInterruptDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mRouteInterruptDialog.setCancelable(true);
+        mRouteInterruptDialog.setContentView(R.layout.layout_custom_dialog_2);
+
+        final TextView tvMessage = (TextView) mRouteInterruptDialog.findViewById(R.id.message_text);
+        tvMessage.setText(mI10n.l("route_interrupt_confirm"));
+
+        final Button btnOk = (Button) mRouteInterruptDialog.findViewById(R.id.ok_button);
+        btnOk.setText(mI10n.l("ok"));
+        btnOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRouteInterruptDialog.dismiss();
+
+                RouteListFragment routeListFragment = (RouteListFragment)replaceToFragment(RouteListFragment.class);
+                routeListFragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+            }
+        });
+
+        final Button btnCancel = (Button) mRouteInterruptDialog.findViewById(R.id.cancel_button);
+        btnCancel.setText(mI10n.l("cancel"));
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRouteInterruptDialog.dismiss();
+            }
+        });
+
+        mRouteInterruptDialog.show();
     }
 
     /**
@@ -846,6 +885,14 @@ public class RouteActivity extends AppCompatActivity implements
                 switchToFragment(UserProfileFragment.class, true);
             }
         });
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onRouteInterrupt() {
+        showRouteInterruptDialog();
     }
 
     /**

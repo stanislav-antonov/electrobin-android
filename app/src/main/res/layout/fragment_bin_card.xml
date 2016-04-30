@@ -100,16 +100,19 @@
                 />
             <Button
                 android:id="@+id/route_point_done_button"
+                android:layout_marginTop="30dp"
+                android:layout_gravity="center_horizontal"
+
+                android:minWidth="230dp"
+                android:minHeight="55dp"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="30dp"
+                android:padding="15dp"
                 android:textSize="22sp"
-                android:textStyle="bold"
                 android:textColor="#FFFFFFFF"
                 android:textAllCaps="false"
-                android:padding="20dp"
-                android:background="@android:color/transparent"
+                android:fontFamily="sans-serif-light"
+                android:background="@drawable/custom_round_button_2"
                 style="?android:attr/borderlessButtonStyle"
                 />
         </LinearLayout>

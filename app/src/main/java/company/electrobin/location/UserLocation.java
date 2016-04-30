@@ -63,11 +63,9 @@ public class UserLocation {
                     restartTimer();
                 }
             };
-
-            restartTimer();
         }
 
-        private synchronized void restartTimer() {
+        public synchronized void restartTimer() {
             mHandler.removeCallbacks(mRunnable);
             mHandler.postDelayed(mRunnable, TIME_INTERVAL);
         }
@@ -240,7 +238,11 @@ public class UserLocation {
                     GPS_LOCATION_UPDATES_MIN_TIME_INTERVAL, GPS_LOCATION_UPDATES_MIN_DISTANCE, mLocationListener);
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     GPS_STATUS_CHECKER_UPDATES_MIN_TIME_INTERVAL, GPS_STATUS_CHECKER_UPDATES_MIN_DISTANCE, mGpsStatusChecker);
-        } catch (IllegalArgumentException e) {
+
+            // Explicitly push
+            mGpsStatusChecker.restartTimer();
+        }
+        catch (IllegalArgumentException e) {
             Log.e(LOG_TAG, "GPS provider error: " + e.getMessage());
         }
 

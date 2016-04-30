@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:gravity="center"
+    android:background="#ff0089b7"
+    android:padding="30dp"
+    android:orientation="vertical"
+    >
+    <TextView
+        android:id="@+id/message_text"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:textSize="24sp"
+        android:textColor="#ffffff"
+        android:fontFamily="sans-serif-light"
+        android:layout_gravity="center"
+        android:gravity="center"
+        />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        >
+        <Button
+            android:id="@+id/ok_button"
+
+            android:minWidth="100dp"
+            android:minHeight="55dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:padding="15dp"
+            android:textSize="22sp"
+            android:textColor="#FFFFFFFF"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-light"
+            android:background="@drawable/custom_round_button_2"
+            style="?android:attr/borderlessButtonStyle"
+            />
+
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
+
+            android:minWidth="100dp"
+            android:minHeight="55dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:padding="15dp"
+            android:textSize="22sp"
+            android:textColor="#FFFFFFFF"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-light"
+            android:background="@drawable/custom_round_button_2"
+            style="?android:attr/borderlessButtonStyle"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

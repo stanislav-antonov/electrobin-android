@@ -43,6 +43,8 @@ public class RouteMapFragment extends Fragment {
     private RelativeLayout mRlLoadRetry;
     private RelativeLayout mRlRouteBuilding;
 
+    private Button mBtnRouteInterrupt;
+
     private MapLoadBreaker mMapLoadBreaker;
     private RouteViewer mRouteViewer;
 
@@ -79,6 +81,7 @@ public class RouteMapFragment extends Fragment {
         public void onRouteBuildingStart();
         public void onRouteBuildingReady();
         public void onRoutePointClick(int id);
+        public void onRouteInterrupt();
     }
 
     /**
@@ -156,6 +159,7 @@ public class RouteMapFragment extends Fragment {
                 @Override
                 public void run() {
                     mRouteViewer.notifyRouteDisplayed();
+                    mBtnRouteInterrupt.setVisibility(View.VISIBLE);
                     mListener.onRouteBuildingReady();
                 }
             });
@@ -385,6 +389,9 @@ public class RouteMapFragment extends Fragment {
 
         ((TextView) mRlRouteBuilding.findViewById(R.id.route_building_text)).setText(mI10n.l("route_building"));
 
+        mBtnRouteInterrupt = (Button) view.findViewById(R.id.route_interrupt_button);
+        mBtnRouteInterrupt.setVisibility(View.GONE);
+
         return view;
     }
 
@@ -443,6 +450,13 @@ public class RouteMapFragment extends Fragment {
         }
 
         setActionBarTitle();
+
+        mBtnRouteInterrupt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onRouteInterrupt();
+            }
+        });
     }
 
     /**
@@ -513,6 +527,11 @@ public class RouteMapFragment extends Fragment {
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         if (!hidden && !isRemoving()) setActionBarTitle();
+        if (hidden) {
+            final RouteActivity routeActivity = (RouteActivity) getActivity();
+            if (routeActivity != null)
+                routeActivity.toggleBottomNotification(RouteActivity.BOTTOM_NOTIFICATION_NO_GPS, View.GONE);
+        }
     }
 
     /**
