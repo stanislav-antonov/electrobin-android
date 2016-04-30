@@ -96,6 +96,7 @@ public class RouteActivity extends AppCompatActivity implements
         private Integer mId;
         private Date mDate;
         private List<Point> mWayPointList;
+        private boolean mAvoidTrafficJams;
         private Point mStartPoint;
         private float mRun;
 
@@ -235,6 +236,7 @@ public class RouteActivity extends AppCompatActivity implements
 
             mStartPoint = in.readParcelable(Point.class.getClassLoader());
             mRun = in.readFloat();
+            mAvoidTrafficJams =  in.readByte() != 0;
         }
 
         public int describeContents() {
@@ -247,6 +249,7 @@ public class RouteActivity extends AppCompatActivity implements
             out.writeList(mWayPointList);
             out.writeParcelable(mStartPoint, flags);
             out.writeFloat(mRun);
+            out.writeByte((byte) (mAvoidTrafficJams ? 1 : 0));
         }
 
         public static final Parcelable.Creator<Route> CREATOR
@@ -265,6 +268,10 @@ public class RouteActivity extends AppCompatActivity implements
         public int getRunFormatted() {
             return Math.round(getRun() / 1000F);
         }
+
+        public boolean getAvoidTrafficJams() { return mAvoidTrafficJams; }
+
+        public void setAvoidTrafficJams(boolean isEnabled) { mAvoidTrafficJams = isEnabled; }
 
         public Date getDate() { return mDate; }
 

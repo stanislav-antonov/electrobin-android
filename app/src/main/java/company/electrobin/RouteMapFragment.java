@@ -192,6 +192,34 @@ public class RouteMapFragment extends Fragment {
                 }
             });
         }
+
+        /**
+         *
+         */
+        @JavascriptInterface
+        public void onAvoidTrafficJamsEnabled() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    final RouteActivity.Route route = mListener.onGetRoute();
+                    route.setAvoidTrafficJams(true);
+                }
+            });
+        }
+
+        /**
+         *
+         */
+        @JavascriptInterface
+        public void onAvoidTrafficJamsDisabled() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    final RouteActivity.Route route = mListener.onGetRoute();
+                    route.setAvoidTrafficJams(false);
+                }
+            });
+        }
     }
 
     /**
@@ -326,7 +354,7 @@ public class RouteMapFragment extends Fragment {
         private void displayRoute() {
             if (!mHasMapReady) return;
             final RouteActivity.Route route = mListener.onGetRoute();
-            mWvMap.loadUrl(String.format("javascript:displayRoute('%s')", route.asJSON()));
+            mWvMap.loadUrl(String.format("javascript:displayRoute('%s', %s)", route.asJSON(), route.getAvoidTrafficJams()));
         }
 
         /**

@@ -17,6 +17,7 @@
             var routePointStep = 4;
 
             var avoidTrafficJams;
+            var trafficControl;
 
             var routePoints;
 
@@ -38,27 +39,44 @@
                     center: initCoords,
                     zoom: 16,
                     geoObjectOverlayFactory: 'default#interactiveGraphics',
-                    controls: ["trafficControl"]
+                    controls: []
                 }, {
                     suppressMapOpenBlock: true
                 });
 
                 coordSystem = myMap.options.get('projection').getCoordSystem();
 
-                var trafficControlButton = myMap.controls.get("trafficControl");
-                trafficControlButton.events.add('select', function () {
-                        avoidTrafficJams = true;
-                        updateStartPoint();
-                        _displayRoute(true);
-                    }).add('deselect', function () {
-                        avoidTrafficJams = false;
-                        updateStartPoint();
-                        _displayRoute(false);
-                    }
-                );
+                trafficControl = new ymaps.control.TrafficControl({trafficShown: false, options: {float: "left"}});
+                myMap.controls.add(trafficControl, {top: 10, left: 10});
+                registerTrafficControlEvents();
 
                 Android.onMapReady();
             });
+
+
+            function onTrafficControlShow() {
+                avoidTrafficJams = true;
+                Android.onAvoidTrafficJamsEnabled();
+                updateStartPoint();
+                _displayRoute();
+            }
+
+
+            function onTrafficControlHide() {
+                avoidTrafficJams = false;
+                Android.onAvoidTrafficJamsDisabled();
+                updateStartPoint();
+                _displayRoute();
+            }
+
+
+            function registerTrafficControlEvents() {
+                if (!trafficControl) return;
+
+                trafficControl.events.remove('showtraffic', onTrafficControlShow);
+                trafficControl.events.remove('hidetraffic', onTrafficControlHide);
+                trafficControl.events.add('showtraffic', onTrafficControlShow).add('hidetraffic', onTrafficControlHide);
+            }
 
 
             function updateStartPoint() {
@@ -203,9 +221,15 @@
             }
 
 
-            function displayRoute(routeJSON) {
+            function displayRoute(routeJSON, avoidTJ) {
                 currentRouteData = $.parseJSON(routeJSON);
-                _displayRoute();
+                avoidTrafficJams = avoidTJ;
+
+                if (trafficControl) {
+                    trafficControl.state.set('trafficShown', avoidTrafficJams);
+                }
+
+                 _displayRoute();
             }
 
 
@@ -267,14 +291,6 @@
                             });
                         });
 
-                        if (hasStartPoint && startPoint != null) {
-                            // var startPointPlacemark = new ymaps.Placemark(startPoint.geometry.getCoordinates(), {}, {
-                            //    hasBalloon: false,
-                            //    iconColor: "0066ff99"
-                            // });
-                            // points.add(startPointPlacemark, 0);
-                        }
-
                         myMap.geoObjects.add(route);
                         routePoints = routeToPoints(route);
                         currentRoute = route;
@@ -297,12 +313,6 @@
 
             #map {
                 background-color: black;
-            }
-
-            #button {
-                position: absolute;
-                height: 20px;
-                top: 10px; left: 10px;
             }
         </style>
     </head>
