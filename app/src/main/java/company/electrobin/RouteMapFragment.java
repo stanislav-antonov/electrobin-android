@@ -483,6 +483,11 @@ public class RouteMapFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        final RouteActivity routeActivity = (RouteActivity) getActivity();
+        if (routeActivity != null) {
+            routeActivity.getUserLocation().stopLocationUpdates();
+            routeActivity.toggleNotification(RouteActivity.NOTIFICATION_NO_GPS, View.GONE);
+        }
     }
 
     /**
@@ -526,11 +531,18 @@ public class RouteMapFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (!hidden && !isRemoving()) setActionBarTitle();
+        final RouteActivity routeActivity = (RouteActivity) getActivity();
         if (hidden) {
-            final RouteActivity routeActivity = (RouteActivity) getActivity();
-            if (routeActivity != null)
-                routeActivity.toggleBottomNotification(RouteActivity.BOTTOM_NOTIFICATION_NO_GPS, View.GONE);
+            if (routeActivity != null) {
+                routeActivity.getUserLocation().stopLocationUpdates();
+                routeActivity.toggleNotification(RouteActivity.NOTIFICATION_NO_GPS, View.GONE);
+            }
+        } else {
+            if (!isRemoving()) {
+                setActionBarTitle();
+                if (routeActivity != null)
+                    routeActivity.getUserLocation().startLocationUpdates();
+            }
         }
     }
 

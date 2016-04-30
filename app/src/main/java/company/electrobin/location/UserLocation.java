@@ -28,8 +28,8 @@ public class UserLocation {
     private static final long GPS_LOCATION_UPDATES_MIN_TIME_INTERVAL = 1000L;
     private static final long GPS_LOCATION_UPDATES_MIN_DISTANCE = 10L;
 
-    private static final long NETWORK_LOCATION_UPDATES_MIN_TIME_INTERVAL = 5000L;
-    private static final long NETWORK_LOCATION_UPDATES_MIN_DISTANCE = 10L;
+    private static final long NETWORK_LOCATION_UPDATES_MIN_TIME_INTERVAL = 10000L;
+    private static final long NETWORK_LOCATION_UPDATES_MIN_DISTANCE = 0L;
 
     private static final long GPS_STATUS_CHECKER_UPDATES_MIN_TIME_INTERVAL = 5000L;
     private static final long GPS_STATUS_CHECKER_UPDATES_MIN_DISTANCE = 0L;
@@ -66,8 +66,12 @@ public class UserLocation {
         }
 
         public synchronized void restartTimer() {
-            mHandler.removeCallbacks(mRunnable);
+            stopTimer();
             mHandler.postDelayed(mRunnable, TIME_INTERVAL);
+        }
+
+        public synchronized void stopTimer() {
+            mHandler.removeCallbacks(mRunnable);
         }
 
         @Override
@@ -253,8 +257,10 @@ public class UserLocation {
         if (mLocationListener != null)
             mLocationManager.removeUpdates(mLocationListener);
 
-        if (mGpsStatusChecker != null)
+        if (mGpsStatusChecker != null) {
+            mGpsStatusChecker.stopTimer();
             mLocationManager.removeUpdates(mGpsStatusChecker);
+        }
 
         mIsRunning = false;
     }

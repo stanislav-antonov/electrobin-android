@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -85,8 +86,8 @@ public class RouteActivity extends AppCompatActivity implements
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
     private static final String BUNDLE_KEY_ROUTE = "route";
 
-    public final static int BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION = 1;
-    public final static int BOTTOM_NOTIFICATION_NO_GPS = 2;
+    public final static int NOTIFICATION_NO_INTERNET_CONNECTION = 1;
+    public final static int NOTIFICATION_NO_GPS = 2;
 
     /**
      *
@@ -378,13 +379,24 @@ public class RouteActivity extends AppCompatActivity implements
         private final static String JSON_ACTION_NEW_ROUTE = "new_route";
         private final static String JSON_ACTION_UPDATE_TOKEN = "update_token";
 
+        private final static long NOTIFICATION_NO_INTERNET_CONNECTION_TIMEOUT = 10000L;
+
+        private Handler mHandler = new Handler();
+        private Runnable mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                toggleNotification(NOTIFICATION_NO_INTERNET_CONNECTION, View.VISIBLE);
+            }
+        };
+
         @Override
         public void onConnectResult(int result) {
             Log.d(LOG_TAG, "Connect result: " + result);
             if (result == TCPClientListener.CONNECT_RESULT_OK) {
-                toggleBottomNotification(BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION, View.GONE);
+                mHandler.removeCallbacks(mRunnable);
+                toggleNotification(NOTIFICATION_NO_INTERNET_CONNECTION, View.GONE);
             } else {
-                toggleBottomNotification(BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION, View.VISIBLE);
+                toggleNotification(NOTIFICATION_NO_INTERNET_CONNECTION, View.VISIBLE);
             }
         }
 
@@ -429,7 +441,8 @@ public class RouteActivity extends AppCompatActivity implements
 
         @Override
         public void onConnectionClosed() {
-            toggleBottomNotification(BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION, View.VISIBLE);
+            mHandler.removeCallbacks(mRunnable);
+            mHandler.postDelayed(mRunnable, NOTIFICATION_NO_INTERNET_CONNECTION_TIMEOUT);
         }
     }
 
@@ -477,7 +490,7 @@ public class RouteActivity extends AppCompatActivity implements
                 case UserLocation.BROADCAST_INTENT_GPS_STATUS: {
                     final Bundle bundle = intent.getExtras();
                     if (bundle == null) return;
-                    toggleBottomNotification(BOTTOM_NOTIFICATION_NO_GPS, bundle.getBoolean(UserLocation.BUNDLE_KEY_IS_GPS_AVAILABLE) ? View.GONE : View.VISIBLE);
+                    toggleNotification(NOTIFICATION_NO_GPS, bundle.getBoolean(UserLocation.BUNDLE_KEY_IS_GPS_AVAILABLE) ? View.GONE : View.VISIBLE);
 
                     break;
                 }
@@ -634,14 +647,14 @@ public class RouteActivity extends AppCompatActivity implements
     /**
      *
      */
-    public void toggleBottomNotification(int what, int visibility) {
+    public void toggleNotification(int what, int visibility) {
         final TextView tvWhat;
         switch(what) {
-            case BOTTOM_NOTIFICATION_NO_INTERNET_CONNECTION:
+            case NOTIFICATION_NO_INTERNET_CONNECTION:
                 tvWhat = (TextView)mLlBottomNotification.findViewById(R.id.no_internet_connection_text);
                 tvWhat.setText(mI10n.l("no_internet_connection"));
                 break;
-            case BOTTOM_NOTIFICATION_NO_GPS:
+            case NOTIFICATION_NO_GPS:
                 tvWhat = (TextView)mLlBottomNotification.findViewById(R.id.no_gps_text);
                 tvWhat.setText(mI10n.l("no_gps"));
                 break;
@@ -833,7 +846,7 @@ public class RouteActivity extends AppCompatActivity implements
                 mRouteInterruptDialog.dismiss();
 
                 RouteListFragment routeListFragment = (RouteListFragment)replaceToFragment(RouteListFragment.class);
-                routeListFragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+                routeListFragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_WAITING);
             }
         });
 
