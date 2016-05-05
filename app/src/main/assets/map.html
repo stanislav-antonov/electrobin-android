@@ -46,9 +46,19 @@
 
                 coordSystem = myMap.options.get('projection').getCoordSystem();
 
-                trafficControl = new ymaps.control.TrafficControl({trafficShown: false, options: {float: "left"}});
-                myMap.controls.add(trafficControl, {top: 10, left: 10});
+                trafficControl = new ymaps.control.TrafficControl({ trafficShown: false, options: { size: "small" } });
+                myMap.controls.add(trafficControl, { position: { left: "10px", top: "50px" } });
                 registerTrafficControlEvents();
+
+                var zoomControl = new ymaps.control.ZoomControl({ options: { size: "large" } });
+                myMap.controls.add(zoomControl, { position: { right: "15px", top: "50px" } });
+
+                var geolocationControl = new ymaps.control.GeolocationControl({ options: { noPlacemark: true } });
+                myMap.controls.add(geolocationControl, { position: { left: "10px", top: "90px" } });
+                geolocationControl.events.add('locationchange', function (event) {
+                    var position = event.get('position');
+                    myMap.panTo(position);
+                });
 
                 Android.onMapReady();
             });
