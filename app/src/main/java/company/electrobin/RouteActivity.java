@@ -1037,7 +1037,7 @@ public class RouteActivity extends AppCompatActivity implements
     /**
      *
      */
-    public void shouldDisplayHomeUp(){
+    public void shouldDisplayHomeUp() {
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(mFragmentManager.getBackStackEntryCount() > 0);
@@ -1062,7 +1062,8 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onBackPressed() {
-        // Do nothing
+        if (mFragmentManager.getBackStackEntryCount() > 0)
+            super.onBackPressed();
     }
 
     /**
