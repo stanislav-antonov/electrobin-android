@@ -1063,7 +1063,9 @@ public class RouteActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         if (mFragmentManager.getBackStackEntryCount() > 0)
-            super.onBackPressed();
+            // Also works:
+            // super.onBackPressed();
+            onSupportNavigateUp();
     }
 
     /**
