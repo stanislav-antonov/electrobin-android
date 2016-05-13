@@ -10,27 +10,25 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
             >
             <TableLayout
                 android:id="@+id/table"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:stretchColumns="1"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="10dp"
                 >
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#00a0d4"
+
                     >
                     <TextView
                         android:text="Заполняемость"
                         android:padding="10dp"
-                        android:gravity="center_horizontal"
                         android:textSize="16sp"
                         android:textColor="#ffffff"
-                        android:background="@android:color/transparent"
                         android:fontFamily="sans-serif-light"
                         />
                     <TextView
@@ -39,7 +37,6 @@
                         android:gravity="center_horizontal"
                         android:textSize="16sp"
                         android:textColor="#ffffff"
-                        android:background="@android:color/transparent"
                         android:fontFamily="sans-serif-light"
                         />
                     <TextView
@@ -48,16 +45,46 @@
                         android:gravity="center_horizontal"
                         android:textSize="16sp"
                         android:textColor="#ffffff"
-                        android:background="@android:color/transparent"
                         android:fontFamily="sans-serif-light"
                         />
                 </TableRow>
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#32abd7"
+                    android:paddingTop="10dp"
                     >
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:paddingLeft="10dp"
+                        >
+                        <TextView
+                            android:layout_height="45dp"
+                            android:layout_width="45dp"
+                            android:text="%"
+                            android:gravity="center"
+                            android:textSize="24sp"
+                            android:textColor="#ffffff"
+                            android:background="@drawable/background_statistics_percent_1"
+                            android:fontFamily="sans-serif-light"
+                            />
+                        <TextView
+                            android:layout_marginLeft="10dp"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="0 - 50"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:textSize="24sp"
+                            android:textColor="#ffffff"
+                            android:background="@android:color/transparent"
+                            android:fontFamily="sans-serif-light"
+                            />
+                    </LinearLayout>
                     <TextView
-                        android:text="1 - 50"
+                        android:text="0"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -66,48 +93,7 @@
                         android:fontFamily="sans-serif-light"
                         />
                     <TextView
-                        android:text=""
-                        android:padding="10dp"
-                        android:gravity="center_horizontal"
-                        android:textSize="24sp"
-                        android:textColor="#ffffff"
-                        android:background="@android:color/transparent"
-                        android:fontFamily="sans-serif-light"
-                        />
-                    <TextView
-                        android:text=""
-                        android:padding="10dp"
-                        android:gravity="center_horizontal"
-                        android:textSize="24sp"
-                        android:textColor="#ffffff"
-                        android:fontFamily="sans-serif-light"
-                        android:background="@android:color/transparent"
-                        />
-                </TableRow>
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    >
-                    <TextView
-                        android:text="50 - 75"
-                        android:padding="10dp"
-                        android:gravity="center_horizontal"
-                        android:textSize="24sp"
-                        android:textColor="#ffffff"
-                        android:fontFamily="sans-serif-light"
-                        android:background="@android:color/transparent"
-                        />
-                    <TextView
-                        android:text=""
-                        android:padding="10dp"
-                        android:gravity="center_horizontal"
-                        android:textSize="24sp"
-                        android:textColor="#ffffff"
-                        android:fontFamily="sans-serif-light"
-                        android:background="@android:color/transparent"
-                        />
-                    <TextView
-                        android:text=""
+                        android:text="0"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -119,9 +105,40 @@
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#32abd7"
+                    android:paddingTop="10dp"
                     >
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:paddingLeft="10dp"
+                        >
+                        <TextView
+                            android:layout_height="45dp"
+                            android:layout_width="45dp"
+                            android:text="%"
+                            android:gravity="center"
+                            android:textSize="24sp"
+                            android:textColor="#ffffff"
+                            android:background="@drawable/background_statistics_percent_2"
+                            android:fontFamily="sans-serif-light"
+                            />
+                        <TextView
+                            android:layout_marginLeft="10dp"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="50 - 75"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:textSize="24sp"
+                            android:textColor="#ffffff"
+                            android:fontFamily="sans-serif-light"
+                            android:background="@android:color/transparent"
+                            />
+                    </LinearLayout>
                     <TextView
-                        android:text="75 - 90"
+                        android:text="4"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -130,16 +147,7 @@
                         android:background="@android:color/transparent"
                         />
                     <TextView
-                        android:text=""
-                        android:padding="10dp"
-                        android:gravity="center_horizontal"
-                        android:textSize="24sp"
-                        android:textColor="#ffffff"
-                        android:fontFamily="sans-serif-light"
-                        android:background="@android:color/transparent"
-                        />
-                    <TextView
-                        android:text=""
+                        android:text="4"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -151,9 +159,40 @@
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#32abd7"
+                    android:paddingTop="10dp"
                     >
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:paddingLeft="10dp"
+                        >
+                        <TextView
+                            android:layout_height="45dp"
+                            android:layout_width="45dp"
+                            android:text="%"
+                            android:gravity="center"
+                            android:textSize="24sp"
+                            android:textColor="#ffffff"
+                            android:background="@drawable/background_statistics_percent_3"
+                            android:fontFamily="sans-serif-light"
+                            />
+                        <TextView
+                            android:layout_marginLeft="10dp"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="75 - 90"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:textSize="24sp"
+                            android:textColor="#ffffff"
+                            android:fontFamily="sans-serif-light"
+                            android:background="@android:color/transparent"
+                            />
+                    </LinearLayout>
                     <TextView
-                        android:text="90 - 100"
+                        android:text="8"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -162,7 +201,52 @@
                         android:background="@android:color/transparent"
                         />
                     <TextView
-                        android:text=""
+                        android:text="8"
+                        android:padding="10dp"
+                        android:gravity="center_horizontal"
+                        android:textSize="24sp"
+                        android:textColor="#ffffff"
+                        android:fontFamily="sans-serif-light"
+                        android:background="@android:color/transparent"
+                        />
+                </TableRow>
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#32abd7"
+                    android:paddingTop="10dp"
+                    >
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:paddingLeft="10dp"
+                        >
+                        <TextView
+                            android:layout_height="45dp"
+                            android:layout_width="45dp"
+                            android:text="%"
+                            android:gravity="center"
+                            android:textSize="24sp"
+                            android:textColor="#ffffff"
+                            android:background="@drawable/background_statistics_percent_4"
+                            android:fontFamily="sans-serif-light"
+                            />
+                        <TextView
+                            android:layout_marginLeft="10dp"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="90 - 100"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:textSize="24sp"
+                            android:textColor="#ffffff"
+                            android:fontFamily="sans-serif-light"
+                            android:background="@android:color/transparent"
+                            />
+                    </LinearLayout>
+                    <TextView
+                        android:text="12"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -171,7 +255,7 @@
                         android:background="@android:color/transparent"
                         />
                     <TextView
-                        android:text=""
+                        android:text="12"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -181,17 +265,40 @@
                         />
                 </TableRow>
             </TableLayout>
-            <TextView
-                android:id="@+id/run_text"
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:textSize="16sp"
-                android:textColor="#ffffff"
-                android:fontFamily="sans-serif-light"
-                android:gravity="center_horizontal"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="30dp"
-                />
+                android:background="#32abd7"
+                android:paddingTop="10dp"
+                android:paddingBottom="20dp"
+                >
+                <TextView
+                    android:id="@+id/run_text"
+                    android:text="Пробег"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="#ffffff"
+                    android:fontFamily="sans-serif-light"
+                    android:gravity="center_horizontal"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    />
+                <TextView
+                    android:text="23 км"
+                    android:id="@+id/run_value"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="32sp"
+                    android:textColor="#ffffff"
+                    android:fontFamily="sans-serif-light"
+                    android:gravity="center_horizontal"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="5dp"
+                    />
+            </LinearLayout>
             <Button
                 android:id="@+id/new_route_button"
                 android:layout_gravity="center_horizontal"

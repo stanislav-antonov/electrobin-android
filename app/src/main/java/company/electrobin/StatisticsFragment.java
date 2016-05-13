@@ -72,9 +72,12 @@ public class StatisticsFragment extends Fragment {
     }
 
     public void showUI() {
+
+        ((TextView) mLlCommon.findViewById(R.id.run_text)).setText(mI10n.l("run_text"));
+
         final RouteActivity.Route route = mListener.onGetRoute();
         if (route != null)
-            ((TextView) mLlCommon.findViewById(R.id.run_text)).setText(String.format(mI10n.l("run"), route.getRunFormatted()));
+            ((TextView) mLlCommon.findViewById(R.id.run_value)).setText(String.format(mI10n.l("run_value"), route.getRunFormatted()));
 
         btnNewRoute = (Button) mLlCommon.findViewById(R.id.new_route_button);
         btnNewRoute.setText(mI10n.l("get_route"));

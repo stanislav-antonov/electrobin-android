@@ -48,7 +48,8 @@
     <string name="move_to_the_base_1">Move to the base</string>
     <string name="move_to_the_base_2">Please move to the base and push the "Finish route" button on arrived.</string>
 
-    <string name="run">Run: %s km</string>
+    <string name="run_text">Run</string>
+    <string name="run_value">%s km</string>
 
     <string name="get_route">Get route</string>
 
