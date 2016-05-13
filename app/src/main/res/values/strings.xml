@@ -51,6 +51,10 @@
     <string name="run_text">Run</string>
     <string name="run_value">%s km</string>
 
+    <string name="fill">Fill</string>
+    <string name="count">Count</string>
+    <string name="volume">Volume</string>
+
     <string name="get_route">Get route</string>
 
     <string name="internet_connection">Internet connection:</string>

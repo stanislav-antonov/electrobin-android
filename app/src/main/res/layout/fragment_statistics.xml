@@ -24,7 +24,7 @@
                     android:background="#00a0d4"
                     >
                     <TextView
-                        android:text="Заполняемость"
+                        android:id="@+id/fill_text"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
                         android:paddingLeft="20dp"
@@ -34,7 +34,7 @@
                         android:fontFamily="sans-serif-light"
                         />
                     <TextView
-                        android:text="Кол-во"
+                        android:id="@+id/count_text"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="16sp"
@@ -42,7 +42,7 @@
                         android:fontFamily="sans-serif-light"
                         />
                     <TextView
-                        android:text="Объем"
+                        android:id="@+id/volume_text"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
                         android:paddingLeft="10dp"
