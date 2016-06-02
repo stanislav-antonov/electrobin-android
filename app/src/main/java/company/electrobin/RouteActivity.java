@@ -429,7 +429,7 @@ public class RouteActivity extends AppCompatActivity implements
                         RouteListFragment routeListFragment = (RouteListFragment)mFragmentManager.findFragmentByTag(RouteListFragment.FRAGMENT_TAG);
                         if (routeListFragment != null && routeListFragment.isVisible()) {
                             routeListFragment.showUIRouteList();
-                            showRouteUpdatedNotification(true);
+                            // showRouteUpdatedNotification(true);
                         }
                         else {
                             showRouteUpdatedNotification(false);
