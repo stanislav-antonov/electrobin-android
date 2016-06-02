@@ -95,8 +95,8 @@
 
                 ymaps.modules.require(['geoObject.Arrow'], function (Arrow) {
                     dfd.done(function(points) {
-                        var len = 200;
-                        for (var i = 0; i < points.length; i += len + 1000) {
+                        var len = 50;
+                        for (var i = 0; i < points.length; i += len + 500) {
                             var pts = [];
                             for (var j = i; j < i + len; j++) {
                                 var pt = points[j];
@@ -512,7 +512,7 @@
                         route.getPaths().options.set({
                             // strokeColor: '0000ffff',
                             // opacity: 0.9,
-                            strokeWidth: 8
+                            strokeWidth: 5
                         });
 
                         var points = route.getWayPoints();
