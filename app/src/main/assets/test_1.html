@@ -1,12 +1,12 @@
 <!doctype html>
 <html>
-    <head>
-        <title>Route</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
-        <script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
-        <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
-        <script type="text/javascript">
+<head>
+<title>Route</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+<meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
+<script type="text/javascript">
             var myMap;
             var coordSystem;
 
@@ -26,7 +26,7 @@
                 prevLocation;
 
             var arrows = [],
-                Arrow = null;
+                arrow = null;
 
             var dfd = $.Deferred();
 
@@ -39,6 +39,10 @@
 
             function getRotationAngle(p1, p2) {
                 return Math.PI / 2 - Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
+            }
+
+            function getVectorLength(x, y) {
+                return Math.sqrt(x * x + y * y);
             }
 
             function rotate(coordinates, angle) {
@@ -62,20 +66,17 @@
                 arrows = [];
 
                 var zoom = myMap.getZoom();
-                var arrowLen = Math.floor((-20 * zoom + 370) * (2 / (Math.log(zoom) / Math.log(2)) ));
+                var len = Math.floor( (-200 * zoom + 3700) * (2 / Math.log2(zoom)) );
 
-                var step = Math.floor(zoom * 0.2);
-                if (step <= 0) step = 1;
-
-                for (var i = 0; i < routePoints.length; i += arrowLen + 500) {
+                for (var i = 0; i < routePoints.length; i += len + 1300) {
                     var pts = [];
-                    for (var j = i; j < i + arrowLen; j = j + step) {
+                    for (var j = i; j < i + len; j++) {
                         var pt = routePoints[j];
                         if (!pt) continue;
                         pts.push(pt);
                     }
 
-                    var arrow1 = new Arrow(pts, null, {
+                    var arrow1 = new arrow(pts, null, {
                         geodesic: true,
                         strokeWidth: 5,
                         strokeColor: '#000000',
@@ -86,7 +87,7 @@
                     myMap.geoObjects.add(arrow1);
                     arrows.push(arrow1);
 
-                    var arrow2 = new Arrow(pts, null, {
+                    var arrow2 = new arrow(pts, null, {
                         geodesic: true,
                         strokeWidth: 3,
                         strokeColor: '#FFFFFF',
@@ -126,25 +127,23 @@
                     myMap.panTo(position);
                 });
 
-                ymaps.modules.require(['geoObject.Arrow'], function(arrow) {
-                    Arrow = arrow;
-                    dfd.done(function() { drawArrows(); });
+                ymaps.modules.require(['geoObject.Arrow'], function (arr) {
+                    dfd.done(function(points) {
+                        arrow = arr;
+                        drawArrows();
+                    });
                 });
 
                 myMap.events.add('boundschange', function(e) {
-                    try {
-                        var newZoom = e.get('newZoom'),
-                            oldZoom = e.get('oldZoom');
+                    var newZoom = e.get('newZoom'),
+                        oldZoom = e.get('oldZoom');
 
-                        if (oldZoom == newZoom) return;
-                    } catch(err) {
-                        return;
-                    }
+                    if (oldZoom == newZoom) return;
 
                     drawArrows();
                 });
 
-                Android.onMapReady();
+                // Android.onMapReady();
             });
 
             ymaps.modules.define("geoObject.Arrow", [
@@ -306,19 +305,22 @@
                 provide(ArrowOverlay);
             });
 
+
             function onTrafficControlShow() {
                 avoidTrafficJams = true;
-                Android.onAvoidTrafficJamsEnabled();
+                // Android.onAvoidTrafficJamsEnabled();
                 updateStartPoint();
                 _displayRoute();
             }
 
+
             function onTrafficControlHide() {
                 avoidTrafficJams = false;
-                Android.onAvoidTrafficJamsDisabled();
+                // Android.onAvoidTrafficJamsDisabled();
                 updateStartPoint();
                 _displayRoute();
             }
+
 
             function registerTrafficControlEvents() {
                 if (!trafficControl) return;
@@ -328,6 +330,7 @@
                 trafficControl.events.add('showtraffic', onTrafficControlShow).add('hidetraffic', onTrafficControlHide);
             }
 
+
             function updateStartPoint() {
                 if (prevLocation && currentRouteData && currentRouteData.hasOwnProperty("start_point")) {
                     var startPoint = currentRouteData["start_point"];
@@ -335,6 +338,7 @@
                     startPoint.longitude = prevLocation[1];
                 }
             }
+
 
             function routeToPoints(route) {
                 var points = [];
@@ -373,6 +377,7 @@
                 return result;
             }
 
+
             function snapToRoute(point) {
                 if (!point) return null;
                 if (!routePoints) {
@@ -403,7 +408,7 @@
                 } else {
                     if (routeDeviationCount > routeDeviationThreshold) {
                         routeDeviationCount = 0;
-                        Android.onRouteDeviation();
+                        // Android.onRouteDeviation();
                     }
 
                     routeDeviationCount++;
@@ -411,6 +416,7 @@
                     return [point[0], point[1]];
                 }
             }
+
 
             function calcBearing(lat1, lon1, lat2, lon2) {
                 var latitude1 = lat1 * Math.PI / 180;
@@ -421,6 +427,7 @@
 
                 return (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360;
             }
+
 
             function updatePosition(lat, long, bearing) {
                 var pointSnapped = snapToRoute([lat, long]);
@@ -503,7 +510,7 @@
                     myMap.geoObjects.remove(currentRoute);
                 }
 
-                Android.onRouteBuildingStart();
+                // Android.onRouteBuildingStart();
 
                 ymaps.route(wayPointsData, {avoidTrafficJams: avoidTrafficJams, mapStateAutoApply: true}).then(
                     function(route) {
@@ -538,38 +545,37 @@
                             });
 
                             point.events.add("click", function () {
-                                Android.onRoutePointClick(point.properties.get("unique_id"));
+                                // Android.onRoutePointClick(point.properties.get("unique_id"));
                             });
                         });
 
                         myMap.geoObjects.add(route);
                         routePoints = routeToPoints(route);
                         currentRoute = route;
-                        dfd.resolve();
+                        dfd.resolve(routePoints);
 
-                        Android.onRouteBuildingReady();
+                        // Android.onRouteBuildingReady();
                     },
                     function (error) {
-                        //
-                        console.log(error);
+                        alert(error.message);
                     }
                 );
             }
         </script>
-        <style>
-            html, body, #map {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
+<style>
+    html, body, #map {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    }
 
-            #map {
-                background-color: black;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="map"></div>
-    </body>
+    #map {
+    background-color: black;
+    }
+</style>
+</head>
+<body>
+<div id="map"></div>
+</body>
 </html>
