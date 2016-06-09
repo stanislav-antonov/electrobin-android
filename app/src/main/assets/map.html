@@ -62,9 +62,9 @@
                 arrows = [];
 
                 var zoom = myMap.getZoom();
-                var arrowLen = Math.floor((-20 * zoom + 370) * (2 / (Math.log(zoom) / Math.log(2)) ));
+                var arrowLen = Math.floor((-20 * zoom + 500) * (2 / (Math.log(zoom) / Math.log(2)) ));
 
-                var step = Math.floor(zoom * 0.2);
+                var step = Math.floor(zoom * 0.4);
                 if (step <= 0) step = 1;
 
                 for (var i = 0; i < routePoints.length; i += arrowLen + 500) {
