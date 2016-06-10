@@ -108,6 +108,7 @@ public class RouteActivity extends AppCompatActivity implements
         private final static String JSON_ROUTE_POINT_CITY_KEY = "city";
         private final static String JSON_ROUTE_POINT_LONGITUDE_KEY = "longitude";
         private final static String JSON_ROUTE_POINT_LATITUDE_KEY = "latitude";
+        private final static String JSON_ROUTE_POINT_FULLNESS_KEY = "fullness";
 
         public final static String FORMAT_DATE_ORIGINAL = "yyyy-MM-dd'T'HH:mm:ss.SSS";
         public final static String FORMAT_DATE_FORMATTED = "H:mm d.MM.yyyy";
@@ -119,6 +120,7 @@ public class RouteActivity extends AppCompatActivity implements
             public String mCity;
             public double mLat;
             public double mLng;
+            public int mFullness;
             public boolean mIsVisited;
 
             public Point() {}
@@ -130,6 +132,7 @@ public class RouteActivity extends AppCompatActivity implements
                 mCity = in.readString();
                 mLat = in.readDouble();
                 mLng = in.readDouble();
+                mFullness = in.readInt();
                 mIsVisited =  in.readByte() != 0;
             }
 
@@ -144,6 +147,7 @@ public class RouteActivity extends AppCompatActivity implements
                 out.writeString(mCity);
                 out.writeDouble(mLat);
                 out.writeDouble(mLng);
+                out.writeInt(mFullness);
                 out.writeByte((byte) (mIsVisited ? 1 : 0));
             }
 
@@ -205,6 +209,7 @@ public class RouteActivity extends AppCompatActivity implements
                         point.mCity = joPoint.getString(JSON_ROUTE_POINT_CITY_KEY);
                         point.mLng = joPoint.getDouble(JSON_ROUTE_POINT_LONGITUDE_KEY);
                         point.mLat = joPoint.getDouble(JSON_ROUTE_POINT_LATITUDE_KEY);
+                        point.mFullness = joPoint.getInt(JSON_ROUTE_POINT_FULLNESS_KEY);
 
                         point.mUniqueId = i + 1;
 
@@ -304,6 +309,7 @@ public class RouteActivity extends AppCompatActivity implements
                     joWayPoint.put("unique_id", wayPoint.mUniqueId);
                     joWayPoint.put("latitude", wayPoint.mLat);
                     joWayPoint.put("longitude", wayPoint.mLng);
+                    joWayPoint.put("fullness", wayPoint.mFullness);
 
                     jaWayPoints.put(joWayPoint);
                 }
