@@ -21,7 +21,7 @@ android {
         applicationId 'company.electrobin'
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 8
+        versionCode 9
         versionName '1.0.8'
     }
     buildTypes {
