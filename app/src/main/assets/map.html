@@ -148,6 +148,17 @@
                     drawArrows();
                 });
 
+                var template = ymaps.templateLayoutFactory.createClass('<div style="display: inline-block; width: 26px; margin-left: -5px;">$[properties.iconContent]</div>', {
+                    build: function () {
+                        this.constructor.superclass.build.call(this);
+                    },
+                    clear: function () {
+                        this.constructor.superclass.clear.call(this);
+                    }
+                });
+
+                ymaps.layout.storage.add('placemark#center', template);
+
                 Android.onMapReady();
             });
 
@@ -557,6 +568,7 @@
                             point.options.set("iconImageOffset", [0, 0]);
                             point.options.set("iconOffset", [-20, -40]);
                             point.options.set("iconContentOffset", [12, 11]);
+                            point.options.set("iconContentLayout", "placemark#center");
                             point.options.set({
                                 hasBalloon: false
                             });
