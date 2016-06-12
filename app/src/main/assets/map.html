@@ -39,10 +39,12 @@
             };
 
             function getRotationAngle(p1, p2) {
+                if (!p1 || !p2) return 0;
                 return Math.PI / 2 - Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
             }
 
             function rotate(coordinates, angle) {
+                if (!coordinates || !angle) return [];
                 var rotatedCoordinates = [];
                 for (var i = 0, l = coordinates.length, x, y; i < l; i++) {
                     x = coordinates[i][0];
@@ -56,26 +58,32 @@
                 return rotatedCoordinates;
             }
 
-            function drawArrows() {
+            function drawArrows(bounds) {
                 for (var ii = 0; ii < arrows.length; ii++)
                     myMap.geoObjects.remove(arrows[ii]);
 
                 arrows = [];
 
                 var zoom = myMap.getZoom();
-                var arrowLen = Math.floor((-20 * zoom + 500) * (2 / (Math.log(zoom) / Math.log(2)) ));
+                var invZoom = (18 - zoom);
+                if (invZoom < 1) invZoom = 1;
 
-                var step = Math.floor(zoom * 0.4);
-                if (step <= 0) step = 1;
+                var arrowLen = Math.floor( 0.3 * Math.pow(invZoom, 4.3) );
+                if (arrowLen <= 100) arrowLen = 25;
 
-                var arrowInterval = -zoom * 667 + 10000;
-                if (arrowInterval < 500) arrowInterval = 500;
+                var arrowInterval = Math.floor( 0.2 * Math.pow(invZoom, 4.5) );
+                if (arrowInterval < 150) arrowInterval = 100;
 
-                for (var i = 0; i < routePoints.length; i += arrowLen + arrowInterval) {
+                var step = Math.floor(Math.pow(invZoom, 3));
+                if (step <= 100) step = 1;
+
+                outer: for (var i = 0; i < routePoints.length; i += arrowLen + arrowInterval) {
                     var pts = [];
                     for (var j = i; j < i + arrowLen; j = j + step) {
                         var pt = routePoints[j];
                         if (!pt) continue;
+                        if (!fitsToBounds(pt, bounds))
+                            continue outer;
                         pts.push(pt);
                     }
 
@@ -101,6 +109,12 @@
                     myMap.geoObjects.add(arrow2);
                     arrows.push(arrow2);
                 }
+            }
+
+            function fitsToBounds (p, bounds) {
+                var a = bounds[0],
+                    b = bounds[1];
+                return p[0] > a[0] && p[0] < b[0] && p[1] > a[1] && p[1] < b[1];
             }
 
             ymaps.ready(function () {
@@ -132,20 +146,16 @@
 
                 ymaps.modules.require(['geoObject.Arrow'], function(arrow) {
                     Arrow = arrow;
-                    dfd.done(function() { drawArrows(); });
+                    dfd.done(function() { drawArrows(myMap.getBounds()); });
                 });
 
                 myMap.events.add('boundschange', function(e) {
-                    try {
-                        var newZoom = e.get('newZoom'),
-                            oldZoom = e.get('oldZoom');
 
-                        if (oldZoom == newZoom) return;
-                    } catch(err) {
-                        return;
-                    }
+                    var newZoom = e.get('newZoom'),
+                        oldZoom = e.get('oldZoom');
 
-                    drawArrows();
+                    // if (oldZoom == newZoom) return;
+                    drawArrows(e.get('newBounds'));
                 });
 
                 var template = ymaps.templateLayoutFactory.createClass('<div style="display: inline-block; width: 26px; margin-left: -5px;">$[properties.iconContent]</div>', {
@@ -219,10 +229,12 @@
                             if (!map) {
                                 this._onRemoveFromMap();
                             }
+
                             this._map = map;
                             if (map) {
                                 this._onAddToMap();
                             }
+
                             this.events.fire('mapchange', {
                                 oldMap: oldMap,
                                 newMap: map
@@ -310,9 +322,13 @@
                 }
 
                 function getArrowsBeginningCoordinates (coordinates, arrowLength, arrowAngle) {
+                    if (!coordinates) return [];
                     var p1 = coordinates[0],
-                        p2 = coordinates[1],
-                        dx = arrowLength * Math.sin(arrowAngle),
+                        p2 = coordinates[1];
+
+                    if (!p1 || !p2) return [];
+
+                    var dx = arrowLength * Math.sin(arrowAngle),
                         y = p2[1] - arrowLength * Math.cos(arrowAngle);
 
                     return [[p1[0] - dx, y], [p1[0] + dx, y]];
@@ -395,9 +411,7 @@
                     return [point[0], point[1]];
                 }
 
-                var minDistance = null;
-                var distance = null;
-                var rpFound;
+                var minDistance, rpFound;
 
                 for (var i = 0; i < routePoints.length; i++) {
                     var rp = routePoints[i];
@@ -480,7 +494,6 @@
                 );
             }
 
-
             function displayRoute(routeJSON, avoidTJ) {
                 currentRouteData = $.parseJSON(routeJSON);
                 avoidTrafficJams = avoidTJ;
@@ -491,7 +504,6 @@
 
                  _displayRoute();
             }
-
 
             function getWayPointBubble(f) {
                 var key;
@@ -509,7 +521,6 @@
 
                 return wayPointBubbles[key];
             }
-
 
             function _displayRoute() {
                 if (!currentRouteData) {
