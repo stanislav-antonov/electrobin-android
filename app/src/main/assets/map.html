@@ -68,14 +68,23 @@
                 var invZoom = (18 - zoom);
                 if (invZoom < 1) invZoom = 1;
 
-                var arrowLen = Math.floor( 0.3 * Math.pow(invZoom, 4.3) );
-                if (arrowLen <= 100) arrowLen = 25;
-
-                var arrowInterval = Math.floor( 0.2 * Math.pow(invZoom, 4.5) );
-                if (arrowInterval < 150) arrowInterval = 100;
+                var arrowLen, arrowInterval;
+                if (invZoom >= 1 && invZoom <= 3.5) {
+                    arrowLen = 30;
+                    arrowInterval = 100;
+                }
+                else {
+                    arrowLen = Math.floor( 0.3 * Math.pow(invZoom, 4.3) );
+                    arrowInterval = Math.floor( 0.2 * Math.pow(invZoom, 4.5) );
+                }
 
                 var step = Math.floor(Math.pow(invZoom, 3));
                 if (step <= 100) step = 1;
+
+                console.log('Arrows len: ' + arrowLen);
+                console.log('Arrows interval: ' + arrowInterval);
+                console.log('Inv zoom: ' + invZoom);
+                console.log('Step: ' + step);
 
                 outer: for (var i = 0; i < routePoints.length; i += arrowLen + arrowInterval) {
                     var pts = [];
