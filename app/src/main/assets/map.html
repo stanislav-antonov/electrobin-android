@@ -66,7 +66,7 @@
 
                 var zoom = myMap.getZoom();
                 var invZoom = (18 - zoom);
-                if (invZoom < 1)
+                if (invZoom < 1) invZoom = 1;
 
                 var arrowLen, arrowInterval;
                 if (invZoom >= 1 && invZoom <= 3.5) {
