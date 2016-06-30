@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
@@ -26,6 +27,7 @@ public class BinCardFragment extends Fragment {
     private Button mBtnRoutePointDone;
     private RadioButton mRbBinUnloadedOk;
     private RadioButton mRbBinUnloadedError;
+    private EditText mEtBinComment;
 
     private TextView mTvRoutePointAddress;
 
@@ -66,6 +68,8 @@ public class BinCardFragment extends Fragment {
         mBtnRoutePointDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mRoutePoint.mIsUnloadedOk = mRbBinUnloadedOk.isChecked();
+                mRoutePoint.mComment = mEtBinComment.getText().toString();
                 mListener.onRoutePointDone(mRoutePoint);
             }
         });
@@ -78,6 +82,8 @@ public class BinCardFragment extends Fragment {
 
         mRbBinUnloadedError = (RadioButton)view.findViewById(R.id.bin_unloaded_error_radio);
         mRbBinUnloadedError.setText(mI10n.l("container_status_unloaded_error"));
+
+        mEtBinComment = (EditText)view.findViewById(R.id.bin_comment_input);
 
         mTvRoutePointAddress = (TextView)view.findViewById(R.id.address_text);
         mTvRoutePointAddress.setText(mRoutePoint.mAddress);

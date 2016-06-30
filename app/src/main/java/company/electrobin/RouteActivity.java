@@ -42,6 +42,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
+import java.security.Timestamp;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ public class RouteActivity extends AppCompatActivity implements
     private FragmentManager mFragmentManager;
     private Route mRoute;
     private UserLocation mUserLocation;
+    private JsonCommand mJsonCommand;
 
     private Dialog mRouteUpdatedDialog;
     private Dialog mRouteInterruptDialog;
@@ -88,6 +90,9 @@ public class RouteActivity extends AppCompatActivity implements
 
     public final static int NOTIFICATION_NO_INTERNET_CONNECTION = 1;
     public final static int NOTIFICATION_NO_GPS = 2;
+
+    public final static String FORMAT_DATE_ORIGINAL = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    public final static String FORMAT_DATE_FORMATTED = "H:mm d.MM.yyyy";
 
     /**
      *
@@ -110,9 +115,6 @@ public class RouteActivity extends AppCompatActivity implements
         private final static String JSON_ROUTE_POINT_LATITUDE_KEY = "latitude";
         private final static String JSON_ROUTE_POINT_FULLNESS_KEY = "fullness";
 
-        public final static String FORMAT_DATE_ORIGINAL = "yyyy-MM-dd'T'HH:mm:ss.SSS";
-        public final static String FORMAT_DATE_FORMATTED = "H:mm d.MM.yyyy";
-
         public static class Point implements Parcelable {
             public int mId;
             public int mUniqueId;
@@ -120,7 +122,12 @@ public class RouteActivity extends AppCompatActivity implements
             public String mCity;
             public double mLat;
             public double mLng;
+
+            // TODO: Bin related fields - need refactoring
             public int mFullness;
+            public boolean mIsUnloadedOk;
+            public String mComment;
+
             public boolean mIsVisited;
 
             public Point() {}
@@ -132,7 +139,11 @@ public class RouteActivity extends AppCompatActivity implements
                 mCity = in.readString();
                 mLat = in.readDouble();
                 mLng = in.readDouble();
+
                 mFullness = in.readInt();
+                mIsUnloadedOk = in.readByte() != 0;
+                mComment = in.readString();
+
                 mIsVisited =  in.readByte() != 0;
             }
 
@@ -147,7 +158,11 @@ public class RouteActivity extends AppCompatActivity implements
                 out.writeString(mCity);
                 out.writeDouble(mLat);
                 out.writeDouble(mLng);
+
                 out.writeInt(mFullness);
+                out.writeByte((byte) (mIsUnloadedOk ? 1 : 0));
+                out.writeString(mComment);
+
                 out.writeByte((byte) (mIsVisited ? 1 : 0));
             }
 
@@ -357,7 +372,7 @@ public class RouteActivity extends AppCompatActivity implements
             return null;
         }
 
-        public boolean hasUnvisitedWayPoints() {
+        public boolean hasUnvisitedPoints() {
             for (Point point : getWayPointList()) {
                 if (!point.mIsVisited)
                     return true;
@@ -456,6 +471,52 @@ public class RouteActivity extends AppCompatActivity implements
         public void onConnectionClosed() {
             mHandler.removeCallbacks(mRunnable);
             mHandler.postDelayed(mRunnable, NOTIFICATION_NO_INTERNET_CONNECTION_TIMEOUT);
+        }
+    }
+
+    /**
+     *
+     */
+    private class JsonCommand {
+
+        private Format mFormatter = new SimpleDateFormat(FORMAT_DATE_ORIGINAL);
+
+        public void routeStart() {
+            final Route route = getCurrentRoute();
+            final String strJSON = String.format("{\"action\":\"start_route\", \"route_id\":\"%s\", \"created\":\"%s\"}",
+                    route.getId(), getTime());
+            mService.sendData(strJSON);
+        }
+
+        public void routeComplete() {
+            final Route route = getCurrentRoute();
+            final String strJSON = String.format("{\"action\":\"route_complete\", \"route_id\":\"%s\", \"created\":\"%s\"}",
+                    route.getId(), getTime());
+            mService.sendData(strJSON);
+        }
+
+        public void routeInterrupt() {
+            final Route route = getCurrentRoute();
+            final String strJSON = String.format("{\"action\":\"route_stop\", \"route_id\":\"%s\", \"created\":\"%s\"}",
+                    route.getId(), getTime());
+            mService.sendData(strJSON);
+        }
+
+        public void allBinsDone() {
+            final Route route = getCurrentRoute();
+            final String strJSON = String.format("{\"action\":\"moving_home\", \"route_id\":\"%s\", \"created\":\"%s\"}",
+                    route.getId(), getTime());
+            mService.sendData(strJSON);
+        }
+
+        public void binCollect(Route.Point point) {
+            final String strJSON = String.format("{\"action\":\"collection\", \"container_id\":\"%s\", \"comment\":\"%s\", \"created\":\"%s\", \"latitude\":\"%s\", \"longitude\":\"%s\", \"fullness\":\"%s\"}",
+                    point.mId, point.mComment, getTime(), point.mLat, point.mLng, point.mFullness);
+            mService.sendData(strJSON);
+        }
+
+        private String getTime() {
+            return mFormatter.format(new Date());
         }
     }
 
@@ -633,6 +694,7 @@ public class RouteActivity extends AppCompatActivity implements
         mI10n = mApp.getI10n();
 
         mUserLocation = new UserLocation(this);
+        mJsonCommand = new JsonCommand();
 
         setupCustomActionBar();
 
@@ -860,6 +922,8 @@ public class RouteActivity extends AppCompatActivity implements
 
                 RouteListFragment routeListFragment = (RouteListFragment)replaceToFragment(RouteListFragment.class);
                 routeListFragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_WAITING);
+
+                mJsonCommand.routeInterrupt();
             }
         });
 
@@ -990,10 +1054,12 @@ public class RouteActivity extends AppCompatActivity implements
         mUserLocation.stopLocationUpdates();
         mUserLocation.startLocationUpdates();
 
-        if (route.hasUnvisitedWayPoints()) {
+        if (route.hasUnvisitedPoints()) {
+            mJsonCommand.binCollect(point);
             replaceToFragment(RouteMapFragment.class);
         }
         else {
+            mJsonCommand.allBinsDone();
             replaceToFragment(AllBinsDoneFragment.class);
         }
     }
@@ -1003,7 +1069,9 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteDone() {
+        mJsonCommand.routeComplete();
         mUserLocation.stopLocationUpdates();
+
         replaceToFragment(StatisticsFragment.class);
     }
 
@@ -1025,11 +1093,7 @@ public class RouteActivity extends AppCompatActivity implements
         mUserLocation.stopLocationUpdates();
         mUserLocation.startLocationUpdates();
 
-        // TODO: Not totally correct to make this call here..
-        final Route route = getCurrentRoute();
-        final String strJSON = String.format("{\"action\":\"start_route\", \"route_id\":\"%s\", \"created\":\"%s\"}",
-                route.getId(), route.getDateFormatted(Route.FORMAT_DATE_ORIGINAL));
-        mService.sendData(strJSON);
+        mJsonCommand.routeStart();
     }
 
     /**
