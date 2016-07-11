@@ -479,7 +479,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     private class JsonCommand {
 
-        private Format mFormatter = new SimpleDateFormat(FORMAT_DATE_ORIGINAL);
+        final private Format mFormatter = new SimpleDateFormat(FORMAT_DATE_ORIGINAL);
 
         public void routeStart() {
             final Route route = getCurrentRoute();

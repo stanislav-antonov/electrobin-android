@@ -9,6 +9,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
@@ -51,11 +52,11 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
 
     private TCPClientListener mTCPClientListener;
 
-    private volatile SSLSocket mSocket;
+    private SSLSocket mSocket;
     private volatile boolean mIsConnected;
 
-    private volatile BufferedReader mIn;
-    private volatile PrintWriter mOut;
+    private BufferedReader mIn;
+    private PrintWriter mOut;
 
     private boolean mIsRunning;
 
@@ -316,6 +317,10 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
 
     private class Writer {
 
+        private volatile boolean mIsRunning;
+        private HandlerThread mHT;
+        private Handler mHtHandler;
+
         private final AsyncWriterErrorListener mListener;
         private final String LOG_TAG = Writer.class.getName();
 
@@ -327,6 +332,45 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
             mListener = listener;
         }
 
+        public void start() {
+            if (mIsRunning) {
+                Log.i(LOG_TAG, "AsyncWriter already running");
+                return;
+            }
+
+            if (!mIsConnected) {
+                Log.e(LOG_TAG, "Can't start AsyncWriter - no network connection");
+                return;
+            }
+
+            mHT = new HandlerThread("Async writer");
+            mHT.start();
+
+            mHtHandler = new Handler(mHT.getLooper()) {
+                public void handleMessage (Message msg) {
+                    Bundle bundle = msg.getData();
+                    String data = bundle.getString("data");
+
+                    try {
+                        mOut.println(data);
+                        mOut.flush();
+                    }
+                    catch (Exception e1) {
+                        try {
+                            mListener.onWriteError(e1);
+                        } catch (Exception e2) {
+                            Log.e(LOG_TAG, e2.toString());
+                        }
+                    }
+                }
+            };
+        }
+
+        public void shutdown() {
+            mIsRunning = false;
+            if (mHT != null) mHT.quit();
+        }
+
         /**
          *
          * @param data
@@ -334,17 +378,13 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
         public void sendData(String data) {
             if (!mIsConnected) throw new IllegalStateException("Not connected");
 
-            try {
-                mOut.println(data);
-                mOut.flush();
-            }
-            catch (Exception e1) {
-                try {
-                    mListener.onWriteError(e1);
-                } catch (Exception e2) {
-                    Log.e(LOG_TAG, e2.toString());
-                }
-            }
+            Bundle bundle = new Bundle();
+            bundle.putString("data", data);
+
+            Message message = new Message();
+            message.setData(bundle);
+
+            mHtHandler.sendMessage(message);
         }
     }
 
@@ -371,7 +411,7 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
          *
          */
         public void start() {
-            if (mAsyncReader.isRunning()) {
+            if (mIsRunning) {
                 Log.i(LOG_TAG, "AsyncReader already running");
                 return;
             }
@@ -553,6 +593,7 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
      */
     private void shutdown() {
         if (mAsyncReader != null) mAsyncReader.shutdown();
+        if (mWriter != null) mWriter.shutdown();
     }
 
     /**
@@ -565,7 +606,8 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mAsyncReader.start();
+                mAsyncReader.start();
+                mWriter.start();
                 }
             }, 100);
         }
