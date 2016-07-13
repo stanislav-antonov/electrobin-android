@@ -322,7 +322,9 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
         private Handler mHtHandler;
 
         private final AsyncWriterErrorListener mListener;
+
         private final String LOG_TAG = Writer.class.getName();
+        private final String BUNDLE_KEY_DATA = "data";
 
         /**
          *
@@ -347,9 +349,10 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
             mHT.start();
 
             mHtHandler = new Handler(mHT.getLooper()) {
+                @SuppressWarnings("HandlerLeak")
                 public void handleMessage (Message msg) {
                     Bundle bundle = msg.getData();
-                    String data = bundle.getString("data");
+                    String data = bundle.getString(BUNDLE_KEY_DATA);
 
                     try {
                         mOut.println(data);
@@ -379,7 +382,7 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
             if (!mIsConnected) throw new IllegalStateException("Not connected");
 
             Bundle bundle = new Bundle();
-            bundle.putString("data", data);
+            bundle.putString(BUNDLE_KEY_DATA, data);
 
             Message message = new Message();
             message.setData(bundle);

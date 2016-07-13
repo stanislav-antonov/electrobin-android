@@ -1054,8 +1054,9 @@ public class RouteActivity extends AppCompatActivity implements
         mUserLocation.stopLocationUpdates();
         mUserLocation.startLocationUpdates();
 
+        mJsonCommand.binCollect(point);
+
         if (route.hasUnvisitedPoints()) {
-            mJsonCommand.binCollect(point);
             replaceToFragment(RouteMapFragment.class);
         }
         else {

@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "885439719958",
+    "project_id": "firebase-binology"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:885439719958:android:475b893c4cb13b19",
+        "android_client_info": {
+          "package_name": "company.electrobin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVkusrSAFVGNdVwFPN1k_x_wGrd44qZT8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
