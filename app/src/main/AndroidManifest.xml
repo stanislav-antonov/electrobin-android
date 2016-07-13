@@ -5,11 +5,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <permission android:name="company.electrobin.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-    <uses-permission android:name="company.electrobin.permission.C2D_MESSAGE" />
 
     <application
         android:name=".ElectrobinApplication"
@@ -18,28 +13,17 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <receiver
-            android:name="com.google.android.gms.gcm.GcmReceiver"
-            android:exported="true"
-            android:permission="com.google.android.c2dm.permission.SEND" >
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="company.electrobin.gcm" />
-            </intent-filter>
-        </receiver>
-
         <service
-            android:name=".gcm.MyGcmListenerService"
-            android:exported="false" >
+            android:name=".fcm.MyFirebaseInstanceIDService">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
         </service>
+
         <service
-            android:name=".gcm.MyInstanceIDListenerService"
-            android:exported="false">
+            android:name=".fcm.MyFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID" />
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
 
