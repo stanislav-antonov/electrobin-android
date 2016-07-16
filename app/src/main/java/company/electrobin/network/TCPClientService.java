@@ -544,7 +544,7 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
         try {
             mWriter.sendData(data);
         } catch(Exception e) {
-            Log.e(LOG_TAG, e.getMessage());
+            e.printStackTrace();
         }
     }
 

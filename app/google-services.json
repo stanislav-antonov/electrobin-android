@@ -1,20 +1,27 @@
 {
   "project_info": {
-    "project_number": "885439719958",
-    "project_id": "firebase-binology"
+    "project_number": "418931941573",
+    "firebase_url": "https://binology-1357.firebaseio.com",
+    "project_id": "binology-1357",
+    "storage_bucket": "binology-1357.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:885439719958:android:475b893c4cb13b19",
+        "mobilesdk_app_id": "1:418931941573:android:475b893c4cb13b19",
         "android_client_info": {
           "package_name": "company.electrobin"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "418931941573-omm8mv4v4i5vcq40obssaaomki5h5h27.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBVkusrSAFVGNdVwFPN1k_x_wGrd44qZT8"
+          "current_key": "AIzaSyACBGSBp4E_5vQljBsh0i9jGGoDs8yvVFk"
         }
       ],
       "services": {
@@ -26,7 +33,7 @@
           "other_platform_oauth_client": []
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }

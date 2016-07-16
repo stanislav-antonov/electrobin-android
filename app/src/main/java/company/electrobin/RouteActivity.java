@@ -38,6 +38,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -423,6 +425,13 @@ public class RouteActivity extends AppCompatActivity implements
             if (result == TCPClientListener.CONNECT_RESULT_OK) {
                 mHandler.removeCallbacks(mRunnable);
                 toggleNotification(NOTIFICATION_NO_INTERNET_CONNECTION, View.GONE);
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mJsonCommand.sendFCMToken(FirebaseInstanceId.getInstance().getToken());
+                    }
+               }, 2000);
             } else {
                 toggleNotification(NOTIFICATION_NO_INTERNET_CONNECTION, View.VISIBLE);
             }
@@ -512,6 +521,11 @@ public class RouteActivity extends AppCompatActivity implements
         public void binCollect(Route.Point point) {
             final String strJSON = String.format("{\"action\":\"collection\", \"container_id\":\"%s\", \"comment\":\"%s\", \"created\":\"%s\", \"latitude\":\"%s\", \"longitude\":\"%s\", \"fullness\":\"%s\"}",
                     point.mId, point.mComment, getTime(), point.mLat, point.mLng, point.mFullness);
+            mService.sendData(strJSON);
+        }
+
+        public void sendFCMToken(String token) {
+            final String strJSON = String.format("{\"action\":\"update_token\", \"token\":\"%s\"}", token);
             mService.sendData(strJSON);
         }
 

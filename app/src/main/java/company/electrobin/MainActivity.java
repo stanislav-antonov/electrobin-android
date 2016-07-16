@@ -79,3 +79,5 @@ public class MainActivity extends Activity implements UserProfileLoadListener, I
         // Do nothing
     }
 }
+
+// curl --header "Authorization: key=<YOUR_KEY_GOES_HERE>" --header Content-Type:"application/json" https://fcm.googleapis.com/fcm/send  -d "{\"to\":\"/topics/news\",\"notification\": {\"title\": \"Click Action Message\",\"text\": \"Sample message\",\"click_action\":\"OPEN_ACTIVITY_1\"}}"
