@@ -9,8 +9,8 @@ import com.google.firebase.iid.FirebaseInstanceIdService;
 
 public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
-    public static final String BUNDLE_KEY_TOKEN = "token";
-    public static final String BROADCAST_INTENT_TOKEN_REFRESH = "tokenRefresh";
+    public static final String BUNDLE_KEY_TOKEN = "fcmToken";
+    public static final String BROADCAST_INTENT_TOKEN_REFRESH = "fcmTokenRefresh";
     private static final String TAG = "MyFirebaseIIDService";
 
     /**
