@@ -60,7 +60,7 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
 
     private boolean mIsRunning;
 
-    private Writer mWriter;
+    private AsyncWriter mAsyncWriter;
     private AsyncReader mAsyncReader;
     private AsyncConnector mAsyncConnector;
     private ConnectionChecker mConnectionChecker;
@@ -156,6 +156,9 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
                         String data = mIn.readLine();
                         if (data == null || !data.equals(HANDSHAKE_PROMPT))
                             throw new IllegalStateException("Bad handshake prompt: " + data);
+
+                        if (mTCPClientListener == null)
+                            throw new IllegalStateException("No listener");
 
                         String token = String.format("Token:%1$s", mTCPClientListener.onAuthToken());
                         mOut.println(token);
@@ -315,7 +318,7 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
         }
     }
 
-    private class Writer {
+    private class AsyncWriter {
 
         private volatile boolean mIsRunning;
         private HandlerThread mHT;
@@ -323,14 +326,14 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
 
         private final AsyncWriterErrorListener mListener;
 
-        private final String LOG_TAG = Writer.class.getName();
+        private final String LOG_TAG = AsyncWriter.class.getName();
         private final String BUNDLE_KEY_DATA = "data";
 
         /**
          *
          * @param listener
          */
-        public Writer(AsyncWriterErrorListener listener) {
+        public AsyncWriter(AsyncWriterErrorListener listener) {
             mListener = listener;
         }
 
@@ -542,7 +545,7 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
         if (data == null || data.isEmpty()) return;
 
         try {
-            mWriter.sendData(data);
+            mAsyncWriter.sendData(data);
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -550,18 +553,24 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
 
     /**
      *
+     * @param listener
      */
-    public void start(final TCPClientListener listener) {
+    public void setListener(final TCPClientListener listener) {
+        if (listener == null) throw new IllegalArgumentException();
+        mTCPClientListener = listener;
+    }
+
+    /**
+     *
+     */
+    public void start() {
         if (mIsRunning) {
             Log.i(LOG_TAG, "TCPClient is already running");
             return;
         }
 
-        if (listener == null) throw new IllegalArgumentException();
-        mTCPClientListener = listener;
-
         mConnectionChecker = new ConnectionChecker();
-        mWriter = new Writer(mConnectionChecker);
+        mAsyncWriter = new AsyncWriter(mConnectionChecker);
         mAsyncReader = new AsyncReader(mConnectionChecker);
 
         mAsyncConnector = new AsyncConnector();
@@ -596,7 +605,7 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
      */
     private void shutdown() {
         if (mAsyncReader != null) mAsyncReader.shutdown();
-        if (mWriter != null) mWriter.shutdown();
+        if (mAsyncWriter != null) mAsyncWriter.shutdown();
     }
 
     /**
@@ -610,7 +619,7 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
                 @Override
                 public void run() {
                 mAsyncReader.start();
-                mWriter.start();
+                mAsyncWriter.start();
                 }
             }, 100);
         }
@@ -675,6 +684,8 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        start();
+
         // If we get killed, after returning from here, restart
         return START_STICKY;
     }

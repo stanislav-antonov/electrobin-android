@@ -543,9 +543,10 @@ public class RouteActivity extends AppCompatActivity implements
         public void onServiceConnected(ComponentName className, IBinder service) {
             TCPClientService.TCPClientServiceBinder binder = (TCPClientService.TCPClientServiceBinder)service;
             mService = binder.getService();
+            mService.setListener(new SocketAPIEventsHandler());
             mBound = true;
 
-            mService.start(new SocketAPIEventsHandler());
+            startService(new Intent(RouteActivity.this, TCPClientService.class));
         }
 
         @Override
