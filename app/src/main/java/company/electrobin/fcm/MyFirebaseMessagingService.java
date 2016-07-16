@@ -13,6 +13,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import company.electrobin.MainActivity;
+import company.electrobin.R;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -52,7 +53,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 // .setSmallIcon(R.drawable.ic_stat_ic_notification)
-                .setContentTitle("Binology")
+                .setContentTitle(getResources().getString(R.string.app_name))
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
