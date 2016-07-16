@@ -44,13 +44,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
-import java.security.Timestamp;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import company.electrobin.fcm.MyFirebaseInstanceIDService;
 import company.electrobin.i10n.I10n;
 import company.electrobin.location.UserLocation;
 import company.electrobin.network.TCPClientListener;
@@ -580,6 +580,16 @@ public class RouteActivity extends AppCompatActivity implements
                     final Bundle bundle = intent.getExtras();
                     if (bundle == null) return;
                     toggleNotification(NOTIFICATION_NO_GPS, bundle.getBoolean(UserLocation.BUNDLE_KEY_IS_GPS_AVAILABLE) ? View.GONE : View.VISIBLE);
+
+                    break;
+                }
+
+                case MyFirebaseInstanceIDService.BROADCAST_INTENT_TOKEN_REFRESH: {
+                    final Bundle bundle = intent.getExtras();
+                    if (bundle == null) return;
+
+                    String token = bundle.getString(MyFirebaseInstanceIDService.BUNDLE_KEY_TOKEN);
+                    mJsonCommand.sendFCMToken(token);
 
                     break;
                 }

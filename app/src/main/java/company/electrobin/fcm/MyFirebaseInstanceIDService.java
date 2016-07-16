@@ -1,6 +1,7 @@
 package company.electrobin.fcm;
 
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -8,6 +9,8 @@ import com.google.firebase.iid.FirebaseInstanceIdService;
 
 public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
+    public static final String BUNDLE_KEY_TOKEN = "token";
+    public static final String BROADCAST_INTENT_TOKEN_REFRESH = "tokenRefresh";
     private static final String TAG = "MyFirebaseIIDService";
 
     /**
@@ -17,10 +20,8 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
      */
     @Override
     public void onTokenRefresh() {
-        // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
-
         sendRegistrationToServer(refreshedToken);
     }
 
@@ -33,6 +34,8 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
-        // Add custom implementation, as needed.
+        Intent intent = new Intent(BROADCAST_INTENT_TOKEN_REFRESH);
+        intent.putExtra(BUNDLE_KEY_TOKEN, token);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 }
