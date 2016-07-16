@@ -28,7 +28,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
-        String body = "";
+        String body = getResources().getString(R.string.route_updated);
         RemoteMessage.Notification notification = remoteMessage.getNotification();
         if (notification != null) {
             body = remoteMessage.getNotification().getBody();
@@ -50,7 +50,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 // .setSmallIcon(R.drawable.ic_stat_ic_notification)
                 .setContentTitle(getResources().getString(R.string.app_name))
