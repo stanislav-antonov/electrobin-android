@@ -499,8 +499,8 @@ public class RouteActivity extends AppCompatActivity implements
 
         public void routeComplete() {
             final Route route = getCurrentRoute();
-            final String strJSON = String.format("{\"action\":\"route_complete\", \"route_id\":\"%s\", \"created\":\"%s\"}",
-                    route.getId(), getTime());
+            final String strJSON = String.format("{\"action\":\"route_complete\", \"track\":\"%s\", \"route_id\":\"%s\", \"created\":\"%s\"}",
+                    route.getRunFormatted(), route.getId(), getTime());
             mService.sendData(strJSON);
         }
 
@@ -513,14 +513,15 @@ public class RouteActivity extends AppCompatActivity implements
 
         public void allBinsDone() {
             final Route route = getCurrentRoute();
-            final String strJSON = String.format("{\"action\":\"moving_home\", \"route_id\":\"%s\", \"created\":\"%s\"}",
-                    route.getId(), getTime());
+            final String strJSON = String.format("{\"action\":\"moving_home\", \"track\":\"%s\", \"route_id\":\"%s\", \"created\":\"%s\"}",
+                    route.getRunFormatted(), route.getId(), getTime());
             mService.sendData(strJSON);
         }
 
         public void binCollect(Route.Point point) {
-            final String strJSON = String.format("{\"action\":\"collection\", \"container_id\":\"%s\", \"comment\":\"%s\", \"created\":\"%s\", \"latitude\":\"%s\", \"longitude\":\"%s\", \"fullness\":\"%s\"}",
-                    point.mId, point.mComment, getTime(), point.mLat, point.mLng, point.mFullness);
+            final Route route = getCurrentRoute();
+            final String strJSON = String.format("{\"action\":\"collection\", \"route_id\":\"%s\", \"container_id\":\"%s\", \"comment\":\"%s\", \"created\":\"%s\", \"latitude\":\"%s\", \"longitude\":\"%s\", \"fullness\":\"%s\"}",
+                    route.mId, point.mId, point.mComment, getTime(), point.mLat, point.mLng, point.mFullness);
             mService.sendData(strJSON);
         }
 
