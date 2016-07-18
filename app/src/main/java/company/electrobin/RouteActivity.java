@@ -497,7 +497,6 @@ public class RouteActivity extends AppCompatActivity implements
             mService.sendData(strJSON);
         }
 
-        //
         public void routeComplete() {
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"route_complete\", \"track\":\"%s\", \"route_id\":\"%s\", \"created\":\"%s\"}",
@@ -505,6 +504,7 @@ public class RouteActivity extends AppCompatActivity implements
             mService.sendData(strJSON);
         }
 
+        //
         public void routeInterrupt() {
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"route_stop\", \"route_id\":\"%s\", \"created\":\"%s\"}",
