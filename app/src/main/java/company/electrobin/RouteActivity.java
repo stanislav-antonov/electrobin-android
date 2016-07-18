@@ -498,6 +498,7 @@ public class RouteActivity extends AppCompatActivity implements
         }
 
         public void routeComplete() {
+            //
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"route_complete\", \"track\":\"%s\", \"route_id\":\"%s\", \"created\":\"%s\"}",
                     route.getRunFormatted(), route.getId(), getTime());
