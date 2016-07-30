@@ -59,7 +59,7 @@ import company.electrobin.user.User;
 
 public class RouteActivity extends AppCompatActivity implements
         RouteListFragment.OnFragmentInteractionListener,
-        RouteMapFragment.OnFragmentInteractionListener,
+        RouteMapFragmentWebView.OnFragmentInteractionListener,
         UserProfileFragment.OnFragmentInteractionListener,
         BinCardFragment.OnFragmentInteractionListener,
         AllBinsDoneFragment.OnFragmentInteractionListener,
@@ -1083,7 +1083,7 @@ public class RouteActivity extends AppCompatActivity implements
         mJsonCommand.binCollect(point);
 
         if (route.hasUnvisitedPoints()) {
-            replaceToFragment(RouteMapFragment.class);
+            replaceToFragment(RouteMapFragmentWebView.class);
         }
         else {
             mJsonCommand.allBinsDone();
@@ -1115,7 +1115,7 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteStart() {
-        replaceToFragment(RouteMapFragment.class);
+        replaceToFragment(RouteMapFragmentWebView.class);
 
         mUserLocation.stopLocationUpdates();
         mUserLocation.startLocationUpdates();

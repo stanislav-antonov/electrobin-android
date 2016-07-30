@@ -30,7 +30,7 @@ import company.electrobin.i10n.I10n;
 import company.electrobin.location.UserLocation;
 import company.electrobin.user.User;
 
-public class RouteMapFragment extends Fragment {
+public class RouteMapFragmentWebView extends Fragment {
 
     private User mUser;
     private I10n mI10n;
@@ -371,8 +371,8 @@ public class RouteMapFragment extends Fragment {
      *
      * @return
      */
-    public static RouteMapFragment newInstance() {
-        return new RouteMapFragment();
+    public static RouteMapFragmentWebView newInstance() {
+        return new RouteMapFragmentWebView();
     }
 
     /**
@@ -401,7 +401,7 @@ public class RouteMapFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_route_map, container, false);
+        View view = inflater.inflate(R.layout.fragment_route_map_webview, container, false);
 
         mRlRouteMap = (RelativeLayout) view.findViewById(R.id.route_map_layout);
         mRlRouteMap.setVisibility(View.VISIBLE);
@@ -423,7 +423,7 @@ public class RouteMapFragment extends Fragment {
         return view;
     }
 
-     /**
+    /**
      *
      * @param activity
      */
@@ -597,7 +597,7 @@ public class RouteMapFragment extends Fragment {
             String htmlText = new String(buffer);
 
             mWvMap.loadDataWithBaseURL(
-                    "http://ru.yandex.api.yandexmapswebviewexample.ymapapp",
+                    "file:///android_asset/",
                     htmlText,
                     "text/html",
                     "UTF-8",
