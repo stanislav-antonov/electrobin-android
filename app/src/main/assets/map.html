@@ -4,7 +4,7 @@
         <title>Route</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
-        <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkMJw2Og0duKgKkIQO1Cx0FOSdOAtJu2o&callback=initMap&v=3.exp"></script>
+        <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkMJw2Og0duKgKkIQO1Cx0FOSdOAtJu2o&callback=initMap&v=3.exp&libraries=geometry"></script>
         <script defer src="file:///android_asset/markerwithlabel.js"></script>
 
         <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
@@ -27,13 +27,11 @@
                 currentRouteData,
                 currentRoute;
 
-            var locationArrow,
-                prevLocation;
+            var positionMarker,
+                prevPosition;
 
             var arrows = [],
                 Arrow = null;
-
-            var dfd = $.Deferred();
 
             // 99 x 102
             var wayPointBubbles = {
@@ -187,44 +185,40 @@
             }
 
             function updateStartPoint() {
-                if (prevLocation && currentRouteData && currentRouteData.hasOwnProperty("start_point")) {
+                if (prevPosition && currentRouteData && currentRouteData.hasOwnProperty("start_point")) {
                     var startPoint = currentRouteData["start_point"];
-                    startPoint.latitude  = prevLocation[0];
-                    startPoint.longitude = prevLocation[1];
+                    startPoint.latitude  = prevPosition[0];
+                    startPoint.longitude = prevPosition[1];
                 }
             }
 
+            function distance(p1, p2) {
+                return google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+            }
+
             function routeToPoints(route) {
-                var points = [];
-                var prevSegment, currSegment;
+                var result = [],
+                    points = [];
 
-                var paths = route.getPaths();
-                for (var jj = 0; jj < paths.getLength(); jj++) {
-                    var path = paths.get(jj);
-                    var segments = path.getSegments();
-                    for (var i = 0; i < segments.length; i++) {
-                        var segment = segments[i].getCoordinates();
-                        for (var j = 0; j < segment.length; j++) {
-                            currSegment = segment[j];
-                            if (prevSegment && prevSegment[0].toPrecision(10) === currSegment[0].toPrecision(10) && prevSegment[1].toPrecision(10) === currSegment[1].toPrecision(10)) {
-                                continue;
-                            }
-
-                            points.push(currSegment);
-                            prevSegment = currSegment;
+                var legs = route.legs;
+                for (var i = 0; i < legs.length; i++) {
+                    var steps = legs[i].steps;
+                    for (var j = 0; j < steps.length; j++) {
+                        var segments = steps[j].path;
+                        for (var k = 0; k < segments.length; k++) {
+                            points.push(segments[k]);
                         }
                     }
                 }
 
-                var result = [];
                 for (var i = 0, l = points.length - 1; l; --l, ++i) {
                     var from = points[i],
                         to = points[i + 1],
-                        diff = [to[0] - from[0], to[1] - from[1]];
+                        diff = [ to.lat() - from.lat(), to.lng() - from.lng() ];
 
-                    for (var j = 0, k = Math.round(coordSystem.distance(from, to)); j < k; j += routePointStep) {
+                    for (var j = 0, k = Math.round(distance(from, to)); j < k; j += routePointStep) {
                         var ratio = j / k;
-                        result.push([from[0] + (diff[0] * ratio), from[1] + (diff[1] * ratio)]);
+                        result.push([ from.lat() + (diff[0] * ratio), from.lng() + (diff[1] * ratio) ]);
                     }
                 }
 
@@ -256,7 +250,8 @@
 
                 if (minDistance < snapDistanceThreshold) {
                     return rpFound ? [rpFound[0], rpFound[1]] : null;
-                } else {
+                }
+                else {
                     if (routeDeviationCount > routeDeviationThreshold) {
                         routeDeviationCount = 0;
                         Android.onRouteDeviation();
@@ -279,46 +274,36 @@
             }
 
             function updatePosition(lat, long, bearing) {
-                var pointSnapped = snapToRoute([lat, long]);
-                if (!pointSnapped) return;
+                var position = snapToRoute([lat, long]);
+                if (!position) return;
 
-                var b = 0;
-                if (prevLocation) {
-                    b = calcBearing(prevLocation[0], prevLocation[1], pointSnapped[0], pointSnapped[1]);
+                var bearing = 0;
+                if (prevPosition) {
+                    bearing = calcBearing(prevPosition[0], prevPosition[1], position[0], position[1]);
                 }
 
-                prevLocation = pointSnapped;
+                prevPosition = position;
 
-                myMap.panTo([pointSnapped]).then(
-                    function () {
-                        if (!locationArrow) {
-                            locationArrow = new ymaps.Placemark(
-                                pointSnapped, {}, {
-                                    iconLayout: 'default#image',
-                                    iconShadow: false,
-                                    iconImageHref: 'data:image/png;base64,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',
-                                    iconImageSize: [32, 32],
-                                    iconImageOffset: [-16, -16],
-                                    iconOffset: [0, 0],
-                                }
-                            );
+                position = new google.maps.LatLng(position[0], position[1]);
+                myMap.panTo(position);
 
-                            myMap.geoObjects.add(locationArrow);
-                        }
-                        else {
-                            locationArrow.geometry.setCoordinates(pointSnapped);
-                        }
+                if (!positionMarker) {
+                    positionMarker = new google.maps.Marker({
+                        map: myMap,
+                    });
+                }
 
-                        locationArrow.getOverlay().then(function (value) {
-                            var $ico = $(value.getIconElement());
-                            $ico.css('transform', 'rotate(' + b + 'deg)');
-                        }, function (err) {
-                            console.log('Ошибка: ' + err);
-                        });
-                    },
-                    function (err) {},
-                    this
-                );
+                positionMarker.setPosition(position);
+                positionMarker.setIcon({
+                    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                    // url: 'file:///android_asset/location_arrow.png',
+                    strokeColor: 'yellow',
+                    strokeWeight: 3,
+                    scale: 6,
+                    anchor: new google.maps.Point(0, 2),
+                    // size: new google.maps.Size(20, 50),
+                    rotation: bearing
+                });
             }
 
             function displayRoute(routeJSON, avoidTJ) {
@@ -349,9 +334,9 @@
                 return wayPointBubbles[key];
             }
 
-            function makeMarker(location, fullness, icon) {
+            function makeMarker(position, fullness) {
                 return new MarkerWithLabel({
-                    position: location,
+                    position: position,
                     map: myMap,
                     draggable: false,
 
@@ -360,7 +345,7 @@
                     labelClass: "marker",
                     labelInBackground: false,
 
-                    icon: icon,
+                    icon: getWayPointBubble(fullness),
                 });
             }
 
@@ -409,12 +394,11 @@
                         for (var i = 0; i < legs.length - 1; i++) {
                             var leg = legs[i];
                             var endLocation = leg['end_location'];
-                            console.log(endLocation.toString());
 
                             var wayPoint = wayPoints[ wayPointOrder[i] ];
                             var fullness = wayPoint['fullness'];
 
-                            var marker = makeMarker(endLocation, fullness, getWayPointBubble(fullness));
+                            var marker = makeMarker(endLocation, fullness);
                             marker.setValues({ unique_id: wayPoint['unique_id'] });
 
                             google.maps.event.addListener(marker, 'click', function() {
@@ -422,7 +406,7 @@
                             });
                         }
 
-                        // routePoints = routeToPoints(route);
+                        routePoints = routeToPoints(route);
                         currentRoute = route;
 
                         Android.onRouteBuildingReady();
@@ -431,61 +415,6 @@
                         console.log("directions response " + status);
                     }
                 });
-
-/*
-                ymaps.route(wayPointsData, {avoidTrafficJams: avoidTrafficJams, mapStateAutoApply: true}).then(
-                    function(route) {
-                        route.getPaths().options.set({
-                            // strokeColor: '0000ffff',
-                            // opacity: 0.9,
-                            strokeWidth: 5
-                        });
-
-                        var points = route.getWayPoints();
-
-                        var startPoint = null;
-                        if (hasStartPoint) {
-                            startPoint = points.get(0);
-                            points.remove(startPoint);
-                        }
-
-                        points.each(function (point, i) {
-                            var uniqueId = wayPoints[i].unique_id;
-                            point.properties.set("unique_id", uniqueId);
-
-                            var fullness = wayPoints[i].fullness;
-                            point.properties.set("iconContent", fullness);
-
-                            // https://tech.yandex.ru/maps/doc/jsapi/2.1/ref/reference/GeoObject-docpage/
-                            point.options.set("iconLayout", "default#imageWithContent");
-                            point.options.set("iconImageHref", getWayPointBubble(fullness));
-                            point.options.set("iconImageSize", [40, 41]);
-                            point.options.set("iconImageOffset", [0, 0]);
-                            point.options.set("iconOffset", [-20, -40]);
-                            point.options.set("iconContentOffset", [12, 11]);
-                            point.options.set("iconContentLayout", "placemark#center");
-                            point.options.set({
-                                hasBalloon: false
-                            });
-
-                            point.events.add("click", function () {
-                                Android.onRoutePointClick(point.properties.get("unique_id"));
-                            });
-                        });
-
-                        myMap.geoObjects.add(route);
-                        routePoints = routeToPoints(route);
-                        currentRoute = route;
-                        // dfd.resolve();
-
-                        Android.onRouteBuildingReady();
-                    },
-                    function (error) {
-                        //
-                        console.log(error);
-                    }
-                );
-*/
             }
         </script>
 
