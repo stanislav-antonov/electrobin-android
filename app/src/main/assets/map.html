@@ -34,6 +34,7 @@
                 Arrow = null;
 
             var trafficLayer;
+            var trafficControlUI;
 
             // 99 x 102
             var wayPointBubbles = {
@@ -132,7 +133,7 @@
             }
 
             function setCustomControls() {
-                var trafficControlUI = document.createElement('div');
+                trafficControlUI = document.createElement('div');
                 $(trafficControlUI).addClass('traffic-control');
                 $(trafficControlUI).text('traffic');
 
@@ -192,8 +193,7 @@
                 // });
 
                 Android.onMapReady();
-            };
-
+            }
 
             function onTrafficControlShow() {
                 avoidTrafficJams = true;
@@ -351,8 +351,14 @@
                 currentRouteData = $.parseJSON(routeJSON);
                 avoidTrafficJams = avoidTJ;
 
-                if (trafficControl) {
-                    // trafficControl.state.set('trafficShown', avoidTrafficJams);
+                if (trafficControlUI && trafficLayer) {
+                    trafficLayer.setMap(null);
+                    $(trafficControlUI).removeClass('traffic-control-active');
+
+                    if (avoidTrafficJams) {
+                        trafficLayer.setMap(myMap);
+                        $(trafficControlUI).addClass('traffic-control-active');
+                    }
                 }
 
                 _displayRoute();
@@ -407,11 +413,6 @@
                         stopover: true,
                         location: new google.maps.LatLng(wayPoint.latitude, wayPoint.longitude)
                     });
-                }
-
-                if (currentRoute) {
-                    // remove route
-                    directionsDisplay.setDirections(null);
                 }
 
                 var request = {

@@ -427,18 +427,12 @@
                     });
                 }
 
-                if (currentRoute) {
-                    // myMap.geoObjects.remove(currentRoute);
-                    directionsDisplay.setDirections(null);
-                }
-
                 var request = {
                     origin: new google.maps.LatLng(startPoint.latitude, startPoint.longitude),
                     destination: new google.maps.LatLng(lastPoint.latitude, lastPoint.longitude),
                     waypoints: wayPointsData,
                     optimizeWaypoints: true,
                     travelMode: google.maps.DirectionsTravelMode.DRIVING,
-                    durationInTraffic: false,
                 };
 
                 // Android.onRouteBuildingStart();
