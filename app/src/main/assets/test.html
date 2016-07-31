@@ -38,6 +38,8 @@
 
             var dfd = $.Deferred();
 
+            var trafficLayer;
+
             // 99 x 102
             var wayPointBubbles = {
                 green: 'data:image/png;base64,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',
@@ -131,18 +133,51 @@
                 return p[0] > a[0] && p[0] < b[0] && p[1] > a[1] && p[1] < b[1];
             }
 
+            function setCustomControls() {
+                var trafficControlUI = document.createElement('div');
+                $(trafficControlUI).addClass('traffic-control');
+                $(trafficControlUI).text('traffic');
+
+                google.maps.event.addDomListener(trafficControlUI, 'click', function() {
+                    if (typeof trafficLayer.getMap() == 'undefined' || trafficLayer.getMap() === null) {
+                        $(trafficControlUI).addClass('traffic-control-active');
+                        onTrafficControlShow();
+                    } else {
+                        onTrafficControlHide();
+                        $(trafficControlUI).removeClass('traffic-control-active');
+                    }
+                });
+
+                myMap.controls[google.maps.ControlPosition.TOP_LEFT].push(trafficControlUI);
+            }
+
             function initMap() {
                 var mapDiv = document.getElementById('map');
                 myMap = new google.maps.Map(mapDiv, {
                     center: {lat: 55.53638053374438, lng: 37.529385721565184},
-                    zoom: 8
+                    zoom: 8,
+
+                    mapTypeControl: false,
+
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        position: google.maps.ControlPosition.LEFT_CENTER,
+                    },
+
+                    scaleControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false
                 });
+
+                setCustomControls();
 
                 directionsService = new google.maps.DirectionsService();
                 directionsDisplay = new google.maps.DirectionsRenderer();
 
                 directionsDisplay.setMap(myMap);
                 directionsDisplay.setOptions( { suppressMarkers: true } );
+
+                trafficLayer = new google.maps.TrafficLayer();
 
                 // coordSystem = myMap.options.get('projection').getCoordSystem();
 
@@ -176,17 +211,22 @@
                 _displayRoute();
             };
 
-
             function onTrafficControlShow() {
                 avoidTrafficJams = true;
-                Android.onAvoidTrafficJamsEnabled();
+                // Android.onAvoidTrafficJamsEnabled();
+
+                trafficLayer.setMap(myMap);
+
                 updateStartPoint();
                 _displayRoute();
             }
 
             function onTrafficControlHide() {
                 avoidTrafficJams = false;
-                Android.onAvoidTrafficJamsDisabled();
+                // Android.onAvoidTrafficJamsDisabled();
+
+                trafficLayer.setMap(null);
+
                 updateStartPoint();
                 _displayRoute();
             }
@@ -315,6 +355,8 @@
                     strokeColor: 'yellow',
                     strokeWeight: 3,
                     scale: 6,
+                    fillColor: 'yellow',
+                    fillOpacity: 0.7,
                     anchor: new google.maps.Point(0, 2),
                     // size: new google.maps.Size(20, 50),
                     rotation: bearing
@@ -364,6 +406,8 @@
                 });
             }
 
+            var interval;
+
             function _displayRoute() {
                 if (!currentRouteData) {
                     console.log('no route data!');
@@ -393,7 +437,8 @@
                     destination: new google.maps.LatLng(lastPoint.latitude, lastPoint.longitude),
                     waypoints: wayPointsData,
                     optimizeWaypoints: true,
-                    travelMode: google.maps.DirectionsTravelMode.DRIVING
+                    travelMode: google.maps.DirectionsTravelMode.DRIVING,
+                    durationInTraffic: false,
                 };
 
                 // Android.onRouteBuildingStart();
@@ -426,7 +471,7 @@
                         currentRoute = route;
 
                         var i = 0;
-                        var interval;
+                        clearInterval(interval);
                         interval = setInterval(function() {
                             var nextPoint = routePoints[i++];
                             if (!nextPoint) {
@@ -461,6 +506,31 @@
         font-size: 14px;
         text-align: center;
         width: 23px;
+    }
+
+    .traffic-control {
+        cursor: pointer;
+        background-color: #FEFEFE;
+        border: 1px solid #A9BBDF;
+        border-radius: 2px;
+        margin: 12px;
+        padding: 0 5px;
+        line-height: 160%;
+        font-size: 12px;
+        font-family: Arial,sans-serif;
+        box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.35);
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+    }
+
+    .traffic-control-active {
+        background-color: #6D8ACC;
+        color: #fff;
+        font-weight: bold;
+        border: 1px solid #678AC7;
     }
 </style>
 </head>

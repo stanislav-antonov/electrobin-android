@@ -129,20 +129,49 @@
                 return p[0] > a[0] && p[0] < b[0] && p[1] > a[1] && p[1] < b[1];
             }
 
+            function setCustomControls() {
+                var trafficControlUI = document.createElement('div');
+                $(trafficControlUI).addClass('traffic-control');
+                $(trafficControlUI).text('traffic');
+
+                google.maps.event.addDomListener(trafficControlUI, 'click', function() {
+                    if (typeof trafficLayer.getMap() == 'undefined' || trafficLayer.getMap() === null) {
+                        $(trafficControlUI).addClass('traffic-control-active');
+                        onTrafficControlShow();
+                    } else {
+                        onTrafficControlHide();
+                        $(trafficControlUI).removeClass('traffic-control-active');
+                    }
+                });
+
+                myMap.controls[google.maps.ControlPosition.TOP_LEFT].push(trafficControlUI);
+            }
+
             function initMap() {
                 var mapDiv = document.getElementById('map');
                 myMap = new google.maps.Map(mapDiv, {
                     center: {lat: 55.53638053374438, lng: 37.529385721565184},
-                    zoom: 8
+                    zoom: 8,
+
+                    mapTypeControl: false,
+
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        position: google.maps.ControlPosition.LEFT_CENTER
+                    },
+
+                    scaleControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false
                 });
+
+                setCustomControls();
 
                 directionsService = new google.maps.DirectionsService();
                 directionsDisplay = new google.maps.DirectionsRenderer();
 
                 directionsDisplay.setMap(myMap);
                 directionsDisplay.setOptions( { suppressMarkers: true } );
-
-                // coordSystem = myMap.options.get('projection').getCoordSystem();
 
                 // trafficControl = new ymaps.control.TrafficControl({ trafficShown: false, options: { size: "small" } });
                 // myMap.controls.add(trafficControl, { position: { left: "10px", top: "50px" } });
@@ -165,6 +194,9 @@
             function onTrafficControlShow() {
                 avoidTrafficJams = true;
                 Android.onAvoidTrafficJamsEnabled();
+
+                trafficLayer.setMap(myMap);
+
                 updateStartPoint();
                 _displayRoute();
             }
@@ -172,6 +204,9 @@
             function onTrafficControlHide() {
                 avoidTrafficJams = false;
                 Android.onAvoidTrafficJamsDisabled();
+
+                trafficLayer.setMap(null);
+
                 updateStartPoint();
                 _displayRoute();
             }
@@ -300,6 +335,8 @@
                     strokeColor: 'yellow',
                     strokeWeight: 3,
                     scale: 6,
+                    fillColor: 'yellow',
+                    fillOpacity: 0.7,
                     anchor: new google.maps.Point(0, 2),
                     // size: new google.maps.Size(20, 50),
                     rotation: bearing
@@ -432,6 +469,31 @@
                 font-size: 14px;
                 text-align: center;
                 width: 23px;
+            }
+
+            .traffic-control {
+                cursor: pointer;
+                background-color: #FEFEFE;
+                border: 1px solid #A9BBDF;
+                border-radius: 2px;
+                margin: 12px;
+                padding: 0 5px;
+                line-height: 160%;
+                font-size: 12px;
+                font-family: Arial,sans-serif;
+                box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.35);
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -o-user-select: none;
+                user-select: none;
+            }
+
+            .traffic-control-active {
+                background-color: #6D8ACC;
+                color: #fff;
+                font-weight: bold;
+                border: 1px solid #678AC7;
             }
         </style>
     </head>
