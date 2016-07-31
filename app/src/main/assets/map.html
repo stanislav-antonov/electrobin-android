@@ -174,7 +174,26 @@
                 directionsDisplay = new google.maps.DirectionsRenderer();
 
                 directionsDisplay.setMap(myMap);
-                directionsDisplay.setOptions( { suppressMarkers: true } );
+                directionsDisplay.setOptions({
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeWeight: 6,
+                        strokeOpacity: 0.6,
+                        strokeColor: '#009DE0',
+                        icons: [{
+                            repeat: '60px',
+                            icon: {
+                                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                                strokeWeight: 1,
+                                strokeOpacity: 1,
+                                strokeColor: '#000000',
+                                fillColor: '#FFFFFF',
+                                fillOpacity: 1,
+                                scale: 3,
+                            }
+                        }]
+                    },
+                });
 
                 trafficLayer = new google.maps.TrafficLayer();
 
