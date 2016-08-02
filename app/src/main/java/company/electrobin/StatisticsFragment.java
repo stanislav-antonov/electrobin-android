@@ -10,6 +10,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+
 import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
 
@@ -31,6 +36,60 @@ public class StatisticsFragment extends Fragment {
         public RouteActivity.Route onGetRoute();
     }
 
+    private final Category[] mCategory = {
+        new Category(0, 50, R.drawable.background_statistics_percent_1),
+        new Category(50, 75, R.drawable.background_statistics_percent_2),
+        new Category(75, 90, R.drawable.background_statistics_percent_3),
+        new Category(90, 100, R.drawable.background_statistics_percent_4)
+    };
+
+    private class Category {
+
+        private int mFrom;
+        private int mTo;
+        private int mBg;
+
+        int mCount;
+
+        Category(int from, int to, int bg) {
+            mFrom = from;
+            mTo = to;
+            mBg = bg;
+        }
+
+        public int from() {
+            return mFrom;
+        }
+
+        public int to() {
+            return mTo;
+        }
+
+        public int bg() {
+            return mBg;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s - %s", mFrom, mTo);
+        }
+
+        @Override
+        public int hashCode() {
+            return Integer.parseInt( String.valueOf(mFrom) + String.valueOf(mTo) );
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || !(o instanceof Category)) {
+                return false;
+            }
+
+            Category category = (Category)o;
+            return (this.mFrom == category.mFrom && this.mTo == category.mTo);
+        }
+    }
+
     public static StatisticsFragment newInstance() {
         return new StatisticsFragment();
     }
@@ -42,6 +101,9 @@ public class StatisticsFragment extends Fragment {
         mApp = (ElectrobinApplication)getActivity().getApplicationContext();
         mUser = mApp.getUser();
         mI10n = mApp.getI10n();
+
+
+
     }
 
     @Override
@@ -78,8 +140,45 @@ public class StatisticsFragment extends Fragment {
         ((TextView) mLlCommon.findViewById(R.id.volume_text)).setText(mI10n.l("volume"));
 
         final RouteActivity.Route route = mListener.onGetRoute();
-        if (route != null)
+        if (route != null) {
             ((TextView) mLlCommon.findViewById(R.id.run_value)).setText(String.format(mI10n.l("run_value"), route.getRunFormatted()));
+
+            List<RouteActivity.Route.Point> list = route.getWayPointList();
+
+            for (RouteActivity.Route.Point point : list) {
+                if (!point.mIsVisited) continue;
+                int fullness = point.mFullness;
+
+                if (fullness >= mCategory[0].from() && fullness <= mCategory[0].to()) {
+                    mCategory[0].mCount++;
+                }
+                else if (fullness > mCategory[1].from() && fullness <= mCategory[1].to()) {
+                    mCategory[1].mCount++;
+                }
+                else if (fullness > mCategory[2].from() && fullness <= mCategory[2].to()) {
+                    mCategory[2].mCount++;
+                }
+                else if (fullness > mCategory[3].from() && fullness <= mCategory[3].to()) {
+                    mCategory[3].mCount++;
+                }
+            }
+        }
+
+        (mLlCommon.findViewById(R.id.category_1_legend)).setBackgroundDrawable(getResources().getDrawable(mCategory[0].bg()));
+        ((TextView)mLlCommon.findViewById(R.id.category_1_name)).setText(mCategory[0].toString());
+        ((TextView)mLlCommon.findViewById(R.id.category_1_count)).setText(String.valueOf(mCategory[0].mCount));
+
+        (mLlCommon.findViewById(R.id.category_2_legend)).setBackgroundDrawable(getResources().getDrawable(mCategory[1].bg()));
+        ((TextView)mLlCommon.findViewById(R.id.category_2_name)).setText(mCategory[1].toString());
+        ((TextView)mLlCommon.findViewById(R.id.category_2_count)).setText(String.valueOf(mCategory[1].mCount));
+
+        (mLlCommon.findViewById(R.id.category_3_legend)).setBackgroundDrawable(getResources().getDrawable(mCategory[2].bg()));
+        ((TextView)mLlCommon.findViewById(R.id.category_3_name)).setText(mCategory[2].toString());
+        ((TextView)mLlCommon.findViewById(R.id.category_3_count)).setText(String.valueOf(mCategory[2].mCount));
+
+        (mLlCommon.findViewById(R.id.category_4_legend)).setBackgroundDrawable(getResources().getDrawable(mCategory[3].bg()));
+        ((TextView)mLlCommon.findViewById(R.id.category_4_name)).setText(mCategory[3].toString());
+        ((TextView)mLlCommon.findViewById(R.id.category_4_count)).setText(String.valueOf(mCategory[3].mCount));
 
         btnNewRoute = (Button) mLlCommon.findViewById(R.id.new_route_button);
         btnNewRoute.setText(mI10n.l("get_route"));

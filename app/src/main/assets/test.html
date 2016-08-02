@@ -447,6 +447,7 @@
                 var request = {
                     origin: new google.maps.LatLng(startPoint.latitude, startPoint.longitude),
                     destination: new google.maps.LatLng(lastPoint.latitude, lastPoint.longitude),
+                    // destination: new google.maps.LatLng(startPoint.latitude, startPoint.longitude),
                     waypoints: wayPointsData,
                     optimizeWaypoints: true,
                     travelMode: google.maps.DirectionsTravelMode.DRIVING,

@@ -66,20 +66,20 @@
                         android:paddingLeft="20dp"
                         >
                         <TextView
+                            android:id="@+id/category_1_legend"
                             android:layout_height="45dp"
                             android:layout_width="45dp"
                             android:text="%"
                             android:gravity="center"
                             android:textSize="24sp"
                             android:textColor="#ffffff"
-                            android:background="@drawable/background_statistics_percent_1"
                             android:fontFamily="sans-serif-light"
                             />
                         <TextView
+                            android:id="@+id/category_1_name"
                             android:layout_marginLeft="10dp"
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="0 - 50"
                             android:paddingTop="10dp"
                             android:paddingBottom="10dp"
                             android:textSize="24sp"
@@ -89,7 +89,7 @@
                             />
                     </LinearLayout>
                     <TextView
-                        android:text="0"
+                        android:id="@+id/category_1_count"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -98,7 +98,7 @@
                         android:fontFamily="sans-serif-light"
                         />
                     <TextView
-                        android:text="0"
+                        android:id="@+id/category_1_volume"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -120,20 +120,20 @@
                         android:paddingLeft="20dp"
                         >
                         <TextView
+                            android:id="@+id/category_2_legend"
                             android:layout_height="45dp"
                             android:layout_width="45dp"
                             android:text="%"
                             android:gravity="center"
                             android:textSize="24sp"
                             android:textColor="#ffffff"
-                            android:background="@drawable/background_statistics_percent_2"
                             android:fontFamily="sans-serif-light"
                             />
                         <TextView
+                            android:id="@+id/category_2_name"
                             android:layout_marginLeft="10dp"
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="50 - 75"
                             android:paddingTop="10dp"
                             android:paddingBottom="10dp"
                             android:textSize="24sp"
@@ -143,7 +143,7 @@
                             />
                     </LinearLayout>
                     <TextView
-                        android:text="4"
+                        android:id="@+id/category_2_count"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -152,7 +152,7 @@
                         android:background="@android:color/transparent"
                         />
                     <TextView
-                        android:text="4"
+                        android:id="@+id/category_2_volume"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -174,20 +174,20 @@
                         android:paddingLeft="20dp"
                         >
                         <TextView
+                            android:id="@+id/category_3_legend"
                             android:layout_height="45dp"
                             android:layout_width="45dp"
                             android:text="%"
                             android:gravity="center"
                             android:textSize="24sp"
                             android:textColor="#ffffff"
-                            android:background="@drawable/background_statistics_percent_3"
                             android:fontFamily="sans-serif-light"
                             />
                         <TextView
+                            android:id="@+id/category_3_name"
                             android:layout_marginLeft="10dp"
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="75 - 90"
                             android:paddingTop="10dp"
                             android:paddingBottom="10dp"
                             android:textSize="24sp"
@@ -197,7 +197,7 @@
                             />
                     </LinearLayout>
                     <TextView
-                        android:text="8"
+                        android:id="@+id/category_3_count"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -206,7 +206,7 @@
                         android:background="@android:color/transparent"
                         />
                     <TextView
-                        android:text="8"
+                        android:id="@+id/category_3_volume"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -228,20 +228,20 @@
                         android:paddingLeft="20dp"
                         >
                         <TextView
+                            android:id="@+id/category_4_legend"
                             android:layout_height="45dp"
                             android:layout_width="45dp"
                             android:text="%"
                             android:gravity="center"
                             android:textSize="24sp"
                             android:textColor="#ffffff"
-                            android:background="@drawable/background_statistics_percent_4"
                             android:fontFamily="sans-serif-light"
                             />
                         <TextView
+                            android:id="@+id/category_4_name"
                             android:layout_marginLeft="10dp"
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:text="90 - 100"
                             android:paddingTop="10dp"
                             android:paddingBottom="10dp"
                             android:textSize="24sp"
@@ -251,7 +251,7 @@
                             />
                     </LinearLayout>
                     <TextView
-                        android:text="12"
+                        android:id="@+id/category_4_count"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
@@ -260,7 +260,7 @@
                         android:background="@android:color/transparent"
                         />
                     <TextView
-                        android:text="12"
+                        android:id="@+id/category_4_volume"
                         android:padding="10dp"
                         android:gravity="center_horizontal"
                         android:textSize="24sp"
