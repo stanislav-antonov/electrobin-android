@@ -116,6 +116,7 @@ public class RouteActivity extends AppCompatActivity implements
         private final static String JSON_ROUTE_POINT_LONGITUDE_KEY = "longitude";
         private final static String JSON_ROUTE_POINT_LATITUDE_KEY = "latitude";
         private final static String JSON_ROUTE_POINT_FULLNESS_KEY = "fullness";
+        private final static String JSON_ROUTE_POINT_VOLUME_KEY = "volume";
 
         public static class Point implements Parcelable {
             public int mId;
@@ -127,6 +128,7 @@ public class RouteActivity extends AppCompatActivity implements
 
             // TODO: Bin related fields - need refactoring
             public int mFullness;
+            public int mVolume;
             public boolean mIsUnloadedOk;
             public String mComment;
 
@@ -143,6 +145,7 @@ public class RouteActivity extends AppCompatActivity implements
                 mLng = in.readDouble();
 
                 mFullness = in.readInt();
+                mVolume = in.readInt();
                 mIsUnloadedOk = in.readByte() != 0;
                 mComment = in.readString();
 
@@ -162,6 +165,7 @@ public class RouteActivity extends AppCompatActivity implements
                 out.writeDouble(mLng);
 
                 out.writeInt(mFullness);
+                out.writeInt(mVolume);
                 out.writeByte((byte) (mIsUnloadedOk ? 1 : 0));
                 out.writeString(mComment);
 
@@ -227,6 +231,7 @@ public class RouteActivity extends AppCompatActivity implements
                         point.mLng = joPoint.getDouble(JSON_ROUTE_POINT_LONGITUDE_KEY);
                         point.mLat = joPoint.getDouble(JSON_ROUTE_POINT_LATITUDE_KEY);
                         point.mFullness = joPoint.getInt(JSON_ROUTE_POINT_FULLNESS_KEY);
+                        point.mVolume = joPoint.getInt(JSON_ROUTE_POINT_VOLUME_KEY);
 
                         point.mUniqueId = i + 1;
 
@@ -327,6 +332,7 @@ public class RouteActivity extends AppCompatActivity implements
                     joWayPoint.put("latitude", wayPoint.mLat);
                     joWayPoint.put("longitude", wayPoint.mLng);
                     joWayPoint.put("fullness", wayPoint.mFullness);
+                    joWayPoint.put("volume", wayPoint.mVolume);
 
                     jaWayPoints.put(joWayPoint);
                 }
@@ -1081,6 +1087,15 @@ public class RouteActivity extends AppCompatActivity implements
         mUserLocation.startLocationUpdates();
 
         mJsonCommand.binCollect(point);
+
+        List<Fragment> fragmentList = mFragmentManager.getFragments();
+        if (fragmentList != null) {
+            for (Fragment fragment : fragmentList) {
+                if (fragment != null && fragment.isHidden() && fragment.getTag().equals(RouteMapFragmentWebView.FRAGMENT_TAG)) {
+                    fragment.onDestroy();
+                }
+            }
+        }
 
         if (route.hasUnvisitedPoints()) {
             replaceToFragment(RouteMapFragmentWebView.class);

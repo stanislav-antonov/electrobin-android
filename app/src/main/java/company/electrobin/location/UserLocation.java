@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -230,27 +231,31 @@ public class UserLocation {
             return;
         }
 
-        try {
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                    NETWORK_LOCATION_UPDATES_MIN_TIME_INTERVAL, NETWORK_LOCATION_UPDATES_MIN_DISTANCE, mLocationListener);
-        } catch(IllegalArgumentException e) {
-            Log.e(LOG_TAG, "Network provider error: " + e.getMessage());
-        }
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                            NETWORK_LOCATION_UPDATES_MIN_TIME_INTERVAL, NETWORK_LOCATION_UPDATES_MIN_DISTANCE, mLocationListener, Looper.getMainLooper());
+                } catch(IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "Network provider error: " + e.getMessage());
+                }
 
-        try {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    GPS_LOCATION_UPDATES_MIN_TIME_INTERVAL, GPS_LOCATION_UPDATES_MIN_DISTANCE, mLocationListener);
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    GPS_STATUS_CHECKER_UPDATES_MIN_TIME_INTERVAL, GPS_STATUS_CHECKER_UPDATES_MIN_DISTANCE, mGpsStatusChecker);
+                try {
+                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                            GPS_LOCATION_UPDATES_MIN_TIME_INTERVAL, GPS_LOCATION_UPDATES_MIN_DISTANCE, mLocationListener, Looper.getMainLooper());
+                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                            GPS_STATUS_CHECKER_UPDATES_MIN_TIME_INTERVAL, GPS_STATUS_CHECKER_UPDATES_MIN_DISTANCE, mGpsStatusChecker, Looper.getMainLooper());
 
-            // Explicitly push
-            mGpsStatusChecker.restartTimer();
-        }
-        catch (IllegalArgumentException e) {
-            Log.e(LOG_TAG, "GPS provider error: " + e.getMessage());
-        }
+                    // Explicitly push
+                    mGpsStatusChecker.restartTimer();
+                }
+                catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "GPS provider error: " + e.getMessage());
+                }
 
-        mIsRunning = true;
+                mIsRunning = true;
+            }
+        }).start();
     }
 
     public synchronized void stopLocationUpdates() {

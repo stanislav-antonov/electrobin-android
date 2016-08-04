@@ -30,13 +30,9 @@
             var positionMarker,
                 prevPosition;
 
-            var arrows = [],
-                Arrow = null;
-
             var trafficLayer;
             var trafficControlUI;
 
-            // 99 x 102
             var wayPointBubbles = {
                 green: 'file:///android_asset/bin_bubble_4_resized.png',
                 orange: 'file:///android_asset/bin_bubble_1_resized.png',
@@ -62,68 +58,6 @@
                 }
 
                 return rotatedCoordinates;
-            }
-
-            function drawArrows(bounds) {
-                for (var ii = 0; ii < arrows.length; ii++)
-                    myMap.geoObjects.remove(arrows[ii]);
-
-                arrows = [];
-
-                var zoom = myMap.getZoom();
-                var invZoom = (18 - zoom);
-                if (invZoom < 1) invZoom = 1;
-
-                var arrowLen, arrowInterval;
-                if (invZoom >= 1 && invZoom <= 3.5) {
-                    arrowLen = 30;
-                    arrowInterval = 100;
-                }
-                else {
-                    arrowLen = Math.floor( 0.3 * Math.pow(invZoom, 4.3) );
-                    arrowInterval = Math.floor( 0.2 * Math.pow(invZoom, 4.5) );
-                }
-
-                var step = Math.floor(Math.pow(invZoom, 3));
-                if (step <= 100) step = 1;
-
-                console.log('Arrows len: ' + arrowLen);
-                console.log('Arrows interval: ' + arrowInterval);
-                console.log('Inv zoom: ' + invZoom);
-                console.log('Step: ' + step);
-
-                outer: for (var i = 0; i < routePoints.length; i += arrowLen + arrowInterval) {
-                    var pts = [];
-                    for (var j = i; j < i + arrowLen; j = j + step) {
-                        var pt = routePoints[j];
-                        if (!pt) continue;
-                        if (!fitsToBounds(pt, bounds))
-                            continue outer;
-                        pts.push(pt);
-                    }
-
-                    var arrow1 = new Arrow(pts, null, {
-                        geodesic: true,
-                        strokeWidth: 5,
-                        strokeColor: '#000000',
-                        opacity: 1,
-                        strokeStyle: 'solid',
-                    });
-
-                    myMap.geoObjects.add(arrow1);
-                    arrows.push(arrow1);
-
-                    var arrow2 = new Arrow(pts, null, {
-                        geodesic: true,
-                        strokeWidth: 3,
-                        strokeColor: '#FFFFFF',
-                        opacity: 1,
-                        strokeStyle: 'solid',
-                    });
-
-                    myMap.geoObjects.add(arrow2);
-                    arrows.push(arrow2);
-                }
             }
 
             function fitsToBounds(p, bounds) {
@@ -476,9 +410,6 @@
                 });
             }
         </script>
-
-
-
         <style>
             html, body, #map {
                 width: 100%;

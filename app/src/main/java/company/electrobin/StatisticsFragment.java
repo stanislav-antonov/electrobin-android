@@ -50,6 +50,7 @@ public class StatisticsFragment extends Fragment {
         private int mBg;
 
         int mCount;
+        int mVolume;
 
         Category(int from, int to, int bg) {
             mFrom = from;
@@ -151,15 +152,19 @@ public class StatisticsFragment extends Fragment {
 
                 if (fullness >= mCategory[0].from() && fullness <= mCategory[0].to()) {
                     mCategory[0].mCount++;
+                    mCategory[0].mVolume += point.mVolume;
                 }
                 else if (fullness > mCategory[1].from() && fullness <= mCategory[1].to()) {
                     mCategory[1].mCount++;
+                    mCategory[1].mVolume += point.mVolume;
                 }
                 else if (fullness > mCategory[2].from() && fullness <= mCategory[2].to()) {
                     mCategory[2].mCount++;
+                    mCategory[2].mVolume += point.mVolume;
                 }
                 else if (fullness > mCategory[3].from() && fullness <= mCategory[3].to()) {
                     mCategory[3].mCount++;
+                    mCategory[3].mVolume += point.mVolume;
                 }
             }
         }
@@ -167,18 +172,22 @@ public class StatisticsFragment extends Fragment {
         (mLlCommon.findViewById(R.id.category_1_legend)).setBackgroundDrawable(getResources().getDrawable(mCategory[0].bg()));
         ((TextView)mLlCommon.findViewById(R.id.category_1_name)).setText(mCategory[0].toString());
         ((TextView)mLlCommon.findViewById(R.id.category_1_count)).setText(String.valueOf(mCategory[0].mCount));
+        ((TextView)mLlCommon.findViewById(R.id.category_1_volume)).setText(String.valueOf(mCategory[0].mVolume));
 
         (mLlCommon.findViewById(R.id.category_2_legend)).setBackgroundDrawable(getResources().getDrawable(mCategory[1].bg()));
         ((TextView)mLlCommon.findViewById(R.id.category_2_name)).setText(mCategory[1].toString());
         ((TextView)mLlCommon.findViewById(R.id.category_2_count)).setText(String.valueOf(mCategory[1].mCount));
+        ((TextView)mLlCommon.findViewById(R.id.category_2_volume)).setText(String.valueOf(mCategory[1].mVolume));
 
         (mLlCommon.findViewById(R.id.category_3_legend)).setBackgroundDrawable(getResources().getDrawable(mCategory[2].bg()));
         ((TextView)mLlCommon.findViewById(R.id.category_3_name)).setText(mCategory[2].toString());
         ((TextView)mLlCommon.findViewById(R.id.category_3_count)).setText(String.valueOf(mCategory[2].mCount));
+        ((TextView)mLlCommon.findViewById(R.id.category_3_volume)).setText(String.valueOf(mCategory[2].mVolume));
 
         (mLlCommon.findViewById(R.id.category_4_legend)).setBackgroundDrawable(getResources().getDrawable(mCategory[3].bg()));
         ((TextView)mLlCommon.findViewById(R.id.category_4_name)).setText(mCategory[3].toString());
         ((TextView)mLlCommon.findViewById(R.id.category_4_count)).setText(String.valueOf(mCategory[3].mCount));
+        ((TextView)mLlCommon.findViewById(R.id.category_4_volume)).setText(String.valueOf(mCategory[3].mVolume));
 
         btnNewRoute = (Button) mLlCommon.findViewById(R.id.new_route_button);
         btnNewRoute.setText(mI10n.l("get_route"));

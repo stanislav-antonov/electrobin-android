@@ -250,7 +250,7 @@ public class RouteMapFragmentWebView extends Fragment {
         @Override
         public void run() {
             // Break the map loading
-            mWvMap.stopLoading();
+            if (mWvMap != null) mWvMap.stopLoading();
             mMapState = MAP_STATE_INITIAL;
 
             mRlLoading.setVisibility(View.GONE);
@@ -279,6 +279,7 @@ public class RouteMapFragmentWebView extends Fragment {
             mRlLoading.setVisibility(View.VISIBLE);
 
             try {
+                prepareMapWebView();
                 loadMap();
             } catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
@@ -352,7 +353,7 @@ public class RouteMapFragmentWebView extends Fragment {
          *
          */
         private void displayRoute() {
-            if (!mHasMapReady) return;
+            if (!mHasMapReady || mWvMap == null) return;
             final RouteActivity.Route route = mListener.onGetRoute();
             mWvMap.loadUrl(String.format("javascript:displayRoute('%s', %s)", route.asJSON(), route.getAvoidTrafficJams()));
         }
@@ -361,7 +362,7 @@ public class RouteMapFragmentWebView extends Fragment {
          *
          */
         private void displayUserLocation() {
-            if (!mHasMapReady || mCurrentLocation == null) return;
+            if (!mHasMapReady || mCurrentLocation == null || mWvMap == null) return;
             mWvMap.loadUrl(String.format("javascript:updatePosition(%1$s, %2$s, %3$s)",
                     mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), mCurrentLocation.getBearing()));
         }
@@ -524,6 +525,7 @@ public class RouteMapFragmentWebView extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(UserLocation.BROADCAST_INTENT_LOCATION_CHANGED));
 
@@ -611,6 +613,32 @@ public class RouteMapFragmentWebView extends Fragment {
         mMapState = MAP_STATE_LOADING;
         mRlLoading.setVisibility(View.VISIBLE);
         mMapLoadBreaker.watch();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        clearWebView();
+    }
+
+    /**
+     *
+     */
+    public void clearWebView() {
+        // mRlRouteMap.removeAllViews();
+        if (mWvMap != null) {
+            // mWvMap.stopLoading();
+            // mWvMap.clearHistory();
+            // mWvMap.clearCache(true);
+            // mWvMap.pauseTimers();
+            // mWvMap.clearView();
+            // mWvMap.freeMemory();
+            mWvMap.destroy();
+            mWvMap = null;
+        }
     }
 }
 
