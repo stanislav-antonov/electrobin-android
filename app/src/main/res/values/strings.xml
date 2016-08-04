@@ -54,6 +54,7 @@
     <string name="fill">Fill</string>
     <string name="count">Count</string>
     <string name="volume">Volume</string>
+    <string name="summary">Summary</string>
 
     <string name="get_route">Get route</string>
 

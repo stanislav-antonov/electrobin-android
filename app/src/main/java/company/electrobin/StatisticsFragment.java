@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.lang.reflect.Field;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -139,6 +140,7 @@ public class StatisticsFragment extends Fragment {
         ((TextView) mLlCommon.findViewById(R.id.fill_text)).setText(mI10n.l("fill"));
         ((TextView) mLlCommon.findViewById(R.id.count_text)).setText(mI10n.l("count"));
         ((TextView) mLlCommon.findViewById(R.id.volume_text)).setText(mI10n.l("volume"));
+        ((TextView) mLlCommon.findViewById(R.id.summary_text)).setText(mI10n.l("summary"));
 
         final RouteActivity.Route route = mListener.onGetRoute();
         if (route != null) {
@@ -188,6 +190,15 @@ public class StatisticsFragment extends Fragment {
         ((TextView)mLlCommon.findViewById(R.id.category_4_name)).setText(mCategory[3].toString());
         ((TextView)mLlCommon.findViewById(R.id.category_4_count)).setText(String.valueOf(mCategory[3].mCount));
         ((TextView)mLlCommon.findViewById(R.id.category_4_volume)).setText(String.valueOf(mCategory[3].mVolume));
+
+        int summaryCount = 0, summaryVolume = 0;
+        for (int i = 0; i < 4; i++) {
+            summaryCount += mCategory[i].mCount;
+            summaryVolume += mCategory[i].mVolume;
+        }
+
+        ((TextView)mLlCommon.findViewById(R.id.summary_count)).setText(String.valueOf(summaryCount));
+        ((TextView)mLlCommon.findViewById(R.id.summary_volume)).setText(String.valueOf(summaryVolume));
 
         btnNewRoute = (Button) mLlCommon.findViewById(R.id.new_route_button);
         btnNewRoute.setText(mI10n.l("get_route"));
