@@ -371,7 +371,11 @@
                     destination: new google.maps.LatLng(lastPoint.latitude, lastPoint.longitude),
                     waypoints: wayPointsData,
                     optimizeWaypoints: true,
-                    travelMode: google.maps.DirectionsTravelMode.DRIVING
+                    travelMode: google.maps.DirectionsTravelMode.DRIVING,
+                    drivingOptions: {
+                        departureTime: new Date(Date.now()),
+                        trafficModel: 'bestguess'
+                    }
                 };
 
                 Android.onRouteBuildingStart();
