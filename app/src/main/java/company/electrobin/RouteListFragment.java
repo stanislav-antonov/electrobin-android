@@ -196,11 +196,21 @@ public class RouteListFragment extends Fragment {
         public boolean isChildSelectable(int groupPosition, int childPosition) {
             return true;
         }
-
     }
 
     public static RouteListFragment newInstance() {
         return new RouteListFragment();
+    }
+
+    public static RouteListFragment newInstance(Object args) {
+        int displayLayout = LAYOUT_DISPLAYED_ROUTE_WAITING;
+        if (args != null && args instanceof Integer) {
+            displayLayout = (Integer)args;
+        }
+
+        RouteListFragment fragment = newInstance();
+        fragment.setLayoutDisplayed(displayLayout);
+        return fragment;
     }
 
     @Override

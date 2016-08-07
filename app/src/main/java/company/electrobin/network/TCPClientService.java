@@ -505,27 +505,29 @@ public class TCPClientService extends Service implements AsyncConnectorListener 
     }
 
     private static class OnDataReceivedHandler extends Handler {
-        private final WeakReference<TCPClientListener> mListener;
+        // private final WeakReference<TCPClientListener> mListener;
+        private final TCPClientListener mListener;
 
         OnDataReceivedHandler(TCPClientListener service) {
-            mListener = new WeakReference<TCPClientListener>(service);
+            // mListener = new WeakReference<TCPClientListener>(service);
+            mListener = service;
         }
 
         @Override
         public void handleMessage(Message msg)
         {
-            TCPClientListener listener = mListener.get();
-            if (listener == null) return;
+            // TCPClientListener listener = mListener.get();
+            // if (listener == null) return;
 
             switch (msg.what) {
                 case MESSAGE_TYPE_CONNECT_RESULT:
-                    listener.onConnectResult(msg.getData().getInt(MESSAGE_BUNDLE_KEY_CONNECT_RESULT));
+                    mListener.onConnectResult(msg.getData().getInt(MESSAGE_BUNDLE_KEY_CONNECT_RESULT));
                     break;
                 case MESSAGE_TYPE_DATA_RECEIVED:
-                    listener.onDataReceived(msg.getData().getString(MESSAGE_BUNDLE_KEY_RECEIVED_DATA));
+                    mListener.onDataReceived(msg.getData().getString(MESSAGE_BUNDLE_KEY_RECEIVED_DATA));
                     break;
                 case MESSAGE_TYPE_CONNECTION_CLOSED:
-                    listener.onConnectionClosed();
+                    mListener.onConnectionClosed();
                     break;
             }
         }

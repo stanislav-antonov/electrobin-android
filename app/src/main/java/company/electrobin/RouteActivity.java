@@ -685,6 +685,15 @@ public class RouteActivity extends AppCompatActivity implements
      * @return
      */
     private Fragment replaceToFragment(Class fragmentClass) {
+        return replaceToFragment(fragmentClass, null);
+    }
+
+    /**
+     *
+     * @param fragmentClass
+     * @return
+     */
+    private Fragment replaceToFragment(Class fragmentClass, Object args) {
         String toFragmentTag;
         try {
             toFragmentTag = (String)fragmentClass.getDeclaredField("FRAGMENT_TAG").get(null);
@@ -695,15 +704,29 @@ public class RouteActivity extends AppCompatActivity implements
 
         Fragment toFragment;
         try {
-            Method newInstanceMethod = fragmentClass.getMethod("newInstance", null);
-            toFragment = (Fragment) newInstanceMethod.invoke(null, null);
+            Method newInstanceMethod;
+            if (args != null) {
+                newInstanceMethod = fragmentClass.getMethod("newInstance", Object.class);
+                toFragment = (Fragment) newInstanceMethod.invoke(null, args);
+            } else {
+                newInstanceMethod = fragmentClass.getMethod("newInstance", null);
+                toFragment = (Fragment) newInstanceMethod.invoke(null, null);
+            }
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
             return null;
         }
 
-        mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commit();
-        mFragmentManager.popBackStack();
+        try {
+            mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commit();
+            mFragmentManager.executePendingTransactions();
+            // mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commitAllowingStateLoss();
+            mFragmentManager.popBackStack();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.getMessage());
+            return null;
+        }
+
         mCurrentFragment = toFragment;
 
         return toFragment;
@@ -921,9 +944,7 @@ public class RouteActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 mRouteUpdatedDialog.dismiss();
-
-                RouteListFragment routeListFragment = (RouteListFragment)replaceToFragment(RouteListFragment.class);
-                routeListFragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+                replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
             }
         });
 
