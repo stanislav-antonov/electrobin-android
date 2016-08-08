@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.location.Location;
@@ -465,7 +466,6 @@ public class RouteActivity extends AppCompatActivity implements
                         RouteListFragment routeListFragment = (RouteListFragment)mFragmentManager.findFragmentByTag(RouteListFragment.FRAGMENT_TAG);
                         if (routeListFragment != null && routeListFragment.isVisible()) {
                             routeListFragment.showUIRouteList();
-                            // showRouteUpdatedNotification(true);
                         }
                         else {
                             showRouteUpdatedNotification(false);
@@ -506,7 +506,7 @@ public class RouteActivity extends AppCompatActivity implements
         public void routeComplete() {
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"route_complete\", \"track\":\"%s\", \"route_id\":\"%s\", \"created\":\"%s\"}",
-                    route.getRunFormatted(), route.getId(), getTime());
+                    route.getRun(), route.getId(), getTime());
             mService.sendData(strJSON);
         }
 
@@ -719,8 +719,7 @@ public class RouteActivity extends AppCompatActivity implements
 
         try {
             mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commit();
-            mFragmentManager.executePendingTransactions();
-            // mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commitAllowingStateLoss();
+            // mFragmentManager.executePendingTransactions();
             mFragmentManager.popBackStack();
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
@@ -740,9 +739,6 @@ public class RouteActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route);
-
-        if (savedInstanceState != null)
-            mRoute = savedInstanceState.getParcelable(BUNDLE_KEY_ROUTE);
 
         mApp = (ElectrobinApplication)getApplicationContext();
         mUser = mApp.getUser();
@@ -766,11 +762,19 @@ public class RouteActivity extends AppCompatActivity implements
         shouldDisplayHomeUp();
 
         if (savedInstanceState != null) {
+            mRoute = savedInstanceState.getParcelable(BUNDLE_KEY_ROUTE);
             mCurrentFragment = mFragmentManager.getFragment(savedInstanceState, "currentFragment");
-            mFragmentManager.beginTransaction().replace(R.id.fragment_container, mCurrentFragment).commit();
-            mFragmentManager.popBackStack();
-        } else {
-            replaceToFragment(RouteListFragment.class);
+            replaceToFragment(mCurrentFragment.getClass());
+        }
+        else {
+            Bundle params = getIntent().getExtras();
+            if (params != null) {
+                mRoute = params.getParcelable(BUNDLE_KEY_ROUTE);
+                replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+            }
+            else {
+                replaceToFragment(RouteListFragment.class);
+            }
         }
     }
 
@@ -972,10 +976,7 @@ public class RouteActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 mRouteInterruptDialog.dismiss();
-
-                RouteListFragment routeListFragment = (RouteListFragment)replaceToFragment(RouteListFragment.class);
-                routeListFragment.setLayoutDisplayed(RouteListFragment.LAYOUT_DISPLAYED_ROUTE_WAITING);
-
+                replaceToFragment(RouteListFragment.class);
                 mJsonCommand.routeInterrupt();
             }
         });
@@ -1007,13 +1008,6 @@ public class RouteActivity extends AppCompatActivity implements
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setCustomView(actionBarLayout);
-
-        // Remove margins
-        // Toolbar parent = (Toolbar)actionBarLayout.getParent();
-        // parent.setContentInsetsAbsolute(0, 0);
-
-        // Set the color
-        // actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.actionbar_background)));
 
         // Remove the shadow
         actionBar.setElevation(0);
@@ -1183,10 +1177,6 @@ public class RouteActivity extends AppCompatActivity implements
     @Override
     public boolean onSupportNavigateUp() {
         mFragmentManager.popBackStack();
-        // FragmentManager.BackStackEntry backEntry = mFragmentManager.getBackStackEntryAt(mFragmentManager.getBackStackEntryCount() - 1);
-        // if (backEntry != null)
-        //   mCurrentFragment = mFragmentManager.findFragmentByTag(backEntry.getName());
-
         return true;
     }
 
