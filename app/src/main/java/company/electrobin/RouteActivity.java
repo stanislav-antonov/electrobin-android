@@ -44,6 +44,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -694,7 +695,7 @@ public class RouteActivity extends AppCompatActivity implements
      * @return
      */
     private Fragment replaceToFragment(Class fragmentClass, Object args) {
-        String toFragmentTag;
+        final String toFragmentTag;
         try {
             toFragmentTag = (String)fragmentClass.getDeclaredField("FRAGMENT_TAG").get(null);
         } catch(Exception e) {
@@ -702,7 +703,7 @@ public class RouteActivity extends AppCompatActivity implements
             return null;
         }
 
-        Fragment toFragment;
+        final Fragment toFragment;
         try {
             Method newInstanceMethod;
             if (args != null) {
@@ -718,8 +719,9 @@ public class RouteActivity extends AppCompatActivity implements
         }
 
         try {
+            // mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commitAllowingStateLoss();
             mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commit();
-            mFragmentManager.executePendingTransactions();
+            // mFragmentManager.executePendingTransactions();
             mFragmentManager.popBackStack();
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
@@ -807,8 +809,16 @@ public class RouteActivity extends AppCompatActivity implements
         super.onSaveInstanceState(bundle);
         if (mRoute != null)
             bundle.putParcelable(BUNDLE_KEY_ROUTE, mRoute);
-
         mFragmentManager.putFragment(bundle, "currentFragment", mCurrentFragment);
+    }
+
+    /**
+     *
+     * @param bundle
+     */
+    @Override
+    protected void onRestoreInstanceState(Bundle bundle) {
+        super.onRestoreInstanceState(bundle);
     }
 
     /**
