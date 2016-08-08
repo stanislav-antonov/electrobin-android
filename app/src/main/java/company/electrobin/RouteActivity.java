@@ -719,7 +719,7 @@ public class RouteActivity extends AppCompatActivity implements
 
         try {
             mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commit();
-            // mFragmentManager.executePendingTransactions();
+            mFragmentManager.executePendingTransactions();
             mFragmentManager.popBackStack();
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
