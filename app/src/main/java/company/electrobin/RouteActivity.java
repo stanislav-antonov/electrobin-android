@@ -495,42 +495,42 @@ public class RouteActivity extends AppCompatActivity implements
 
         final private Format mFormatter = new SimpleDateFormat(FORMAT_DATE_ORIGINAL);
 
-        public void routeStart() {
+        void routeStart() {
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"start_route\", \"route_id\":\"%s\", \"created\":\"%s\"}",
                     route.getId(), getTime());
             mService.sendData(strJSON);
         }
 
-        public void routeComplete() {
+        void routeComplete() {
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"route_complete\", \"track\":\"%s\", \"route_id\":\"%s\", \"created\":\"%s\"}",
                     route.getRun(), route.getId(), getTime());
             mService.sendData(strJSON);
         }
 
-        public void routeInterrupt() {
+        void routeInterrupt() {
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"route_stop\", \"route_id\":\"%s\", \"created\":\"%s\"}",
                     route.getId(), getTime());
             mService.sendData(strJSON);
         }
 
-        public void allBinsDone() {
+        void allBinsDone() {
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"moving_home\", \"track\":\"%s\", \"route_id\":\"%s\", \"created\":\"%s\"}",
                     route.getRun(), route.getId(), getTime());
             mService.sendData(strJSON);
         }
 
-        public void binCollect(Route.Point point) {
+        void binCollect(Route.Point point) {
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"collection\", \"route_id\":\"%s\", \"container_id\":\"%s\", \"comment\":\"%s\", \"created\":\"%s\", \"latitude\":\"%s\", \"longitude\":\"%s\", \"fullness\":\"%s\"}",
                     route.mId, point.mId, point.mComment, getTime(), point.mLat, point.mLng, point.mFullness);
             mService.sendData(strJSON);
         }
 
-        public void sendFCMToken(String token) {
+        void sendFCMToken(String token) {
             final String strJSON = String.format("{\"action\":\"update_token\", \"token\":\"%s\"}", token);
             mService.sendData(strJSON);
         }
@@ -662,8 +662,8 @@ public class RouteActivity extends AppCompatActivity implements
                 fragmentTransaction.show(toFragment);
         } else {
             try {
-                Method newInstanceMethod = fragmentClass.getMethod("newInstance", null);
-                toFragment = (Fragment) newInstanceMethod.invoke(null, null);
+                Method newInstanceMethod = fragmentClass.getMethod("newInstance");
+                toFragment = (Fragment) newInstanceMethod.invoke(null);
             } catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
                 return null;
@@ -708,8 +708,8 @@ public class RouteActivity extends AppCompatActivity implements
                 newInstanceMethod = fragmentClass.getMethod("newInstance", Object.class);
                 toFragment = (Fragment) newInstanceMethod.invoke(null, args);
             } else {
-                newInstanceMethod = fragmentClass.getMethod("newInstance", null);
-                toFragment = (Fragment) newInstanceMethod.invoke(null, null);
+                newInstanceMethod = fragmentClass.getMethod("newInstance");
+                toFragment = (Fragment) newInstanceMethod.invoke(null);
             }
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
