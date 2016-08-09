@@ -519,7 +519,7 @@ public class RouteActivity extends AppCompatActivity implements
         public void allBinsDone() {
             final Route route = getCurrentRoute();
             final String strJSON = String.format("{\"action\":\"moving_home\", \"track\":\"%s\", \"route_id\":\"%s\", \"created\":\"%s\"}",
-                    route.getRunFormatted(), route.getId(), getTime());
+                    route.getRun(), route.getId(), getTime());
             mService.sendData(strJSON);
         }
 
@@ -765,7 +765,14 @@ public class RouteActivity extends AppCompatActivity implements
         mFragmentManager.addOnBackStackChangedListener(this);
 
         shouldDisplayHomeUp();
+        dispatchFragment(savedInstanceState);
+    }
 
+    /**
+     *
+     * @param savedInstanceState
+     */
+    private void dispatchFragment(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             mRoute = savedInstanceState.getParcelable(BUNDLE_KEY_ROUTE);
             mCurrentFragment = mFragmentManager.getFragment(savedInstanceState, BUNDLE_KEY_CURRENT_FRAGMENT);
@@ -775,18 +782,15 @@ public class RouteActivity extends AppCompatActivity implements
                     replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
                 else
                     replaceToFragment(mCurrentFragment.getClass());
-
             } else {
                 replaceToFragment(RouteListFragment.class);
             }
-        }
-        else {
+        } else {
             Bundle params = getIntent().getExtras();
             if (params != null) {
                 mRoute = params.getParcelable(BUNDLE_KEY_ROUTE);
                 replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
-            }
-            else {
+            } else {
                 replaceToFragment(RouteListFragment.class);
             }
         }
@@ -1127,8 +1131,7 @@ public class RouteActivity extends AppCompatActivity implements
 
         if (route.hasUnvisitedPoints()) {
             replaceToFragment(RouteMapFragmentWebView.class);
-        }
-        else {
+        } else {
             mJsonCommand.allBinsDone();
             replaceToFragment(AllBinsDoneFragment.class);
         }
