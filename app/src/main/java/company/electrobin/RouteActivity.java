@@ -91,6 +91,7 @@ public class RouteActivity extends AppCompatActivity implements
 
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
     private static final String BUNDLE_KEY_ROUTE = "route";
+    private static final String BUNDLE_KEY_CURRENT_FRAGMENT = "current_fragment";
 
     public final static int NOTIFICATION_NO_INTERNET_CONNECTION = 1;
     public final static int NOTIFICATION_NO_GPS = 2;
@@ -464,13 +465,10 @@ public class RouteActivity extends AppCompatActivity implements
                     case JSON_ACTION_NEW_ROUTE: {
                         setCurrentRoute(Route.newInstance(json));
 
-                        RouteListFragment routeListFragment = (RouteListFragment)mFragmentManager.findFragmentByTag(RouteListFragment.FRAGMENT_TAG);
-                        if (routeListFragment != null && routeListFragment.isVisible()) {
-                            routeListFragment.showUIRouteList();
-                        }
-                        else {
+                        if (mCurrentFragment != null && mCurrentFragment instanceof RouteListFragment)
+                            replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+                        else
                             showRouteUpdatedNotification(false);
-                        }
 
                         break;
                     }
@@ -719,11 +717,16 @@ public class RouteActivity extends AppCompatActivity implements
         }
 
         try {
-            // mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commitAllowingStateLoss();
-            mFragmentManager.beginTransaction().replace(R.id.fragment_container, toFragment, toFragmentTag).commit();
-            // mFragmentManager.executePendingTransactions();
+            final FragmentTransaction ft = mFragmentManager.beginTransaction();
+            if (mCurrentFragment != null)
+                ft.detach(mCurrentFragment).replace(R.id.fragment_container, toFragment, toFragmentTag).attach(toFragment);
+            else
+                ft.add(R.id.fragment_container, toFragment, toFragmentTag);
+
+            ft.commit();
             mFragmentManager.popBackStack();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage());
             return null;
         }
@@ -765,8 +768,17 @@ public class RouteActivity extends AppCompatActivity implements
 
         if (savedInstanceState != null) {
             mRoute = savedInstanceState.getParcelable(BUNDLE_KEY_ROUTE);
-            mCurrentFragment = mFragmentManager.getFragment(savedInstanceState, "currentFragment");
-            replaceToFragment(mCurrentFragment.getClass());
+            mCurrentFragment = mFragmentManager.getFragment(savedInstanceState, BUNDLE_KEY_CURRENT_FRAGMENT);
+
+            if (mCurrentFragment != null) {
+                if (mRoute != null && mCurrentFragment instanceof RouteListFragment)
+                    replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+                else
+                    replaceToFragment(mCurrentFragment.getClass());
+
+            } else {
+                replaceToFragment(RouteListFragment.class);
+            }
         }
         else {
             Bundle params = getIntent().getExtras();
@@ -807,18 +819,8 @@ public class RouteActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        if (mRoute != null)
-            bundle.putParcelable(BUNDLE_KEY_ROUTE, mRoute);
-        mFragmentManager.putFragment(bundle, "currentFragment", mCurrentFragment);
-    }
-
-    /**
-     *
-     * @param bundle
-     */
-    @Override
-    protected void onRestoreInstanceState(Bundle bundle) {
-        super.onRestoreInstanceState(bundle);
+        if (mRoute != null) bundle.putParcelable(BUNDLE_KEY_ROUTE, mRoute);
+        mFragmentManager.putFragment(bundle, BUNDLE_KEY_CURRENT_FRAGMENT, mCurrentFragment);
     }
 
     /**
@@ -862,6 +864,7 @@ public class RouteActivity extends AppCompatActivity implements
         super.onStop();
         if (mBound) {
             unbindService(mConnection);
+            stopService(new Intent(RouteActivity.this, TCPClientService.class));
             mBound = false;
         }
     }

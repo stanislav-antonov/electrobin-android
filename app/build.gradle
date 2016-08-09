@@ -52,6 +52,7 @@ dependencies {
     }
     // compile 'com.android.support:multidex:1.0.1'
     // compile 'com.google.android.gms:play-services-base:9.2.1'
+    compile 'com.android.support:support-v13:24.1.0'
     // compile 'com.google.android.gms:play-services-maps:9.2.1'
 }
 

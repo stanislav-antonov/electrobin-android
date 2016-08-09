@@ -490,15 +490,6 @@ public class RouteMapFragmentWebView extends Fragment {
 
     /**
      *
-     * @param outState
-     */
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    /**
-     *
      */
     @Override
     public void onPause() {
