@@ -631,7 +631,7 @@ public class RouteActivity extends AppCompatActivity implements
      * @param fragmentClass
      * @return
      */
-    private Fragment switchToFragment(Class fragmentClass, boolean toBackStack) {
+    private Fragment switchToFragment(Class<?> fragmentClass, boolean toBackStack) {
         final FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
 
         // Hide all fragments
@@ -692,7 +692,7 @@ public class RouteActivity extends AppCompatActivity implements
      * @param fragmentClass
      * @return
      */
-    private Fragment replaceToFragment(Class fragmentClass, Object args) {
+    private Fragment replaceToFragment(Class<?> fragmentClass, Object args) {
         final String toFragmentTag;
         try {
             toFragmentTag = (String)fragmentClass.getDeclaredField("FRAGMENT_TAG").get(null);
