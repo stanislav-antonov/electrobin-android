@@ -9,11 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import company.electrobin.common.route.Route;
 import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
 
@@ -31,7 +30,7 @@ public class BinCardFragment extends Fragment {
 
     private TextView mTvRoutePointAddress;
 
-    private RouteActivity.Route.Point mRoutePoint;
+    private Route.Point mRoutePoint;
 
     private OnFragmentInteractionListener mListener;
 
@@ -39,7 +38,7 @@ public class BinCardFragment extends Fragment {
     public final static String FRAGMENT_TAG = "fragment_bin_card";
 
     public interface OnFragmentInteractionListener {
-        public void onRoutePointDone(RouteActivity.Route.Point point);
+        public void onRoutePointDone(Route.Point point);
     }
 
     public static BinCardFragment newInstance() {
@@ -167,7 +166,7 @@ public class BinCardFragment extends Fragment {
      *
      * @param point
      */
-    public void setRoutePoint(RouteActivity.Route.Point point) {
+    public void setRoutePoint(Route.Point point) {
         mRoutePoint = point;
     }
 

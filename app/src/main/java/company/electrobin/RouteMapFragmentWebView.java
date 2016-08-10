@@ -26,6 +26,7 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
 
+import company.electrobin.common.route.Route;
 import company.electrobin.i10n.I10n;
 import company.electrobin.location.UserLocation;
 import company.electrobin.user.User;
@@ -77,7 +78,7 @@ public class RouteMapFragmentWebView extends Fragment {
      *
      */
     public interface OnFragmentInteractionListener {
-        public RouteActivity.Route onGetRoute();
+        public Route onGetRoute();
         public void onRouteBuildingStart();
         public void onRouteBuildingReady();
         public void onRoutePointClick(int id);
@@ -201,7 +202,7 @@ public class RouteMapFragmentWebView extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    final RouteActivity.Route route = mListener.onGetRoute();
+                    final Route route = mListener.onGetRoute();
                     route.setAvoidTrafficJams(true);
                 }
             });
@@ -215,7 +216,7 @@ public class RouteMapFragmentWebView extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    final RouteActivity.Route route = mListener.onGetRoute();
+                    final Route route = mListener.onGetRoute();
                     route.setAvoidTrafficJams(false);
                 }
             });
@@ -354,7 +355,7 @@ public class RouteMapFragmentWebView extends Fragment {
          */
         private void displayRoute() {
             if (!mHasMapReady || mWvMap == null) return;
-            final RouteActivity.Route route = mListener.onGetRoute();
+            final Route route = mListener.onGetRoute();
             mWvMap.loadUrl(String.format("javascript:displayRoute('%s', %s)", route.asJSON(), route.getAvoidTrafficJams()));
         }
 

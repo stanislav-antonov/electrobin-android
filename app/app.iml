@@ -83,8 +83,6 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifests" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/mockable-android-21.jar" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/mockable-android-22.jar" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/mockable-android-23.jar" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/pre-dexed" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/res" />
@@ -103,6 +101,7 @@
     <orderEntry type="library" exported="" name="support-v4-24.1.0" level="project" />
     <orderEntry type="library" exported="" name="firebase-messaging-9.2.1" level="project" />
     <orderEntry type="library" exported="" name="support-v13-24.1.0" level="project" />
+    <orderEntry type="library" exported="" name="gson-2.7" level="project" />
     <orderEntry type="library" exported="" name="play-services-basement-9.2.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-tasks-9.2.1" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-24.1.0" level="project" />

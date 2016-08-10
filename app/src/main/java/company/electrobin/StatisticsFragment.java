@@ -10,12 +10,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.lang.reflect.Field;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 
+import company.electrobin.common.route.Route;
 import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
 
@@ -34,7 +31,7 @@ public class StatisticsFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         public void onGetNewRoute();
-        public RouteActivity.Route onGetRoute();
+        public Route onGetRoute();
     }
 
     private final Category[] mCategory = {
@@ -142,13 +139,13 @@ public class StatisticsFragment extends Fragment {
         ((TextView) mLlCommon.findViewById(R.id.volume_text)).setText(mI10n.l("volume"));
         ((TextView) mLlCommon.findViewById(R.id.summary_text)).setText(mI10n.l("summary"));
 
-        final RouteActivity.Route route = mListener.onGetRoute();
+        final Route route = mListener.onGetRoute();
         if (route != null) {
             ((TextView) mLlCommon.findViewById(R.id.run_value)).setText(String.format(mI10n.l("run_value"), route.getRunFormatted()));
 
-            List<RouteActivity.Route.Point> list = route.getWayPointList();
+            List<Route.Point> list = route.getWayPointList();
 
-            for (RouteActivity.Route.Point point : list) {
+            for (Route.Point point : list) {
                 if (!point.mIsVisited) continue;
                 int fullness = point.mFullness;
 

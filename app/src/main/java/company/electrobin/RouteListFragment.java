@@ -12,16 +12,12 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Html;
-import android.text.SpannableString;
-import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -31,6 +27,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import company.electrobin.common.route.Route;
 import company.electrobin.i10n.I10n;
 import company.electrobin.user.User;
 
@@ -55,7 +52,7 @@ public class RouteListFragment extends Fragment {
     public final static String FRAGMENT_TAG = "fragment_route_list";
 
     public interface OnFragmentInteractionListener {
-        public RouteActivity.Route onGetRoute();
+        public Route onGetRoute();
         public void onRouteStart();
     }
 
@@ -65,15 +62,15 @@ public class RouteListFragment extends Fragment {
         private final LayoutInflater inflater;
 
         private class PointGroup {
-            public final String mCity;
-            private List<RouteActivity.Route.Point> mChildItemList;
+            final String mCity;
+            private List<Route.Point> mChildItemList;
 
-            public PointGroup(String city) {
+            PointGroup(String city) {
                 mCity = city;
-                mChildItemList = new ArrayList<RouteActivity.Route.Point>();
+                mChildItemList = new ArrayList<Route.Point>();
             }
 
-            public List<RouteActivity.Route.Point> getChildItemList() {
+            List<Route.Point> getChildItemList() {
                 return mChildItemList;
             }
         }
@@ -82,11 +79,11 @@ public class RouteListFragment extends Fragment {
             private TextView mTvText;
         }
 
-        public RouteListAdapter(Context context, List<RouteActivity.Route.Point> itemList) {
+        RouteListAdapter(Context context, List<Route.Point> itemList) {
             inflater = LayoutInflater.from(context);
             mItemList = new ArrayList<>();
             HashMap<String, PointGroup> groups = new HashMap<>();
-            for (RouteActivity.Route.Point p : itemList) {
+            for (Route.Point p : itemList) {
                 if (groups.containsKey(p.mCity)) {
                     groups.get(p.mCity).getChildItemList().add(p);
                 } else {
@@ -106,7 +103,7 @@ public class RouteListFragment extends Fragment {
         }
 
         @Override
-        public RouteActivity.Route.Point getChild(int groupPosition, int childPosition) {
+        public Route.Point getChild(int groupPosition, int childPosition) {
             return mItemList.get(groupPosition).getChildItemList().get(childPosition);
         }
 
@@ -137,7 +134,7 @@ public class RouteListFragment extends Fragment {
                 viewHolder = (ViewHolder)convertView.getTag();
             }
 
-            final RouteActivity.Route.Point item = getChild(groupPosition, childPosition);
+            final Route.Point item = getChild(groupPosition, childPosition);
             if (item != null)
                 viewHolder.mTvText.setText(item.mAddress);
 
@@ -420,7 +417,7 @@ public class RouteListFragment extends Fragment {
     public void showUIRouteList() {
         switchRouteListLayout();
 
-        final RouteActivity.Route route = mListener.onGetRoute();
+        final Route route = mListener.onGetRoute();
 
         // final TextView tvRouteDate = (TextView)mRlRouteList.findViewById(R.id.route_date_text);
         // tvRouteDate.setVisibility(View.GONE);
