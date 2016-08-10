@@ -85,12 +85,11 @@ public class RouteDbHelper extends SQLiteOpenHelper {
                 c.moveToFirst();
                 return c.getString(c.getColumnIndex(RouteContract.RouteEntry.COLUMN_NAME_SERIALIZED_DATA));
             }
-
-            return null;
-        }
-        finally {
+        } finally {
             if (c != null) c.close();
         }
+
+        return null;
     }
 
     public void delete() {
