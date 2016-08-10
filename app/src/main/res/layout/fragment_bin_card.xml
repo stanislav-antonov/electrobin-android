@@ -51,40 +51,65 @@
             android:paddingTop="20dp"
             android:paddingBottom="30dp"
             >
-            <TextView
-                android:id="@+id/bin_status_label_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:textColor="#ffffff"
-                android:fontFamily="sans-serif-light"
-                />
             <RadioGroup
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 >
-                <RadioButton android:id="@+id/bin_unloaded_ok_radio"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:textSize="16sp"
-                    />
-                <RadioButton android:id="@+id/bin_unloaded_error_radio"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
+                    >
+                    <RadioButton
+                        android:id="@+id/bin_unloaded_ok_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/radiobutton"
+                        android:button="@android:color/transparent"
+                        android:checked="true"
+                        />
+                    <TextView
+                        android:id="@+id/bin_unloaded_ok_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:textSize="16sp"
+                        android:paddingLeft="15dp"
+                        android:paddingStart="15dp"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:textSize="16sp"
-                    />
+                    android:layout_width="wrap_content"
+                    android:paddingTop="15dp"
+                    >
+                    <RadioButton
+                        android:id="@+id/bin_unloaded_error_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/radiobutton"
+                        android:button="@android:color/transparent"
+                        />
+                    <TextView
+                        android:id="@+id/bin_unloaded_error_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ffffff"
+                        android:textSize="16sp"
+                        android:paddingLeft="15dp"
+                        android:paddingStart="15dp"
+                        />
+                </LinearLayout>
             </RadioGroup>
             <TextView
                 android:id="@+id/bin_comment_label_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
+                android:textSize="16sp"
                 android:textColor="#ffffff"
                 android:layout_marginTop="20dp"
-                android:fontFamily="sans-serif-light"
                 />
             <EditText
                 android:id="@+id/bin_comment_input"
@@ -92,7 +117,7 @@
                 android:layout_height="100dp"
                 android:inputType="textMultiLine"
                 android:gravity="top"
-                android:background="#FFFFFFFF"
+                android:background="@drawable/background_edittext_rounded"
                 android:textColor="#ff607677"
                 android:padding="5dp"
                 android:layout_marginTop="10dp"
@@ -102,7 +127,6 @@
                 android:id="@+id/route_point_done_button"
                 android:layout_marginTop="30dp"
                 android:layout_gravity="center_horizontal"
-
                 android:minWidth="230dp"
                 android:minHeight="55dp"
                 android:layout_height="wrap_content"

@@ -74,13 +74,12 @@ public class BinCardFragment extends Fragment {
         });
 
         ((TextView)view.findViewById(R.id.bin_comment_label_text)).setText(mI10n.l("comment"));
-        ((TextView)view.findViewById(R.id.bin_status_label_text)).setText(mI10n.l("container_status"));
 
         mRbBinUnloadedOk = (RadioButton)view.findViewById(R.id.bin_unloaded_ok_radio);
-        mRbBinUnloadedOk.setText(mI10n.l("container_status_unloaded_ok"));
+        ((TextView)view.findViewById(R.id.bin_unloaded_ok_text)).setText(mI10n.l("container_status_unloaded_ok"));
 
         mRbBinUnloadedError = (RadioButton)view.findViewById(R.id.bin_unloaded_error_radio);
-        mRbBinUnloadedError.setText(mI10n.l("container_status_unloaded_error"));
+        ((TextView)view.findViewById(R.id.bin_unloaded_error_text)).setText(mI10n.l("container_status_unloaded_error"));
 
         mEtBinComment = (EditText)view.findViewById(R.id.bin_comment_input);
 
