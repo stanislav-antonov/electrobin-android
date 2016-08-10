@@ -353,7 +353,7 @@ public class RouteActivity extends AppCompatActivity implements
                 fragmentTransaction.show(toFragment);
         } else {
             try {
-                Method newInstanceMethod = fragmentClass.getMethod("create");
+                Method newInstanceMethod = fragmentClass.getMethod("newInstance");
                 toFragment = (Fragment) newInstanceMethod.invoke(null);
             } catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
@@ -396,10 +396,10 @@ public class RouteActivity extends AppCompatActivity implements
         try {
             Method newInstanceMethod;
             if (args != null) {
-                newInstanceMethod = fragmentClass.getMethod("create", Object.class);
+                newInstanceMethod = fragmentClass.getMethod("newInstance", Object.class);
                 toFragment = (Fragment) newInstanceMethod.invoke(null, args);
             } else {
-                newInstanceMethod = fragmentClass.getMethod("create");
+                newInstanceMethod = fragmentClass.getMethod("newInstance");
                 toFragment = (Fragment) newInstanceMethod.invoke(null);
             }
         } catch (Exception e) {
@@ -464,17 +464,6 @@ public class RouteActivity extends AppCompatActivity implements
      * @param savedInstanceState
      */
     private void dispatchFragment(Bundle savedInstanceState) {
-        String serialized = mRouteDbHelper.retrieve();
-        if (serialized != null) {
-            mRoute = Route.create(serialized);
-            if (!mRoute.isStarted())
-                replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
-            else
-                replaceToFragment(RouteListFragment.class);
-
-            return;
-        }
-
         if (savedInstanceState != null) {
             mRoute = savedInstanceState.getParcelable(BUNDLE_KEY_ROUTE);
             mCurrentFragment = mFragmentManager.getFragment(savedInstanceState, BUNDLE_KEY_CURRENT_FRAGMENT);
@@ -493,7 +482,16 @@ public class RouteActivity extends AppCompatActivity implements
                 mRoute = params.getParcelable(BUNDLE_KEY_ROUTE);
                 replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
             } else {
-                replaceToFragment(RouteListFragment.class);
+                String serialized = mRouteDbHelper.retrieve();
+                if (serialized != null) {
+                    mRoute = Route.create(serialized);
+                    if (!mRoute.isStarted())
+                        replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+                    else
+                        replaceToFragment(RouteListFragment.class);
+                } else {
+                    replaceToFragment(RouteListFragment.class);
+                }
             }
         }
     }
@@ -748,6 +746,8 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteInterrupt() {
+        mRouteDbHelper.delete();
+        mRoute = null;
         showRouteInterruptDialog();
     }
 
@@ -863,10 +863,15 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteStart() {
-        replaceToFragment(RouteMapFragmentWebView.class);
+        mRoute.setStarted(true);
+        mRouteDbHelper.store(mRoute);
+
         mUserLocation.stopLocationUpdates();
         mUserLocation.startLocationUpdates();
+
         mJsonCommand.routeStart();
+
+        replaceToFragment(RouteMapFragmentWebView.class);
     }
 
     /**

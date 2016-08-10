@@ -80,6 +80,7 @@ public class RouteDbHelper extends SQLiteOpenHelper {
         );
 
         if (c.getCount() == 0) return null;
+        c.moveToFirst();
         final String result = c.getString(0);
         c.close();
 
