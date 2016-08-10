@@ -485,10 +485,10 @@ public class RouteActivity extends AppCompatActivity implements
                 String serialized = mRouteDbHelper.retrieve();
                 if (serialized != null) {
                     mRoute = Route.create(serialized);
-                    if (!mRoute.isStarted())
-                        replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
+                    if (mRoute.isStarted())
+                        replaceToFragment(RouteMapFragmentWebView.class);
                     else
-                        replaceToFragment(RouteListFragment.class);
+                        replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
                 } else {
                     replaceToFragment(RouteListFragment.class);
                 }

@@ -16,7 +16,7 @@ final class RouteContract {
 
     static abstract class RouteEntry implements BaseColumns {
         static final String TABLE_NAME = "route";
-        static final String COLUMN_NAME_SERIALIZED_DATA = "serialized_data";
+        static final String COLUMN_NAME_SERIALIZED_DATA = "serialized";
     }
 }
 
@@ -27,13 +27,12 @@ public class RouteDbHelper extends SQLiteOpenHelper {
         "CREATE TABLE " + RouteContract.RouteEntry.TABLE_NAME + " (" +
             // RouteContract.RouteEntry._ID + " INTEGER PRIMARY KEY," +
             RouteContract.RouteEntry.COLUMN_NAME_SERIALIZED_DATA + TEXT_TYPE +
-            // FeedEntry.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP +
-        " )";
+        ")";
 
     private static final String SQL_DELETE_ENTRIES =
         "DROP TABLE IF EXISTS " + RouteContract.RouteEntry.TABLE_NAME;
 
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "Route.db";
 
     public RouteDbHelper(Context context) {
@@ -60,7 +59,8 @@ public class RouteDbHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(RouteContract.RouteEntry.COLUMN_NAME_SERIALIZED_DATA, route.serialize());
 
-        db.replace(RouteContract.RouteEntry.TABLE_NAME, null, values);
+        db.delete(RouteContract.RouteEntry.TABLE_NAME, null, null);
+        db.insert(RouteContract.RouteEntry.TABLE_NAME, null, values);
     }
 
     public String retrieve() {
@@ -69,22 +69,28 @@ public class RouteDbHelper extends SQLiteOpenHelper {
             RouteContract.RouteEntry.COLUMN_NAME_SERIALIZED_DATA
         };
 
-        Cursor c = db.query(
-            RouteContract.RouteEntry.TABLE_NAME,
-            projection,                               // The columns to return
-            null,                                     // The columns for the WHERE clause
-            null,                                     // The values for the WHERE clause
-            null,                                     // Group the rows
-            null,                                     // Filter by row groups
-            null                                      // The sort order
-        );
+        Cursor c = null;
+        try {
+            c = db.query(
+                RouteContract.RouteEntry.TABLE_NAME,
+                projection, // The columns to return
+                null,       // The columns for the WHERE clause
+                null,       // The values for the WHERE clause
+                null,       // Group the rows
+                null,       // Filter by row groups
+                null        // The sort order
+            );
 
-        if (c.getCount() == 0) return null;
-        c.moveToFirst();
-        final String result = c.getString(0);
-        c.close();
+            if (c.getCount() > 0) {
+                c.moveToFirst();
+                return c.getString(c.getColumnIndex(RouteContract.RouteEntry.COLUMN_NAME_SERIALIZED_DATA));
+            }
 
-        return result;
+            return null;
+        }
+        finally {
+            if (c != null) c.close();
+        }
     }
 
     public void delete() {
