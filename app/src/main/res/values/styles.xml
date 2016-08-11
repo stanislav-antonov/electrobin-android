@@ -23,4 +23,8 @@
         <item name="android:homeAsUpIndicator">@drawable/back_arrow</item>
         <item name="homeAsUpIndicator">@drawable/back_arrow</item>
     </style>
+    <style name="Radionbutton"
+        parent="Base.Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:button">@drawable/radiobutton</item>
+    </style>
 </resources>
