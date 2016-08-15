@@ -22,12 +22,14 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -693,8 +695,10 @@ public class RouteActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 mRouteInterruptDialog.dismiss();
-                replaceToFragment(RouteListFragment.class);
                 mJsonCommand.routeInterrupt();
+                mRouteDbHelper.delete();
+                mRoute = null;
+                replaceToFragment(RouteListFragment.class);
             }
         });
 
@@ -746,8 +750,6 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteInterrupt() {
-        mRouteDbHelper.delete();
-        mRoute = null;
         showRouteInterruptDialog();
     }
 
@@ -917,6 +919,49 @@ public class RouteActivity extends AppCompatActivity implements
      * @param title
      */
     public void setActionBarTitle(String title) {
-        if (mTvActionBarTitle != null) mTvActionBarTitle.setText(title);
+        if (mTvActionBarTitle != null) {
+            mTvActionBarTitle.setText(title);
+            setActionBarTitlePadding();
+        }
+    }
+
+    /**
+     *
+     */
+    private void setActionBarTitlePadding() {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null) return;
+
+        final RelativeLayout rlCustomView = (RelativeLayout)actionBar.getCustomView();
+        final Toolbar toolbar = (Toolbar)rlCustomView.getParent();
+
+        final ViewTreeObserver viewTreeObserver = rlCustomView.getViewTreeObserver();
+        if (!viewTreeObserver.isAlive()) return;
+
+        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int paddingLeft = (rlCustomView.getWidth() - mTvActionBarTitle.getWidth()) / 2;
+
+                ImageButton imageButton;
+                for (int i = 0; i < toolbar.getChildCount(); i++) {
+                    View childView = toolbar.getChildAt(i);
+                    if (childView.getClass() == ImageButton.class) {
+                        imageButton = (ImageButton)childView;
+                        paddingLeft -= imageButton.getWidth();
+                        break;
+                    }
+                }
+
+                mTvActionBarTitle.setPadding(paddingLeft, 0, 0, 0);
+
+                try {
+                    viewTreeObserver.removeOnGlobalLayoutListener(this);
+                } catch(Exception e) {
+                    // removeOnGlobalLayoutListener() is not supported
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }
