@@ -24,9 +24,9 @@
                 android:id="@+id/header_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
+                android:textSize="16sp"
                 android:textColor="#ffffff"
-                android:fontFamily="sans-serif-light"
+                android:fontFamily="sans-serif"
                 android:gravity="center_horizontal"
                 />
             <TextView
@@ -37,6 +37,7 @@
                 android:textColor="#ffffff"
                 android:gravity="center_horizontal"
                 android:layout_marginTop="10dp"
+                android:fontFamily="sans-serif"
                 />
         </LinearLayout>
         <LinearLayout
@@ -66,6 +67,7 @@
                     android:drawablePadding="15dp"
                     android:paddingLeft="15dp"
                     android:checked="true"
+                    android:fontFamily="sans-serif"
                     />
                 <RadioButton
                     android:id="@+id/bin_unloaded_error_radio"
@@ -77,6 +79,7 @@
                     android:textSize="16sp"
                     android:drawablePadding="15dp"
                     android:paddingLeft="15dp"
+                    android:fontFamily="sans-serif"
                     />
             </RadioGroup>
             <TextView
@@ -86,6 +89,7 @@
                 android:textSize="16sp"
                 android:textColor="#ffffff"
                 android:layout_marginTop="20dp"
+                android:fontFamily="sans-serif"
                 />
             <EditText
                 android:id="@+id/bin_comment_input"

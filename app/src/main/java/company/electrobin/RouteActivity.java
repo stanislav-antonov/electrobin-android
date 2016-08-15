@@ -956,7 +956,7 @@ public class RouteActivity extends AppCompatActivity implements
                 mTvActionBarTitle.setPadding(paddingLeft, 0, 0, 0);
 
                 try {
-                    viewTreeObserver.removeOnGlobalLayoutListener(this);
+                    rlCustomView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } catch(Exception e) {
                     // removeOnGlobalLayoutListener() is not supported
                     e.printStackTrace();
