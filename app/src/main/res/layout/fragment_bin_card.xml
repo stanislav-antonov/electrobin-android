@@ -110,6 +110,7 @@
             android:layout_width="match_parent"
             android:layout_below="@+id/controls_layout"
             android:paddingBottom="30dp"
+            android:paddingTop="10dp"
             >
             <Button
                 android:id="@+id/route_point_done_button"
