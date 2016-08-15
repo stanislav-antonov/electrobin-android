@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -100,9 +101,6 @@ public class StatisticsFragment extends Fragment {
         mApp = (ElectrobinApplication)getActivity().getApplicationContext();
         mUser = mApp.getUser();
         mI10n = mApp.getI10n();
-
-
-
     }
 
     @Override
@@ -111,6 +109,7 @@ public class StatisticsFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_statistics, container, false);
         mLlCommon = (LinearLayout)view.findViewById(R.id.common_layout);
+
         return view;
     }
 
@@ -197,7 +196,8 @@ public class StatisticsFragment extends Fragment {
         ((TextView)mLlCommon.findViewById(R.id.summary_count)).setText(String.valueOf(summaryCount));
         ((TextView)mLlCommon.findViewById(R.id.summary_volume)).setText(String.valueOf(summaryVolume));
 
-        btnNewRoute = (Button) mLlCommon.findViewById(R.id.new_route_button);
+        final RelativeLayout rlMain = (RelativeLayout) mLlCommon.getParent();
+        btnNewRoute = (Button)rlMain.findViewById(R.id.new_route_button);
         btnNewRoute.setText(mI10n.l("get_route"));
         btnNewRoute.setOnClickListener(new View.OnClickListener() {
             @Override

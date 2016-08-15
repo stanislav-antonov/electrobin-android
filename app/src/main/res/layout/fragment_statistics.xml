@@ -5,11 +5,16 @@
     android:background="@drawable/background"
     android:fillViewport="true"
     >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
         <LinearLayout
             android:id="@+id/common_layout"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/new_route_button"
             >
             <TableLayout
                 android:id="@+id/table"
@@ -346,23 +351,26 @@
                     android:paddingLeft="10dp"
                     />
             </LinearLayout>
-            <Button
-                android:id="@+id/new_route_button"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="30dp"
-
-                android:minWidth="230dp"
-                android:minHeight="55dp"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:padding="15dp"
-                android:textSize="22sp"
-                android:textColor="#FFFFFFFF"
-                android:textAllCaps="false"
-                android:fontFamily="sans-serif-light"
-                android:background="@drawable/custom_round_button_2"
-                style="?android:attr/borderlessButtonStyle"
-                />
         </LinearLayout>
+        <Button
+            android:id="@+id/new_route_button"
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="30dp"
+
+            android:minWidth="230dp"
+            android:minHeight="55dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:padding="15dp"
+            android:textSize="22sp"
+            android:textColor="#FFFFFFFF"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-light"
+            android:background="@drawable/custom_round_button_2"
+            style="?android:attr/borderlessButtonStyle"
+            />
+    </RelativeLayout>
 </ScrollView>
