@@ -27,7 +27,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -70,9 +69,9 @@ public class RouteActivity extends AppCompatActivity implements
     private ElectrobinApplication mApp;
 
     private RelativeLayout mRlRouteUpdated;
-    private LinearLayout mLlBottomNotification;
-    public ImageButton mBtnActionBarUserProfile;
-    public TextView mTvActionBarTitle;
+    private LinearLayout mLlTopNotification;
+    public ImageButton mBtnToolbarUserProfile;
+    public TextView mTvToolbarTitle;
 
     private FragmentManager mFragmentManager;
     private Route mRoute;
@@ -445,12 +444,12 @@ public class RouteActivity extends AppCompatActivity implements
         mUserLocation = new UserLocation(this);
         mJsonCommand = new JsonCommand();
 
-        setupCustomActionBar();
+        setupToolbar();
 
         mRlRouteUpdated = (RelativeLayout)findViewById(R.id.route_updated_layout);
         mRlRouteUpdated.setVisibility(View.GONE);
 
-        mLlBottomNotification = (LinearLayout)findViewById(R.id.bottom_notification_layout);
+        mLlTopNotification = (LinearLayout)findViewById(R.id.top_notification_layout);
 
         ((TextView)mRlRouteUpdated.findViewById(R.id.route_updated_text)).setText(mI10n.l("route_updated"));
 
@@ -505,11 +504,11 @@ public class RouteActivity extends AppCompatActivity implements
         final TextView tvWhat;
         switch(what) {
             case NOTIFICATION_NO_INTERNET_CONNECTION:
-                tvWhat = (TextView)mLlBottomNotification.findViewById(R.id.no_internet_connection_text);
+                tvWhat = (TextView) mLlTopNotification.findViewById(R.id.no_internet_connection_text);
                 tvWhat.setText(mI10n.l("no_internet_connection"));
                 break;
             case NOTIFICATION_NO_GPS:
-                tvWhat = (TextView)mLlBottomNotification.findViewById(R.id.no_gps_text);
+                tvWhat = (TextView) mLlTopNotification.findViewById(R.id.no_gps_text);
                 tvWhat.setText(mI10n.l("no_gps"));
                 break;
             default:
@@ -593,9 +592,12 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                return true;
+            case android.R.id.home:
+                // onBackPressed();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -717,27 +719,33 @@ public class RouteActivity extends AppCompatActivity implements
     /**
      *
      */
-    private void setupCustomActionBar() {
+    private void setupToolbar() {
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(R.drawable.back_arrow);
+        setSupportActionBar(toolbar);
+
         final ActionBar actionBar = getSupportActionBar();
-        if (actionBar == null) return;
 
-        final ViewGroup actionBarLayout = (ViewGroup)getLayoutInflater().inflate(
-                R.layout.action_bar_layout,
-                null);
-
-        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setCustomView(actionBarLayout);
 
         // Remove the shadow
         actionBar.setElevation(0);
 
-        mTvActionBarTitle = (TextView)findViewById(R.id.action_bar_title_text);
+        // Just here! It must be only after setSupportActionBar(toolbar)
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
-        mBtnActionBarUserProfile = (ImageButton)findViewById(R.id.action_bar_user_profile_button);
-        mBtnActionBarUserProfile.setVisibility(View.VISIBLE);
-        mBtnActionBarUserProfile.setOnClickListener(new View.OnClickListener() {
+        mTvToolbarTitle = (TextView)findViewById(R.id.toolbar_title_text);
+
+        mBtnToolbarUserProfile = (ImageButton)findViewById(R.id.toolbar_user_profile_button);
+        mBtnToolbarUserProfile.setVisibility(View.VISIBLE);
+        mBtnToolbarUserProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switchToFragment(UserProfileFragment.class, true);
@@ -919,49 +927,8 @@ public class RouteActivity extends AppCompatActivity implements
      * @param title
      */
     public void setActionBarTitle(String title) {
-        if (mTvActionBarTitle != null) {
-            mTvActionBarTitle.setText(title);
-            setActionBarTitlePadding();
+        if (mTvToolbarTitle != null) {
+            mTvToolbarTitle.setText(title);
         }
-    }
-
-    /**
-     *
-     */
-    private void setActionBarTitlePadding() {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar == null) return;
-
-        final RelativeLayout rlCustomView = (RelativeLayout)actionBar.getCustomView();
-        final Toolbar toolbar = (Toolbar)rlCustomView.getParent();
-
-        final ViewTreeObserver viewTreeObserver = rlCustomView.getViewTreeObserver();
-        if (!viewTreeObserver.isAlive()) return;
-
-        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                int paddingLeft = (rlCustomView.getWidth() - mTvActionBarTitle.getWidth()) / 2;
-
-                ImageButton imageButton;
-                for (int i = 0; i < toolbar.getChildCount(); i++) {
-                    View childView = toolbar.getChildAt(i);
-                    if (childView.getClass() == ImageButton.class) {
-                        imageButton = (ImageButton)childView;
-                        paddingLeft -= imageButton.getWidth();
-                        break;
-                    }
-                }
-
-                mTvActionBarTitle.setPadding(paddingLeft, 0, 0, 0);
-
-                try {
-                    rlCustomView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } catch(Exception e) {
-                    // removeOnGlobalLayoutListener() is not supported
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 }

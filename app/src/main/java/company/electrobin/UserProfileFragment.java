@@ -137,7 +137,7 @@ public class UserProfileFragment extends Fragment {
 
         final RouteActivity routeActivity = (RouteActivity)getActivity();
         if (routeActivity != null)
-            routeActivity.mBtnActionBarUserProfile.setVisibility(View.GONE);
+            routeActivity.mBtnToolbarUserProfile.setVisibility(View.INVISIBLE);
 
         setActionBarTitle();
     }
@@ -158,7 +158,7 @@ public class UserProfileFragment extends Fragment {
         super.onStop();
         final RouteActivity routeActivity = (RouteActivity)getActivity();
         if (routeActivity != null)
-            routeActivity.mBtnActionBarUserProfile.setVisibility(View.VISIBLE);
+            routeActivity.mBtnToolbarUserProfile.setVisibility(View.VISIBLE);
     }
 
     /**
