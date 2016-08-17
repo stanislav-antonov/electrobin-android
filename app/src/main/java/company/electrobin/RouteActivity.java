@@ -71,6 +71,7 @@ public class RouteActivity extends AppCompatActivity implements
     private RelativeLayout mRlRouteUpdated;
     private LinearLayout mLlTopNotification;
     public ImageButton mBtnToolbarUserProfile;
+    public ImageButton mBtnToolbarBack;
     public TextView mTvToolbarTitle;
 
     private FragmentManager mFragmentManager;
@@ -721,27 +722,36 @@ public class RouteActivity extends AppCompatActivity implements
      */
     private void setupToolbar() {
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.back_arrow);
+        // toolbar.setNavigationIcon(R.drawable.back_arrow);
         setSupportActionBar(toolbar);
 
         final ActionBar actionBar = getSupportActionBar();
 
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(false);
+        actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setDisplayShowTitleEnabled(false);
 
         // Remove the shadow
         actionBar.setElevation(0);
 
         // Just here! It must be only after setSupportActionBar(toolbar)
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        // toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        //    @Override
+        //    public void onClick(View v) {
+        //        onBackPressed();
+        //    }
+        // });
+
+        mTvToolbarTitle = (TextView)findViewById(R.id.toolbar_title_text);
+
+        mBtnToolbarBack = (ImageButton)findViewById(R.id.toolbar_back_button);
+        mBtnToolbarBack.setVisibility(View.INVISIBLE);
+        mBtnToolbarBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
             }
         });
-
-        mTvToolbarTitle = (TextView)findViewById(R.id.toolbar_title_text);
 
         mBtnToolbarUserProfile = (ImageButton)findViewById(R.id.toolbar_user_profile_button);
         mBtnToolbarUserProfile.setVisibility(View.VISIBLE);
@@ -896,9 +906,13 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     public void shouldDisplayHomeUp() {
-        final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(mFragmentManager.getBackStackEntryCount() > 0);
+        // final ActionBar actionBar = getSupportActionBar();
+        // if (actionBar != null)
+        //    actionBar.setDisplayHomeAsUpEnabled(mFragmentManager.getBackStackEntryCount() > 0);
+        if (mFragmentManager.getBackStackEntryCount() > 0)
+            mBtnToolbarBack.setVisibility(View.VISIBLE);
+        else
+            mBtnToolbarBack.setVisibility(View.INVISIBLE);
     }
 
     /**
