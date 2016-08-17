@@ -19,15 +19,15 @@
             >
             <TableLayout
                 android:id="@+id/table"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:stretchColumns="1"
+                android:stretchColumns="*"
                 android:layout_marginTop="10dp"
                 >
                 <TableRow
-                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#00a0d4"
+                    android:layout_width="0dp"
                     >
                     <TextView
                         android:id="@+id/fill_text"
@@ -35,6 +35,7 @@
                         android:paddingLeft="20dp"
                         android:paddingRight="10dp"
                         android:textSize="16sp"
+                        android:gravity="center_horizontal"
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         />
@@ -60,7 +61,7 @@
                         />
                 </TableRow>
                 <TableRow
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:background="#32abd7"
                     android:paddingTop="5dp"
@@ -70,6 +71,7 @@
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:paddingLeft="20dp"
+                        android:layout_gravity="center_horizontal"
                         >
                         <TextView
                             android:id="@+id/category_1_legend"
@@ -85,7 +87,7 @@
                             android:id="@+id/category_1_name"
                             android:layout_marginLeft="10dp"
                             android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
+                            android:layout_width="95dp"
                             android:paddingTop="10dp"
                             android:paddingBottom="10dp"
                             android:textSize="24sp"
@@ -102,6 +104,7 @@
                         android:textColor="#ffffff"
                         android:background="@android:color/transparent"
                         android:fontFamily="sans-serif-light"
+                        android:layout_gravity="center_horizontal"
                         />
                     <TextView
                         android:id="@+id/category_1_volume"
@@ -111,10 +114,11 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:background="@android:color/transparent"
+                        android:layout_gravity="center_horizontal"
                         />
                 </TableRow>
                 <TableRow
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:background="#32abd7"
                     android:paddingTop="5dp"
@@ -124,6 +128,7 @@
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:paddingLeft="20dp"
+                        android:layout_gravity="center_horizontal"
                         >
                         <TextView
                             android:id="@+id/category_2_legend"
@@ -139,7 +144,7 @@
                             android:id="@+id/category_2_name"
                             android:layout_marginLeft="10dp"
                             android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
+                            android:layout_width="95dp"
                             android:paddingTop="10dp"
                             android:paddingBottom="10dp"
                             android:textSize="24sp"
@@ -156,6 +161,7 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:background="@android:color/transparent"
+                        android:layout_gravity="center_horizontal"
                         />
                     <TextView
                         android:id="@+id/category_2_volume"
@@ -165,10 +171,11 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:background="@android:color/transparent"
+                        android:layout_gravity="center_horizontal"
                         />
                 </TableRow>
                 <TableRow
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:background="#32abd7"
                     android:paddingTop="5dp"
@@ -178,6 +185,7 @@
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:paddingLeft="20dp"
+                        android:layout_gravity="center_horizontal"
                         >
                         <TextView
                             android:id="@+id/category_3_legend"
@@ -193,7 +201,7 @@
                             android:id="@+id/category_3_name"
                             android:layout_marginLeft="10dp"
                             android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
+                            android:layout_width="95dp"
                             android:paddingTop="10dp"
                             android:paddingBottom="10dp"
                             android:textSize="24sp"
@@ -210,6 +218,7 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:background="@android:color/transparent"
+                        android:layout_gravity="center_horizontal"
                         />
                     <TextView
                         android:id="@+id/category_3_volume"
@@ -219,10 +228,11 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:background="@android:color/transparent"
+                        android:layout_gravity="center_horizontal"
                         />
                 </TableRow>
                 <TableRow
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:background="#32abd7"
                     android:paddingTop="5dp"
@@ -232,6 +242,7 @@
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:paddingLeft="20dp"
+                        android:layout_gravity="center_horizontal"
                         >
                         <TextView
                             android:id="@+id/category_4_legend"
@@ -247,7 +258,7 @@
                             android:id="@+id/category_4_name"
                             android:layout_marginLeft="10dp"
                             android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
+                            android:layout_width="95dp"
                             android:paddingTop="10dp"
                             android:paddingBottom="10dp"
                             android:textSize="24sp"
@@ -264,6 +275,7 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:background="@android:color/transparent"
+                        android:layout_gravity="center_horizontal"
                         />
                     <TextView
                         android:id="@+id/category_4_volume"
@@ -273,10 +285,11 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:background="@android:color/transparent"
+                        android:layout_gravity="center_horizontal"
                         />
                 </TableRow>
                 <TableRow
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:background="#32abd7"
                     android:paddingTop="5dp"
@@ -286,6 +299,7 @@
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:paddingLeft="20dp"
+                        android:layout_gravity="center_horizontal"
                         >
                         <TextView
                             android:id="@+id/summary_text"
@@ -308,6 +322,7 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:background="@android:color/transparent"
+                        android:layout_gravity="center_horizontal"
                         />
                     <TextView
                         android:id="@+id/summary_volume"
@@ -317,9 +332,9 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:background="@android:color/transparent"
+                        android:layout_gravity="center_horizontal"
                         />
                 </TableRow>
-
             </TableLayout>
             <LinearLayout
                 android:orientation="horizontal"
