@@ -86,8 +86,8 @@
                             android:id="@+id/category_1_name"
                             android:padding="10dp"
                             android:layout_height="wrap_content"
-                            android:layout_width="80dp"
-                            android:textSize="16sp"
+                            android:layout_width="95dp"
+                            android:textSize="24sp"
                             android:textColor="#ffffff"
                             android:background="@android:color/transparent"
                             android:fontFamily="sans-serif-light"
@@ -129,7 +129,7 @@
                             android:background="@android:color/transparent"
                             android:layout_gravity="center_horizontal"
                             />
-                        </LinearLayout>
+                    </LinearLayout>
                 </TableRow>
                 <TableRow
                     android:layout_width="0dp"
@@ -158,8 +158,8 @@
                             android:id="@+id/category_2_name"
                             android:padding="10dp"
                             android:layout_height="wrap_content"
-                            android:layout_width="80dp"
-                            android:textSize="16sp"
+                            android:layout_width="95dp"
+                            android:textSize="24sp"
                             android:textColor="#ffffff"
                             android:background="@android:color/transparent"
                             android:fontFamily="sans-serif-light"
@@ -201,7 +201,7 @@
                             android:background="@android:color/transparent"
                             android:layout_gravity="center_horizontal"
                             />
-                        </LinearLayout>
+                    </LinearLayout>
                 </TableRow>
                 <TableRow
                     android:layout_width="0dp"
@@ -230,8 +230,8 @@
                             android:id="@+id/category_3_name"
                             android:padding="10dp"
                             android:layout_height="wrap_content"
-                            android:layout_width="80dp"
-                            android:textSize="16sp"
+                            android:layout_width="95dp"
+                            android:textSize="24sp"
                             android:textColor="#ffffff"
                             android:background="@android:color/transparent"
                             android:fontFamily="sans-serif-light"
@@ -273,7 +273,7 @@
                             android:background="@android:color/transparent"
                             android:layout_gravity="center_horizontal"
                             />
-                        </LinearLayout>
+                    </LinearLayout>
                 </TableRow>
                 <TableRow
                     android:layout_width="0dp"
@@ -302,8 +302,8 @@
                             android:id="@+id/category_4_name"
                             android:padding="10dp"
                             android:layout_height="wrap_content"
-                            android:layout_width="80dp"
-                            android:textSize="16sp"
+                            android:layout_width="95dp"
+                            android:textSize="24sp"
                             android:textColor="#ffffff"
                             android:background="@android:color/transparent"
                             android:fontFamily="sans-serif-light"
@@ -345,7 +345,7 @@
                             android:background="@android:color/transparent"
                             android:layout_gravity="center_horizontal"
                             />
-                        </LinearLayout>
+                    </LinearLayout>
                 </TableRow>
 
                 <TableRow
@@ -445,31 +445,31 @@
                     />
             </LinearLayout>
         </LinearLayout>
-    <RelativeLayout
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:paddingBottom="30dp"
-        android:paddingTop="30dp"
-        android:layout_below="@+id/common_layout"
-        >
-        <Button
-            android:id="@+id/new_route_button"
-            android:layout_gravity="center_horizontal"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
+        <RelativeLayout
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:paddingBottom="30dp"
+            android:paddingTop="30dp"
+            android:layout_below="@+id/common_layout"
+            >
+            <Button
+                android:id="@+id/new_route_button"
+                android:layout_gravity="center_horizontal"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
 
-            android:minWidth="230dp"
-            android:minHeight="55dp"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:padding="15dp"
-            android:textSize="22sp"
-            android:textColor="#FFFFFFFF"
-            android:textAllCaps="false"
-            android:fontFamily="sans-serif-light"
-            android:background="@drawable/custom_round_button_2"
-            style="?android:attr/borderlessButtonStyle"
-            />
+                android:minWidth="230dp"
+                android:minHeight="55dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:padding="15dp"
+                android:textSize="22sp"
+                android:textColor="#FFFFFFFF"
+                android:textAllCaps="false"
+                android:fontFamily="sans-serif-light"
+                android:background="@drawable/custom_round_button_2"
+                style="?android:attr/borderlessButtonStyle"
+                />
         </RelativeLayout>
     </RelativeLayout>
 </ScrollView>
