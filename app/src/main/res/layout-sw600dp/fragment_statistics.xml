@@ -36,7 +36,7 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         />
                     <TextView
                         android:id="@+id/count_text"
@@ -56,7 +56,7 @@
                         android:textColor="#ffffff"
                         android:fontFamily="sans-serif-light"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         />
                 </TableRow>
                 <TableRow
@@ -69,7 +69,7 @@
                         android:orientation="horizontal"
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView
@@ -114,7 +114,7 @@
                     <LinearLayout
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView
@@ -141,7 +141,7 @@
                         android:orientation="horizontal"
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView
@@ -186,7 +186,7 @@
                     <LinearLayout
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView
@@ -213,7 +213,7 @@
                         android:orientation="horizontal"
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView
@@ -258,7 +258,7 @@
                     <LinearLayout
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView
@@ -285,7 +285,7 @@
                         android:orientation="horizontal"
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView
@@ -330,7 +330,7 @@
                     <LinearLayout
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView
@@ -358,7 +358,7 @@
                         android:orientation="horizontal"
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView
@@ -394,7 +394,7 @@
                     <LinearLayout
                         android:layout_height="wrap_content"
                         android:layout_width="0dip"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="center"
                         >
                         <TextView

@@ -21,8 +21,8 @@ android {
         applicationId 'company.electrobin'
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 12
-        versionName '2.0.1'
+        versionCode 1
+        versionName '2.0.2'
         // multiDexEnabled true
     }
     // dexOptions {
