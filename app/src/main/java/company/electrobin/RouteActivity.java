@@ -432,6 +432,22 @@ public class RouteActivity extends AppCompatActivity implements
 
     /**
      *
+     * @return
+     */
+    private Fragment getCurrentVisibleFragment() {
+        List<Fragment> fragmentList = mFragmentManager.getFragments();
+        if (fragmentList != null) {
+            for (Fragment fragment : fragmentList) {
+                if (fragment != null && !fragment.isDetached() && fragment.isVisible())
+                    return fragment;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     *
      * @param savedInstanceState
      */
     @Override
@@ -512,8 +528,9 @@ public class RouteActivity extends AppCompatActivity implements
                 tvWhat = (TextView) mLlTopNotification.findViewById(R.id.no_internet_connection_text);
                 tvWhat.setText(mI10n.l("no_internet_connection"));
 
-                if (visibility == View.VISIBLE && !(mCurrentFragment instanceof RouteListFragment
-                    || mCurrentFragment instanceof RouteMapFragmentWebView)) {
+                Fragment currentFragment = getCurrentVisibleFragment();
+                if (visibility == View.VISIBLE && !(currentFragment instanceof RouteListFragment
+                    || currentFragment instanceof RouteMapFragmentWebView)) {
                     return;
                 }
 
