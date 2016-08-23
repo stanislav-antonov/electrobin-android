@@ -225,6 +225,7 @@ public class UserLocation {
         try {
             mLocationManager.addGpsStatusListener(new GpsStatusListener());
         } catch (SecurityException e) {
+            Log.e(LOG_TAG, "GPS status listener error");
             e.printStackTrace();
         }
     }
