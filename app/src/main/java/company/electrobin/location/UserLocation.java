@@ -209,9 +209,9 @@ public class UserLocation {
     private class GpsStatusListener implements GpsStatus.Listener {
         @Override
         public void onGpsStatusChanged(int event) {
-            if (event == GpsStatus.GPS_EVENT_FIRST_FIX) {
+            // if (event == GpsStatus.GPS_EVENT_FIRST_FIX) {
                 // Got first fix since GPS starting
-            }
+            // }
         }
     }
 
@@ -222,7 +222,11 @@ public class UserLocation {
         mGpsStatusChecker = new GpsStatusChecker();
 
         mLocationManager = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
-        mLocationManager.addGpsStatusListener(new GpsStatusListener());
+        try {
+            mLocationManager.addGpsStatusListener(new GpsStatusListener());
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
     }
 
     public synchronized void startLocationUpdates() {
@@ -236,8 +240,9 @@ public class UserLocation {
                 try {
                     mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                             NETWORK_LOCATION_UPDATES_MIN_TIME_INTERVAL, NETWORK_LOCATION_UPDATES_MIN_DISTANCE, mLocationListener, Looper.getMainLooper());
-                } catch(IllegalArgumentException e) {
-                    Log.e(LOG_TAG, "Network provider error: " + e.getMessage());
+                } catch(SecurityException e) {
+                    Log.e(LOG_TAG, "Network location provider error");
+                    e.printStackTrace();
                 }
 
                 try {
@@ -248,23 +253,28 @@ public class UserLocation {
 
                     // Explicitly push
                     mGpsStatusChecker.restartTimer();
-                }
-                catch (IllegalArgumentException e) {
-                    Log.e(LOG_TAG, "GPS provider error: " + e.getMessage());
-                }
 
-                mIsRunning = true;
+                    mIsRunning = true;
+                } catch (SecurityException e) {
+                    Log.e(LOG_TAG, "GPS location provider error");
+                    e.printStackTrace();
+                }
             }
         }).start();
     }
 
     public synchronized void stopLocationUpdates() {
-        if (mLocationListener != null)
+        try {
             mLocationManager.removeUpdates(mLocationListener);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
 
-        if (mGpsStatusChecker != null) {
+        try {
             mGpsStatusChecker.stopTimer();
             mLocationManager.removeUpdates(mGpsStatusChecker);
+        } catch (SecurityException e) {
+            e.printStackTrace();
         }
 
         mIsRunning = false;
