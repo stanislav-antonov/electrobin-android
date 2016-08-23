@@ -82,6 +82,8 @@ public class RouteActivity extends AppCompatActivity implements
     private Dialog mRouteUpdatedDialog;
     private Dialog mRouteInterruptDialog;
 
+    private Handler mHandler;
+
     private boolean mRouteUpdatedPopupShowing;
 
     private Fragment mCurrentFragment;
@@ -441,6 +443,8 @@ public class RouteActivity extends AppCompatActivity implements
         mUser = mApp.getUser();
         mI10n = mApp.getI10n();
 
+        mHandler = new Handler();
+
         mRouteDbHelper = new RouteDbHelper(this);
         mUserLocation = new UserLocation(this);
         mJsonCommand = new JsonCommand();
@@ -501,7 +505,7 @@ public class RouteActivity extends AppCompatActivity implements
     /**
      *
      */
-    public void toggleNotification(int what, int visibility) {
+    public void toggleNotification(int what, final int visibility) {
         final TextView tvWhat;
         switch (what) {
             case NOTIFICATION_NO_INTERNET_CONNECTION:
@@ -522,7 +526,12 @@ public class RouteActivity extends AppCompatActivity implements
                 return;
         }
 
-        tvWhat.setVisibility(visibility);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                tvWhat.setVisibility(visibility);
+            }
+        });
     }
 
     /**
