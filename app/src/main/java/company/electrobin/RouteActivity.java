@@ -503,10 +503,16 @@ public class RouteActivity extends AppCompatActivity implements
      */
     public void toggleNotification(int what, int visibility) {
         final TextView tvWhat;
-        switch(what) {
+        switch (what) {
             case NOTIFICATION_NO_INTERNET_CONNECTION:
                 tvWhat = (TextView) mLlTopNotification.findViewById(R.id.no_internet_connection_text);
                 tvWhat.setText(mI10n.l("no_internet_connection"));
+
+                if (visibility == View.VISIBLE && !(mCurrentFragment instanceof RouteListFragment
+                    || mCurrentFragment instanceof RouteMapFragmentWebView)) {
+                    return;
+                }
+
                 break;
             case NOTIFICATION_NO_GPS:
                 tvWhat = (TextView) mLlTopNotification.findViewById(R.id.no_gps_text);
@@ -722,7 +728,6 @@ public class RouteActivity extends AppCompatActivity implements
      */
     private void setupToolbar() {
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        // toolbar.setNavigationIcon(R.drawable.back_arrow);
         setSupportActionBar(toolbar);
 
         final ActionBar actionBar = getSupportActionBar();
@@ -733,14 +738,6 @@ public class RouteActivity extends AppCompatActivity implements
 
         // Remove the shadow
         actionBar.setElevation(0);
-
-        // Just here! It must be only after setSupportActionBar(toolbar)
-        // toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-        //    @Override
-        //    public void onClick(View v) {
-        //        onBackPressed();
-        //    }
-        // });
 
         mTvToolbarTitle = (TextView)findViewById(R.id.toolbar_title_text);
 
@@ -906,9 +903,6 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     public void shouldDisplayHomeUp() {
-        // final ActionBar actionBar = getSupportActionBar();
-        // if (actionBar != null)
-        //    actionBar.setDisplayHomeAsUpEnabled(mFragmentManager.getBackStackEntryCount() > 0);
         if (mFragmentManager.getBackStackEntryCount() > 0)
             mBtnToolbarBack.setVisibility(View.VISIBLE);
         else
