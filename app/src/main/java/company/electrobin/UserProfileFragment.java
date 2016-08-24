@@ -110,9 +110,6 @@ public class UserProfileFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        showInternetConnectionStatus(mListener.onGetInternetConnectionStatus());
-        showGPSStatus(mListener.onGetGPSStatus());
-
         View view = getView();
         if (view == null) return;
 
@@ -148,6 +145,7 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     /**
@@ -168,6 +166,14 @@ public class UserProfileFragment extends Fragment {
     public void onResume() {
         super.onResume();
         setActionBarTitle();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                showInternetConnectionStatus(mListener.onGetInternetConnectionStatus());
+                showGPSStatus(mListener.onGetGPSStatus());
+                mHandler.postDelayed(this, 1000);
+            }
+        }, 500);
     }
 
     /**
