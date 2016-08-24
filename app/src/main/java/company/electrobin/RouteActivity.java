@@ -323,21 +323,26 @@ public class RouteActivity extends AppCompatActivity implements
 
     /**
      *
+     * @param ft
+     */
+    private void hideAllFragments(FragmentTransaction ft) {
+        List<Fragment> fragmentList = mFragmentManager.getFragments();
+        if (fragmentList != null) {
+            for (Fragment fragment : fragmentList) {
+                if (fragment != null && fragment.isVisible()) ft.hide(fragment);
+            }
+        }
+    }
+
+    /**
+     *
      * @param fragmentClass
      * @return
      */
     private Fragment switchToFragment(Class<?> fragmentClass, boolean toBackStack) {
         final FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
 
-        // Hide all fragments
-        List<Fragment> fragmentList = mFragmentManager.getFragments();
-        if (fragmentList != null) {
-            for (Fragment fragment : fragmentList) {
-                if (fragment != null && fragment.isVisible())
-                    fragmentTransaction.hide(fragment);
-            }
-        }
-
+        hideAllFragments(fragmentTransaction);
         hideAllNotifications();
 
         String toFragmentTag;
@@ -526,11 +531,8 @@ public class RouteActivity extends AppCompatActivity implements
      *
      */
     public void hideAllNotifications() {
-        TextView tvNoInternet = (TextView) mLlTopNotification.findViewById(R.id.no_internet_connection_text);
-        tvNoInternet.setVisibility(View.GONE);
-
-        TextView tvNoGps = (TextView) mLlTopNotification.findViewById(R.id.no_gps_text);
-        tvNoGps.setVisibility(View.GONE);
+        toggleNotification(NOTIFICATION_NO_GPS, View.GONE);
+        toggleNotification(NOTIFICATION_NO_INTERNET_CONNECTION, View.GONE);
     }
 
     /**
