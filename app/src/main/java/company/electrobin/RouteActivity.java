@@ -338,6 +338,8 @@ public class RouteActivity extends AppCompatActivity implements
             }
         }
 
+        hideAllNotifications();
+
         String toFragmentTag;
         try {
             toFragmentTag = (String)fragmentClass.getDeclaredField("FRAGMENT_TAG").get(null);
@@ -395,6 +397,8 @@ public class RouteActivity extends AppCompatActivity implements
             Log.e(LOG_TAG, e.getMessage());
             return null;
         }
+
+        hideAllNotifications();
 
         final Fragment toFragment;
         try {
@@ -516,6 +520,17 @@ public class RouteActivity extends AppCompatActivity implements
                 }
             }
         }
+    }
+
+    /**
+     *
+     */
+    public void hideAllNotifications() {
+        TextView tvNoInternet = (TextView) mLlTopNotification.findViewById(R.id.no_internet_connection_text);
+        tvNoInternet.setVisibility(View.GONE);
+
+        TextView tvNoGps = (TextView) mLlTopNotification.findViewById(R.id.no_gps_text);
+        tvNoGps.setVisibility(View.GONE);
     }
 
     /**
