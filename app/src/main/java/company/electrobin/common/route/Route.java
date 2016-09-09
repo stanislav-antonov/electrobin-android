@@ -27,7 +27,8 @@ public class Route implements Parcelable, Serializable {
     private Date mDate;
     private float mRun;
     private boolean mAvoidTrafficJams;
-    private boolean mIsStarted;
+
+    private int mState;
 
     private Point mStartPoint;
     private List<Point> mWayPointList;
@@ -42,6 +43,10 @@ public class Route implements Parcelable, Serializable {
     private final static String JSON_ROUTE_POINT_LATITUDE_KEY = "latitude";
     private final static String JSON_ROUTE_POINT_FULLNESS_KEY = "fullness";
     private final static String JSON_ROUTE_POINT_VOLUME_KEY = "volume";
+
+    public final static int ROUTE_STATE_INITIAL = 1;
+    public final static int ROUTE_STATE_STARTED = 2;
+    public final static int ROUTE_STATE_MOVING  = 3;
 
     private final static String LOG_TAG = RouteActivity.class.getSimpleName();
 
@@ -201,7 +206,8 @@ public class Route implements Parcelable, Serializable {
         mStartPoint = in.readParcelable(Point.class.getClassLoader());
         mRun = in.readFloat();
         mAvoidTrafficJams = in.readByte() != 0;
-        mIsStarted = in.readByte() != 0;
+        // mIsStarted = in.readByte() != 0;
+        mState = in.readInt();
     }
 
     public int describeContents() {
@@ -215,7 +221,8 @@ public class Route implements Parcelable, Serializable {
         out.writeParcelable(mStartPoint, flags);
         out.writeFloat(mRun);
         out.writeByte((byte) (mAvoidTrafficJams ? 1 : 0));
-        out.writeByte((byte) (mIsStarted ? 1 : 0));
+        // out.writeByte((byte) (mIsStarted ? 1 : 0));
+        out.writeInt(mState);
     }
 
     public static final Parcelable.Creator<Route> CREATOR
@@ -328,12 +335,12 @@ public class Route implements Parcelable, Serializable {
         return false;
     }
 
-    public void setStarted(boolean isStarted) {
-        mIsStarted = isStarted;
+    public void setState(int state) {
+        mState = state;
     }
 
-    public boolean isStarted() {
-        return mIsStarted;
+    public int getState() {
+        return mState;
     }
 
     public Point getStartPoint() {

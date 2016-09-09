@@ -45,6 +45,7 @@ public class RouteMapFragmentWebView extends Fragment {
     private RelativeLayout mRlRouteBuilding;
 
     private Button mBtnRouteInterrupt;
+    private Button mBtnStartMoving;
 
     private MapLoadBreaker mMapLoadBreaker;
     private RouteViewer mRouteViewer;
@@ -83,6 +84,7 @@ public class RouteMapFragmentWebView extends Fragment {
         public void onRouteBuildingReady();
         public void onRoutePointClick(int id);
         public void onRouteInterrupt();
+        public void onRouteMovingStart();
     }
 
     /**
@@ -356,7 +358,11 @@ public class RouteMapFragmentWebView extends Fragment {
         private void displayRoute() {
             if (!mHasMapReady || mWvMap == null) return;
             final Route route = mListener.onGetRoute();
-            mWvMap.loadUrl(String.format("javascript:displayRoute('%s', %s)", route.asJSON(), route.getAvoidTrafficJams()));
+            mWvMap.loadUrl(String.format("javascript:displayRoute('%s', %s, %s)",
+                    route.asJSON(),
+                    route.getAvoidTrafficJams(),
+                    route.getState() == Route.ROUTE_STATE_MOVING
+            ));
         }
 
         /**
@@ -420,7 +426,12 @@ public class RouteMapFragmentWebView extends Fragment {
         ((TextView) mRlRouteBuilding.findViewById(R.id.route_building_text)).setText(mI10n.l("route_building"));
 
         mBtnRouteInterrupt = (Button) view.findViewById(R.id.route_interrupt_button);
+        mBtnRouteInterrupt.setText(mI10n.l("interrupt_route"));
         mBtnRouteInterrupt.setVisibility(View.GONE);
+
+        mBtnStartMoving = (Button) view.findViewById(R.id.start_moving_button);
+        mBtnStartMoving.setText(mI10n.l("start_moving"));
+        mBtnStartMoving.setVisibility(View.GONE);
 
         return view;
     }
@@ -481,12 +492,24 @@ public class RouteMapFragmentWebView extends Fragment {
 
         setActionBarTitle();
 
-        mBtnRouteInterrupt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.onRouteInterrupt();
-            }
-        });
+        final Route route = mListener.onGetRoute();
+        if (route.getState() == Route.ROUTE_STATE_MOVING) {
+            mBtnRouteInterrupt.setVisibility(View.VISIBLE);
+            mBtnRouteInterrupt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.onRouteInterrupt();
+                }
+            });
+        } else if (route.getState() == Route.ROUTE_STATE_STARTED) {
+            mBtnStartMoving.setVisibility(View.VISIBLE);
+            mBtnStartMoving.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.onRouteMovingStart();
+                }
+            });
+        }
     }
 
     /**

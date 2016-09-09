@@ -12,8 +12,9 @@
             var myMap;
             var coordSystem;
 
-            var directionDisplay;
+            var directionsDisplay;
             var directionsService;
+            var directionsDisplayOptions;
 
             var snapDistanceThreshold = 0.0017,
                 routeDeviationThreshold = 5,
@@ -24,8 +25,9 @@
                 trafficControl;
 
             var routePoints,
-                currentRouteData,
-                currentRoute;
+                routeData;
+
+            var displayRouteToNextPoint;
 
             var positionMarker,
                 prevPosition;
@@ -105,10 +107,10 @@
                 setCustomControls();
 
                 directionsService = new google.maps.DirectionsService();
-                directionsDisplay = new google.maps.DirectionsRenderer();
-
-                directionsDisplay.setMap(myMap);
-                directionsDisplay.setOptions({
+                // directionsDisplay = new google.maps.DirectionsRenderer();
+                // directionsDisplay.setMap(myMap);
+                directionsDisplayOptions = {
+                    // preserveViewport: false,
                     suppressMarkers: true,
                     polylineOptions: {
                         strokeWeight: 6,
@@ -127,7 +129,9 @@
                             }
                         }]
                     },
-                });
+                };
+
+
 
                 trafficLayer = new google.maps.TrafficLayer();
 
@@ -177,8 +181,8 @@
             }
 
             function updateStartPoint() {
-                if (prevPosition && currentRouteData && currentRouteData.hasOwnProperty("start_point")) {
-                    var startPoint = currentRouteData["start_point"];
+                if (prevPosition && routeData && routeData.hasOwnProperty("start_point")) {
+                    var startPoint = routeData["start_point"];
                     startPoint.latitude  = prevPosition[0];
                     startPoint.longitude = prevPosition[1];
                 }
@@ -298,9 +302,10 @@
                 });
             }
 
-            function displayRoute(routeJSON, avoidTJ) {
-                currentRouteData = $.parseJSON(routeJSON);
+            function displayRoute(routeJSON, avoidTJ, toNextPoint) {
+                routeData = $.parseJSON(routeJSON);
                 avoidTrafficJams = avoidTJ;
+                displayRouteToNextPoint = toNextPoint;
 
                 if (trafficControlUI && trafficLayer) {
                     trafficLayer.setMap(null);
@@ -332,30 +337,39 @@
                 return wayPointBubbles[key];
             }
 
-            function makeMarker(position, fullness) {
-                return new MarkerWithLabel({
+            function makeMarker(position, point, clickable) {
+                var marker = new MarkerWithLabel({
                     position: position,
                     map: myMap,
                     draggable: false,
 
-                    labelContent: fullness + '',
+                    labelContent: point['fullness'] + '',
                     labelAnchor: new google.maps.Point(12, 36),
-                    labelClass: "marker",
+                    labelClass: 'marker',
                     labelInBackground: false,
 
-                    icon: getWayPointBubble(fullness),
+                    icon: getWayPointBubble(point['fullness']),
                 });
+
+                if (clickable) {
+                    marker.setValues({ unique_id: point['unique_id'] });
+                    google.maps.event.addListener(marker, 'click', function() {
+                        Android.onRoutePointClick(this.get('unique_id'));
+                    });
+                }
+
+                return marker;
             }
 
             function _displayRoute() {
-                if (!currentRouteData) {
+                if (!routeData) {
                     console.log('no route data!');
                     return;
                 }
 
                 var wayPointsData = [];
-                var startPoint = currentRouteData['start_point'];
-                var wayPoints = currentRouteData['way_points'];
+                var startPoint = routeData['start_point'];
+                var wayPoints = routeData['way_points'];
                 var lastPoint = wayPoints[wayPoints.length - 1];
 
                 for (var i = 0; i < wayPoints.length; i++) {
@@ -366,7 +380,9 @@
                     });
                 }
 
-                var request = {
+                Android.onRouteBuildingStart();
+
+                directionsService.route({
                     origin: new google.maps.LatLng(startPoint.latitude, startPoint.longitude),
                     destination: new google.maps.LatLng(lastPoint.latitude, lastPoint.longitude),
                     waypoints: wayPointsData,
@@ -376,37 +392,59 @@
                         departureTime: new Date(Date.now()),
                         trafficModel: 'bestguess'
                     }
-                };
-
-                Android.onRouteBuildingStart();
-
-                directionsService.route(request, function (response, status) {
+                }, function (response, status) {
                     if (status == google.maps.DirectionsStatus.OK) {
-                        directionsDisplay.setDirections(response);
-
                         var route = response.routes[0];
-                        var legs  = route.legs;
                         var wayPointOrder = route['waypoint_order'];
 
-                        for (var i = 0; i < legs.length - 1; i++) {
-                            var leg = legs[i];
-                            var endLocation = leg['end_location'];
+                        if (displayRouteToNextPoint) {
+                            // Get a first optimized point
+                            var lastPoint = wayPoints[ wayPointOrder[0] ];
+                            directionsService.route({
+                                origin: new google.maps.LatLng(startPoint.latitude, startPoint.longitude),
+                                destination: new google.maps.LatLng(lastPoint.latitude, lastPoint.longitude),
+                                travelMode: google.maps.DirectionsTravelMode.DRIVING,
+                                drivingOptions: {
+                                    departureTime: new Date(Date.now()),
+                                    trafficModel: 'bestguess'
+                                }
+                            }, function (response, status) {
+                                if (status == google.maps.DirectionsStatus.OK) {
+                                    directionsDisplay = new google.maps.DirectionsRenderer();
+                                    directionsDisplay.setMap(myMap);
+                                    directionsDisplayOptions['preserveViewport'] = false;
+                                    directionsDisplay.setOptions(directionsDisplayOptions);
+                                    directionsDisplay.setDirections(response);
+                                    var route = response.routes[0],
+                                        legs = route.legs;
 
-                            var wayPoint = wayPoints[ wayPointOrder[i] ];
-                            var fullness = wayPoint['fullness'];
+                                    makeMarker(legs[ legs.length - 1 ]['end_location'], lastPoint, true);
+                                    var listener = google.maps.event.addListener(myMap, 'idle', function() {
+                                        myMap.setZoom(15);
+                                        google.maps.event.removeListener(listener);
+                                        myMap.panTo(new google.maps.LatLng(startPoint.latitude, startPoint.longitude));
+                                    });
 
-                            var marker = makeMarker(endLocation, fullness);
-                            marker.setValues({ unique_id: wayPoint['unique_id'] });
-
-                            google.maps.event.addListener(marker, 'click', function() {
-                                Android.onRoutePointClick(this.get('unique_id'));
+                                    routePoints = routeToPoints(route);
+                                    Android.onRouteBuildingReady();
+                                } else {
+                                    console.log("directions response " + status);
+                                }
                             });
+                        } else {
+                            directionsDisplay = new google.maps.DirectionsRenderer();
+                            directionsDisplay.setMap(myMap);
+                            directionsDisplay.setOptions(directionsDisplayOptions);
+                            directionsDisplay.setDirections(response);
+
+                            var legs = route.legs;
+                            for (var i = 0; i < legs.length - 1; i++) {
+                                makeMarker(legs[i]['end_location'], wayPoints[ wayPointOrder[i] ], false);
+                            }
+
+                            routePoints = routeToPoints(route);
+                            Android.onRouteBuildingReady();
                         }
-
-                        routePoints = routeToPoints(route);
-                        currentRoute = route;
-
-                        Android.onRouteBuildingReady();
                     }
                     else {
                         console.log("directions response " + status);

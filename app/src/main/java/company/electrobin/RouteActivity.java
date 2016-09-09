@@ -516,7 +516,7 @@ public class RouteActivity extends AppCompatActivity implements
                 String serialized = mRouteDbHelper.retrieve();
                 if (serialized != null) {
                     mRoute = Route.create(serialized);
-                    if (mRoute.isStarted())
+                    if (mRoute.getState() == Route.ROUTE_STATE_STARTED)
                         replaceToFragment(RouteMapFragmentWebView.class);
                     else
                         replaceToFragment(RouteListFragment.class, RouteListFragment.LAYOUT_DISPLAYED_ROUTE_LIST);
@@ -923,14 +923,27 @@ public class RouteActivity extends AppCompatActivity implements
      */
     @Override
     public void onRouteStart() {
-        mRoute.setStarted(true);
+        mRoute.setState(Route.ROUTE_STATE_STARTED);
+        mRouteDbHelper.store(mRoute);
+
+        mUserLocation.stopLocationUpdates();
+        mUserLocation.startLocationUpdates();
+
+        replaceToFragment(RouteMapFragmentWebView.class);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onRouteMovingStart() {
+        mRoute.setState(Route.ROUTE_STATE_MOVING);
         mRouteDbHelper.store(mRoute);
 
         mUserLocation.stopLocationUpdates();
         mUserLocation.startLocationUpdates();
 
         mJsonCommand.routeStart();
-
         replaceToFragment(RouteMapFragmentWebView.class);
     }
 

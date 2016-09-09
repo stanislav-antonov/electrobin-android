@@ -14,11 +14,31 @@
             />
         <Button
             android:id="@+id/route_interrupt_button"
+            android:visibility="gone"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="30dp"
-            android:text="Interrupt route"
+
+            android:minWidth="230dp"
+            android:minHeight="55dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:padding="15dp"
+            android:textSize="22sp"
+            android:textColor="#FFFFFFFF"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-light"
+            android:background="@drawable/custom_round_button_2"
+            style="?android:attr/borderlessButtonStyle"
+            />
+        <Button
+            android:id="@+id/start_moving_button"
+            android:visibility="gone"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
 
             android:minWidth="230dp"
             android:minHeight="55dp"

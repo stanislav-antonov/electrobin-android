@@ -37,6 +37,8 @@
     <string name="route_updated">Operator has updated the route.</string>
 
     <string name="route_interrupt_confirm">Do you really want to interrupt the route?</string>
+    <string name="interrupt_route">Interrupt route</string>
+    <string name="start_moving">Start moving</string>
 
     <string name="to_route_list">To route list</string>
     <string name="next_route_point">To next route point</string>

@@ -8,7 +8,6 @@
 <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkMJw2Og0duKgKkIQO1Cx0FOSdOAtJu2o&callback=initMap&v=3.exp&libraries=geometry"></script>
 <script defer src="https://cdn.rawgit.com/googlemaps/v3-utility-library/master/markerwithlabel/src/markerwithlabel.js"></script>
 
-
 <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
 
 <script type="text/javascript">
@@ -217,8 +216,7 @@
                 // Android.onMapReady();
 
                 currentRouteData = {
-
-                    start_point: { latitude: 55.774322, longitude: 37.83096 },
+                    start_point: { latitude: 55.65288429230896, longitude: 37.39352345466614 },
                     way_points: [
                         { unique_id: 1, fullness: 0, latitude: 55.73366, longitude: 37.551966 },
                         { unique_id: 2, fullness: 43, latitude: 55.689031, longitude: 37.584057 },
@@ -349,7 +347,9 @@
 
             function updatePosition(lat, long, bearing) {
                 var position = snapToRoute([lat, long]);
-                if (!position) return;
+
+                // if (!position) return;
+                if (!position) position = [lat, long];
 
                 var bearing = 0;
                 if (prevPosition) {
@@ -485,6 +485,7 @@
                         var i = 0;
                         clearInterval(interval);
                         interval = setInterval(function() {
+                            // if (i > 0) return;
                             var nextPoint = routePoints[i++];
                             if (!nextPoint) {
                                 clearInterval(interval);
@@ -493,8 +494,6 @@
 
                             updatePosition(nextPoint[0], nextPoint[1], null);
                         }, 1);
-
-                        // Android.onRouteBuildingReady();
                     }
                     else {
                         console.log("directions response " + status);
