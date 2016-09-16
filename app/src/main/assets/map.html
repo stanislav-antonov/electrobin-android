@@ -21,8 +21,7 @@
                 routeDeviationCount = 0,
                 routePointStep = 4;
 
-            var avoidTrafficJams,
-                trafficControl;
+            var avoidTrafficJams;
 
             var routePoints,
                 routeData;
@@ -33,7 +32,9 @@
                 prevPosition;
 
             var trafficLayer;
-            var trafficControlUI;
+
+            var trafficControlUI,
+                catchCursorControlUI;
 
             var wayPointBubbles = {
                 green: 'file:///android_asset/bin_bubble_4_resized.png',
@@ -70,8 +71,8 @@
 
             function setCustomControls() {
                 trafficControlUI = document.createElement('div');
+                $(trafficControlUI).addClass('control');
                 $(trafficControlUI).addClass('traffic-control');
-                $(trafficControlUI).text('traffic');
 
                 google.maps.event.addDomListener(trafficControlUI, 'click', function() {
                     if (typeof trafficLayer.getMap() == 'undefined' || trafficLayer.getMap() === null) {
@@ -83,7 +84,17 @@
                     }
                 });
 
-                myMap.controls[google.maps.ControlPosition.TOP_LEFT].push(trafficControlUI);
+                myMap.controls[google.maps.ControlPosition.TOP_RIGHT].push(trafficControlUI);
+
+                catchCursorControlUI = document.createElement('div');
+                $(catchCursorControlUI).addClass('control');
+                $(catchCursorControlUI).addClass('catch-cursor-control');
+
+                google.maps.event.addDomListener(catchCursorControlUI, 'click', function() {
+
+                });
+
+                myMap.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(catchCursorControlUI);
             }
 
             function initMap() {
@@ -131,16 +142,7 @@
                     },
                 };
 
-
-
                 trafficLayer = new google.maps.TrafficLayer();
-
-                // trafficControl = new ymaps.control.TrafficControl({ trafficShown: false, options: { size: "small" } });
-                // myMap.controls.add(trafficControl, { position: { left: "10px", top: "50px" } });
-                // registerTrafficControlEvents();
-
-                // var zoomControl = new ymaps.control.ZoomControl({ options: { size: "large" } });
-                // myMap.controls.add(zoomControl, { position: { right: "15px", top: "50px" } });
 
                 // var geolocationControl = new ymaps.control.GeolocationControl({ options: { noPlacemark: true } });
                 // myMap.controls.add(geolocationControl, { position: { left: "10px", top: "90px" } });
@@ -170,14 +172,6 @@
 
                 updateStartPoint();
                 _displayRoute();
-            }
-
-            function registerTrafficControlEvents() {
-                if (!trafficControl) return;
-
-                trafficControl.events.remove('showtraffic', onTrafficControlShow);
-                trafficControl.events.remove('hidetraffic', onTrafficControlHide);
-                trafficControl.events.add('showtraffic', onTrafficControlShow).add('hidetraffic', onTrafficControlHide);
             }
 
             function updateStartPoint() {
@@ -466,30 +460,35 @@
                 width: 23px;
             }
 
-            .traffic-control {
+            .control {
+                width: 48px;
+                height: 48px;
+                background-size: 48px 48px;
                 cursor: pointer;
-                background-color: #FEFEFE;
-                border: 1px solid #A9BBDF;
-                border-radius: 2px;
-                margin: 10px;
-                margin-top: 50px;
-                padding: 0 5px;
-                line-height: 160%;
-                font-size: 12px;
-                font-family: Arial,sans-serif;
-                box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.35);
                 -webkit-user-select: none;
                 -khtml-user-select: none;
                 -moz-user-select: none;
                 -o-user-select: none;
                 user-select: none;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background-position: center;
+            }
+
+            .traffic-control {
+                margin-top: 55px;
+                margin-right: 10px;
+                background-image: url("file:///android_asset/control_traffic_off.png");
             }
 
             .traffic-control-active {
-                background-color: #6D8ACC;
-                color: #fff;
-                font-weight: bold;
-                border: 1px solid #678AC7;
+                background-image: url("file:///android_asset/control_traffic_on.png");
+            }
+
+            .catch-cursor-control {
+                background-image: url("file:///android_asset/control_catch_cursor.png");
+                margin-bottom: 100px;
+                margin-right: 10px;
             }
         </style>
     </head>
