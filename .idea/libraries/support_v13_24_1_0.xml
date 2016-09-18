@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="support-v13-24.1.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-v13/24.1.0/classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-v13/24.1.0/libs/internal_impl-24.1.0.jar!/" />
+      <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-v13/24.1.0/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.android.support/support-v13/24.1.0/965a06dfa330bfc6a9f01d9991c330f3b5857732/support-v13-24.1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
