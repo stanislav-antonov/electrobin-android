@@ -10,7 +10,6 @@
         <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
         <script type="text/javascript">
             var myMap;
-            var coordSystem;
 
             var directionsDisplay;
             var directionsService;
@@ -29,12 +28,14 @@
             var displayRouteToNextPoint;
 
             var positionMarker,
+                currPosition,
                 prevPosition;
 
             var trafficLayer;
 
             var trafficControlUI,
-                catchCursorControlUI;
+                catchCursorControlUI,
+                zoomControlUI;
 
             var wayPointBubbles = {
                 green: 'file:///android_asset/bin_bubble_4_resized.png',
@@ -91,10 +92,37 @@
                 $(catchCursorControlUI).addClass('catch-cursor-control');
 
                 google.maps.event.addDomListener(catchCursorControlUI, 'click', function() {
-
+                    if (!currPosition) return;
+                    myMap.panTo(new google.maps.LatLng(currPosition[0], currPosition[1]));
                 });
 
                 myMap.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(catchCursorControlUI);
+
+                zoomControlUI = document.createElement('div');
+                $(zoomControlUI).addClass('zoom-control');
+
+                var zoomControlUIWrapper = document.createElement('div');
+                zoomControlUI.appendChild(zoomControlUIWrapper);
+
+                var zoomInButton = document.createElement('div');
+                $(zoomInButton).addClass('control');
+                $(zoomInButton).addClass('zoom-in-control');
+                zoomControlUIWrapper.appendChild(zoomInButton);
+
+                google.maps.event.addDomListener(zoomInButton, 'click', function() {
+                    myMap.setZoom(myMap.getZoom() + 1);
+                });
+
+                var zoomOutButton = document.createElement('div');
+                $(zoomOutButton).addClass('control');
+                $(zoomOutButton).addClass('zoom-out-control');
+                zoomControlUIWrapper.appendChild(zoomOutButton);
+
+                google.maps.event.addDomListener(zoomOutButton, 'click', function() {
+                    myMap.setZoom(myMap.getZoom() - 1);
+                });
+
+                myMap.controls[google.maps.ControlPosition.RIGHT_CENTER].push(zoomControlUI);
             }
 
             function initMap() {
@@ -102,14 +130,10 @@
                 myMap = new google.maps.Map(mapDiv, {
                     center: {lat: 55.53638053374438, lng: 37.529385721565184},
                     zoom: 8,
+                    disableDefaultUI: true,
 
                     mapTypeControl: false,
-
-                    zoomControl: true,
-                    zoomControlOptions: {
-                        position: google.maps.ControlPosition.LEFT_CENTER
-                    },
-
+                    zoomControl: false,
                     scaleControl: false,
                     streetViewControl: false,
                     fullscreenControl: false
@@ -143,13 +167,6 @@
                 };
 
                 trafficLayer = new google.maps.TrafficLayer();
-
-                // var geolocationControl = new ymaps.control.GeolocationControl({ options: { noPlacemark: true } });
-                // myMap.controls.add(geolocationControl, { position: { left: "10px", top: "90px" } });
-                // geolocationControl.events.add('locationchange', function (event) {
-                //    var position = event.get('position');
-                //    myMap.panTo(position);
-                // });
 
                 Android.onMapReady();
             }
@@ -264,26 +281,24 @@
             }
 
             function updatePosition(lat, long, bearing) {
-                var position = snapToRoute([lat, long]);
-                if (!position) return;
+                currPosition = snapToRoute([lat, long]);
+                if (!currPosition) return;
 
                 var bearing = 0;
                 if (prevPosition) {
-                    bearing = calcBearing(prevPosition[0], prevPosition[1], position[0], position[1]);
+                    bearing = calcBearing(prevPosition[0], prevPosition[1], currPosition[0], currPosition[1]);
                 }
 
-                prevPosition = position;
+                prevPosition = currPosition;
 
-                position = new google.maps.LatLng(position[0], position[1]);
-                myMap.panTo(position);
+                var currPositionObj = new google.maps.LatLng(currPosition[0], currPosition[1]);
+                myMap.panTo(currPositionObj);
 
                 if (!positionMarker) {
-                    positionMarker = new google.maps.Marker({
-                        map: myMap,
-                    });
+                    positionMarker = new google.maps.Marker({ map: myMap });
                 }
 
-                positionMarker.setPosition(position);
+                positionMarker.setPosition(currPositionObj);
                 positionMarker.setIcon({
                     path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                     strokeColor: '#000000',
@@ -489,6 +504,19 @@
                 background-image: url("file:///android_asset/control_catch_cursor.png");
                 margin-bottom: 100px;
                 margin-right: 10px;
+            }
+
+            .zoom-control {
+                margin-right: 10px;
+            }
+
+            .zoom-in-control {
+                background-image: url("file:///android_asset/control_zoom_in.png");
+            }
+
+            .zoom-out-control {
+                margin-top: 15px;
+                background-image: url("file:///android_asset/control_zoom_out.png");
             }
         </style>
     </head>
