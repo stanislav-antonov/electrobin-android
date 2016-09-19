@@ -114,6 +114,20 @@ public class Route implements Parcelable, Serializable {
                 return new Point[size];
             }
         };
+
+        public static Point create(JSONObject joPoint) throws Exception {
+            Point point = new Point();
+
+            point.mId = joPoint.getInt(JSON_ROUTE_POINT_ID_KEY);
+            point.mAddress = joPoint.getString(JSON_ROUTE_POINT_ADDRESS_KEY);
+            point.mCity = joPoint.getString(JSON_ROUTE_POINT_CITY_KEY);
+            point.mLng = joPoint.getDouble(JSON_ROUTE_POINT_LONGITUDE_KEY);
+            point.mLat = joPoint.getDouble(JSON_ROUTE_POINT_LATITUDE_KEY);
+            point.mFullness = joPoint.getInt(JSON_ROUTE_POINT_FULLNESS_KEY);
+            point.mVolume = joPoint.getInt(JSON_ROUTE_POINT_VOLUME_KEY);
+
+            return point;
+        }
     }
 
     /**
@@ -163,24 +177,13 @@ public class Route implements Parcelable, Serializable {
             try {
                 JSONArray jaPointList = json.getJSONArray(JSON_ROUTE_POINTS_KEY);
                 for (int i = 0; i < jaPointList.length(); i++) {
-                    JSONObject joPoint = jaPointList.getJSONObject(i);
-
-                    Route.Point point = new Route.Point();
-
-                    point.mId = joPoint.getInt(JSON_ROUTE_POINT_ID_KEY);
-                    point.mAddress = joPoint.getString(JSON_ROUTE_POINT_ADDRESS_KEY);
-                    point.mCity = joPoint.getString(JSON_ROUTE_POINT_CITY_KEY);
-                    point.mLng = joPoint.getDouble(JSON_ROUTE_POINT_LONGITUDE_KEY);
-                    point.mLat = joPoint.getDouble(JSON_ROUTE_POINT_LATITUDE_KEY);
-                    point.mFullness = joPoint.getInt(JSON_ROUTE_POINT_FULLNESS_KEY);
-                    point.mVolume = joPoint.getInt(JSON_ROUTE_POINT_VOLUME_KEY);
-
+                    Route.Point point = Route.Point.create(jaPointList.getJSONObject(i));
                     point.mUniqueId = i + 1;
-
                     pointList.add(point);
                 }
             }
             catch (Exception e) {
+                pointList.clear();
                 throw new Exception(e.getMessage());
             }
         }
@@ -208,6 +211,55 @@ public class Route implements Parcelable, Serializable {
         mAvoidTrafficJams = in.readByte() != 0;
         // mIsStarted = in.readByte() != 0;
         mState = in.readInt();
+    }
+
+    public void update(JSONObject json) throws Exception {
+        // {"action": "new_route", "points": [{"city": "\u041b\u0435\u0441\u043d\u043e\u0439 \u0433\u043e\u0440\u043e\u0434\u043e\u043a", "title": "XX-8888-AA 123", "country": "\u0420\u043e\u0441\u0441\u0438\u044f", "longitude": 37.199621195322315, "volume": 100, "fullness": 76, "address": "\u0421\u0442\u0443\u0434\u0435\u043d\u0447\u0435\u0441\u043a\u0430\u044f \u0434.2", "latitude": 55.641236622653075, "id": 36}, {"city": "\u041c\u043e\u0441\u043a\u0432\u0430", "title": "MSA-351675", "country": "\u0420\u043e\u0441\u0441\u0438\u044f", "longitude": 37.38555, "volume": 100, "fullness": 60, "address": "\u0420\u0443\u043c\u044f\u043d\u0446\u0435\u0432\u0441\u043a\u0430\u044f 20", "latitude": 55.64583, "id": 44}, {"city": "\u041c\u043e\u0441\u043a\u0432\u0430", "title": "MSA-35167513", "country": "\u0420\u043e\u0441\u0441\u0438\u044f", "longitude": 37.66982316447123, "volume": 100, "fullness": 97, "address": "\u042d\u043b\u0435\u0432\u0430\u0442\u043e\u0440\u043d\u0430\u044f \u0443\u043b. \u0434.1\u043a3", "latitude": 55.60211310127687, "id": 26}, {"city": "\u041a\u0440\u0430\u0441\u043d\u043e\u0437\u043d\u0430\u043c\u0435\u043d\u0441\u043a", "title": "XX-8888-AA", "country": "\u0420\u043e\u0441\u0441\u0438\u044f", "longitude": 37.032079691417934, "volume": 100, "fullness": 52, "address": "\u0443\u043b.\u041f\u043e\u0431\u0435\u0434\u044b, 23", "latitude": 55.59071765188984, "id": 35}, {"city": "\u041c\u043e\u0441\u043a\u0432\u0430", "title": "44444444", "country": "\u0420\u043e\u0441\u0441\u0438\u044f", "longitude": 37.667698854931054, "volume": 100, "fullness": 57, "address": "\u041c\u0430\u043b\u0430\u0445\u0438\u0442\u043e\u0432\u0430\u044f \u0443\u043b, \u0434.21", "latitude": 55.82938843126003, "id": 42}, {"city": "\u041c\u043e\u0441\u043a\u0432\u0430", "title": "AAA-123", "country": "\u0420\u043e\u0441\u0441\u0438\u044f", "longitude": 37.611216897496696, "volume": 100, "fullness": 78, "address": "\u041c\u043e\u0445\u043e\u0432\u0430\u044f \u0443\u043b.4/7 \u04412", "latitude": 55.75305392060291, "id": 41}, {"city": "\u041c\u043e\u0441\u043a\u0432\u0430", "title": "MSA-351675+SLAVE_2", "country": "\u0420\u043e\u0441\u0441\u0438\u044f", "longitude": 37.38597571330045, "volume": 100, "fullness": 43, "address": "\u041f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0441\u0442\u0432\u0435\u043d\u043d\u0430\u044f \u0443\u043b.\u0434.6 \u044132", "latitude": 55.64548651148923, "id": 25}, {"city": "\u041b\u0435\u0441\u043d\u043e\u0439 \u0433\u043e\u0440\u043e\u0434\u043e\u043a", "title": "Test_Den", "country": "\u0420\u043e\u0441\u0441\u0438\u044f", "longitude": 37.553930277355484, "volume": 100, "fullness": 0, "address": "kjljk", "latitude": 55.629389964847256, "id": 40}], "id": 780, "created": "2016-09-19T15:08:00.404142+00:00"}
+        Integer routeId = null;
+        if (json.has(JSON_ROUTE_ID_KEY)) {
+            try {
+                routeId = json.getInt(JSON_ROUTE_ID_KEY);
+            } catch (Exception e) {
+                throw new Exception(e.getMessage());
+            }
+
+            if (mId != null && !mId.equals(routeId))
+                throw new IllegalStateException("Unexpected route id");
+        }
+
+        if (routeId == null) throw new Exception("No route id");
+
+        if (json.has(JSON_ROUTE_POINTS_KEY) && !mWayPointList.isEmpty()) {
+            try {
+                JSONArray jaPointList = json.getJSONArray(JSON_ROUTE_POINTS_KEY);
+                for (int i = 0; i < jaPointList.length(); i++) {
+                    Route.Point tmpPoint;
+                    try {
+                        tmpPoint = Route.Point.create(jaPointList.getJSONObject(i));
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Failed to update point: " + e.getMessage());
+                        continue;
+                    }
+
+                    for (int j = 0; j < mWayPointList.size(); j++) {
+                        final Route.Point point = mWayPointList.get(j);
+                        if (point.mId == tmpPoint.mId) {
+                            point.mAddress = tmpPoint.mAddress;
+                            point.mCity = tmpPoint.mCity;
+                            point.mLng = tmpPoint.mLng;
+                            point.mLat = tmpPoint.mLat;
+                            point.mFullness = tmpPoint.mFullness;
+                            point.mVolume = tmpPoint.mVolume;
+
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception e) {
+                throw new Exception(e.getMessage());
+            }
+        }
     }
 
     public int describeContents() {

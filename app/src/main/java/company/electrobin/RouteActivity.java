@@ -109,6 +109,7 @@ public class RouteActivity extends AppCompatActivity implements
 
         private final static String JSON_ACTION_KEY = "action";
         private final static String JSON_ACTION_NEW_ROUTE = "new_route";
+        private final static String JSON_ACTION_UPDATAE_ROUTE = "update_route";
         private final static String JSON_ACTION_UPDATE_TOKEN = "update_token";
 
         private final static long NOTIFICATION_NO_INTERNET_CONNECTION_TIMEOUT = 10000L;
@@ -164,6 +165,11 @@ public class RouteActivity extends AppCompatActivity implements
                         else
                             showRouteUpdatedNotification(false);
 
+                        break;
+                    }
+
+                    case JSON_ACTION_UPDATAE_ROUTE: {
+                        getCurrentRoute().update(json);
                         break;
                     }
 
