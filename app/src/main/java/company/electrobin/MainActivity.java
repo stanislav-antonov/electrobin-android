@@ -76,7 +76,7 @@ public class MainActivity extends Activity implements UserProfileLoadListener, I
 
     @Override
     public void onBackPressed() {
-        // Do nothing
+        // Do nothing when back
     }
 }
 
